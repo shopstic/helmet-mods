@@ -8,7 +8,7 @@ import {
   K8sResource,
 } from "../../../../deps/helmet.ts";
 
-import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb-images.ts";
+import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb_images.ts";
 
 export const PENDING_LABEL_VALUE_YES = "yes";
 export const PENDING_LABEL_VALUE_NO = "no";

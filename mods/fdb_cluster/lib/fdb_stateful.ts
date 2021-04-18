@@ -7,12 +7,12 @@ import {
   K8sImagePullPolicy,
   K8sResource,
 } from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s-utils.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
 import {
   createFdbContainer,
   FdbConfiguredProcessClass,
-} from "./fdb-container.ts";
-import { fdbImage, fdbImagePullPolicy } from "./fdb-images.ts";
+} from "./fdb_container.ts";
+import { fdbImage, fdbImagePullPolicy } from "./fdb_images.ts";
 
 export interface FdbStatefulServer {
   port: number;

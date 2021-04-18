@@ -4,9 +4,9 @@ import {
   K8sImagePullPolicy,
   K8sResource,
 } from "../../../deps/helmet.ts";
-import { createFdbContainer } from "./fdb-container.ts";
-import { fdbImage, fdbImagePullPolicy } from "./fdb-images.ts";
-import { FDB_COMPONENT_LABEL } from "./fdb-stateful.ts";
+import { createFdbContainer } from "./fdb_container.ts";
+import { fdbImage, fdbImagePullPolicy } from "./fdb_images.ts";
+import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
 export function createFdbStatelessResources(
   {

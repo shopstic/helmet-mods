@@ -1,36 +1,74 @@
 import { walk, WalkEntry } from "https://deno.land/std@0.93.0/fs/mod.ts";
 import { dirname, join } from "https://deno.land/std@0.93.0/path/mod.ts";
-import { toSnakeCase } from "./deps/case.ts";
 
 const tsFiles: WalkEntry[] = [];
+const directories: WalkEntry[] = [];
 
 for await (const entry of walk(".")) {
   if (entry.isFile && entry.name.endsWith(".ts")) {
     tsFiles.push(entry);
+  } else if (entry.isDirectory && !entry.path.startsWith(".")) {
+    directories.push(entry);
   }
 }
 
-const renamedMap = new Map(tsFiles.map((tsFile) => {
-  const snakeCased = toSnakeCase(tsFile.name);
-  return [tsFile.name, snakeCased];
-}));
+tsFiles.sort((a, b) => a.path.length - b.path.length);
+directories.sort((a, b) => a.path.length - b.path.length);
 
-const promises = tsFiles.map((tsFile) =>
-  async () => {
-    const newName = renamedMap.get(tsFile.name)!;
-    const dir = dirname(tsFile.path);
-    const newPath = join(dir, newName);
-    await Deno.rename(tsFile.path, newPath);
+const tsFileRenamePairs: Array<[string, string]> = tsFiles.map((tsFile) => {
+  const snakeCased = tsFile.name.replaceAll("-", "_");
+  return [tsFile.name, snakeCased];
+});
+
+const dirRenamePairs: Array<[string, string]> = directories.map((dir) => {
+  const snakeCased = dir.name.replaceAll("-", "_");
+  return [dir.name, snakeCased];
+});
+
+const dirPathRenamePairs: Array<[string, string]> = [];
+
+for (const dir of directories) {
+  const oldPath = dirPathRenamePairs.reduce((p, [f, t]) => {
+    if (p.startsWith(`${f}/`)) {
+      return p.replace(`${f}/`, `${t}/`);
+    }
+    return p;
+  }, dir.path);
+
+  dirPathRenamePairs.push([oldPath, oldPath.replaceAll("-", "_")]);
+}
+
+for (const [fromPath, toPath] of dirPathRenamePairs) {
+  const newParent = dirname(fromPath);
+  await Deno.mkdir(newParent, { recursive: true });
+  console.log("Rename", fromPath, toPath);
+  await Deno.rename(fromPath, toPath);
+}
+
+const filePromises = tsFiles.map((tsFile) =>
+  (async () => {
+    const oldPath = join(
+      dirname(tsFile.path).replaceAll("-", "_"),
+      tsFile.name,
+    );
+    const newPath = tsFile.path.replaceAll("-", "_");
+
+    console.log("Rename", oldPath, newPath);
+    await Deno.rename(oldPath, newPath);
 
     const content = await Deno.readTextFile(newPath);
-    const replaced = Array
-      .from(renamedMap.entries())
+    const replaced1 = tsFileRenamePairs
       .reduce((c, [from, to]) => {
         return c.replaceAll(`${from}"`, `${to}"`);
       }, content);
 
-    return await Deno.writeTextFile(newPath, replaced);
-  }
+    const replaced2 = dirRenamePairs
+      .reduce((c, [from, to]) => {
+        return c.replaceAll(`/${from}/`, `/${to}/`);
+      }, replaced1);
+
+    return await Deno.writeTextFile(newPath, replaced2);
+  })()
 );
 
-await Promise.all(promises);
+await Promise.all(filePromises);

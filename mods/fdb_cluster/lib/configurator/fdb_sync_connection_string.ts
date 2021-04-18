@@ -9,7 +9,7 @@ import {
   K8sResource,
 } from "../../../../deps/helmet.ts";
 
-import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb-images.ts";
+import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb_images.ts";
 
 export function createFdbSyncConnectionStringResources({
   baseLabels,

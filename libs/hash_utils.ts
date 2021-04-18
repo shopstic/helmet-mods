@@ -1,4 +1,4 @@
-import { createHash, safeStringify } from "../deps/std-hash.ts";
+import { createHash, safeStringify } from "../deps/std_hash.ts";
 
 export function stableHash(value: unknown): string {
   return createHash("md5")

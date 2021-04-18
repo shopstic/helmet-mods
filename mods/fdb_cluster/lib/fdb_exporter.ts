@@ -4,7 +4,7 @@ import {
   IoK8sApiCoreV1ConfigMapKeySelector,
   K8sResource,
 } from "../../../deps/helmet.ts";
-import { fdbExporterImage } from "./fdb-images.ts";
+import { fdbExporterImage } from "./fdb_images.ts";
 
 export function createFdbExporterResources(
   {

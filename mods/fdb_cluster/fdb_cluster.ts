@@ -3,24 +3,24 @@ import {
   IoK8sApiCoreV1Volume,
 } from "../../deps/helmet.ts";
 import { IoK8sApiCoreV1ConfigMapKeySelector } from "../../deps/helmet.ts";
-import { createFdbConfigureResources } from "./lib/configurator/fdb-configure.ts";
+import { createFdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
 import {
   createFdbCreateConnectionStringResources,
-} from "./lib/configurator/fdb-create-connection-string.ts";
+} from "./lib/configurator/fdb_create_connection_string.ts";
 import {
   createFdbSyncConnectionStringResources,
-} from "./lib/configurator/fdb-sync-connection-string.ts";
-import createResourceGroup from "../resource-group/resource-group.ts";
+} from "./lib/configurator/fdb_sync_connection_string.ts";
+import createResourceGroup from "../resource_group/resource_group.ts";
 import {
   createFdbStatefulResources,
   FdbStatefulConfig,
-} from "./lib/fdb-stateful.ts";
-import { createFdbEntrypointConfigMap } from "./lib/fdb-entrypoint.ts";
-import { stableHash } from "../../libs/hash-utils.ts";
-import { createFdbStatelessResources } from "./lib/fdb-stateless.ts";
-import { FdbDatabaseConfig } from "../../deps/fdb-configurator.ts";
-import { createFdbExporterResources } from "./lib/fdb-exporter.ts";
-import { fdbVersion } from "./lib/fdb-images.ts";
+} from "./lib/fdb_stateful.ts";
+import { createFdbEntrypointConfigMap } from "./lib/fdb_entrypoint.ts";
+import { stableHash } from "../../libs/hash_utils.ts";
+import { createFdbStatelessResources } from "./lib/fdb_stateless.ts";
+import { FdbDatabaseConfig } from "../../deps/fdb_configurator.ts";
+import { createFdbExporterResources } from "./lib/fdb_exporter.ts";
+import { fdbVersion } from "./lib/fdb_images.ts";
 
 export default defineChartInstance(
   async (

@@ -1,5 +1,5 @@
-import { dirname, fromFileUrl, joinPath } from "../../../deps/std-path.ts";
-import { memoizePromise } from "../../../deps/async-utils.ts";
+import { dirname, fromFileUrl, joinPath } from "../../../deps/std_path.ts";
+import { memoizePromise } from "../../../deps/async_utils.ts";
 import { createK8sConfigMap } from "../../../deps/helmet.ts";
 
 export const readFdbServerEntrypointScriptContent = memoizePromise(async () =>

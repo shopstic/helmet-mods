@@ -1,1 +1,1 @@
-export * from "https://raw.githubusercontent.com/shopstic/helmet/1.1.2/src/deps/typebox.ts";
+export * from "https://deno.land/x/helmet@1.2.0/deps/typebox.ts";
