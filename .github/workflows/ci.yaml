@@ -110,11 +110,16 @@ jobs:
           fi
 
           GIT_REF=${GITHUB_TAG:-"latest"}
+          WILL_RELEASE="0"
 
-          if [[ "${GIT_REF}" != "latest" ]]; then
+          if [[ "${GIT_REF}" != "latest" && "${GITHUB_BRANCH}" == "main" ]]; then
+            WILL_RELEASE="1"
+          fi
+
+          if [[ "${WILL_RELEASE}" == "1" ]]; then
             git fetch origin release
             git checkout release
-            git merge origin/"${GITHUB_BRANCH}"
+            git merge origin/main
           fi
 
           cat <<EOF | docker run \
@@ -134,15 +139,15 @@ jobs:
           ./cli.sh code_quality
           ./cli.sh test
 
-          if [[ "\${GIT_REF}" == "latest" ]]; then
-            ./cli.sh build_apps --output dev_null
-          else
+          if [[ "${WILL_RELEASE}" == "1" ]]; then
             ./cli.sh build_apps --output registry
+          else
+            ./cli.sh build_apps --output dev_null
           fi
 
           EOF
 
-          if [[ "${GIT_REF}" != "latest" ]]; then
+          if [[ "${WILL_RELEASE}" == "1" ]]; then
             git config --global user.email "ci-runner@shopstic.com"
             git config --global user.name "CI Runner"
             git add -A
