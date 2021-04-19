@@ -3,8 +3,15 @@ FROM shopstic/bin-deno:1.9.0 as bin-deno
 
 FROM ubuntu:20.10
 
+SHELL ["/bin/bash", "-c"]
 RUN \
-  apt-get update && apt-get install -y git skopeo
+  apt-get update && \
+  apt-get install -y curl gnupg && \
+  echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.10/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.libcontainers && \
+  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.10/Release.key | apt-key add - && \
+  apt-get update && \
+  apt-get -y upgrade && \
+  apt-get install -y git skopeo
 
 COPY --from=bin-dumb-init /usr/bin/dumb-init /usr/bin/dumb-init
 COPY --from=bin-deno /usr/bin/deno /usr/bin/deno
