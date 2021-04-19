@@ -7,7 +7,7 @@ SHELL ["/bin/bash", "-c"]
 RUN \
   apt-get update && \
   apt-get install -y curl gnupg && \
-  echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.10/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.libcontainers && \
+  echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.10/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && \
   curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.10/Release.key | apt-key add - && \
   apt-get update && \
   apt-get -y upgrade && \
