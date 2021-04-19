@@ -1,7 +1,7 @@
 FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
 FROM shopstic/bin-deno:1.9.0 as bin-deno
 
-FROM ubuntu:20.04
+FROM ubuntu:20.10
 
 RUN \
   apt-get update && apt-get install -y git skopeo
