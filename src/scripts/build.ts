@@ -114,9 +114,9 @@ const buildApps = createCliAction(
         const appEntrypoint = joinPath(appPath, `${appName}.ts`);
         const metaPath = joinPath(appPath, "meta.ts");
         const meta = await import(metaPath);
-        const { version, imageName } = meta;
+        const { imageName } = meta;
 
-        const tag = (version === "latest") ? gitRef : version;
+        const tag = gitRef;
 
         if (await fsExists(appEntrypoint)) {
           console.error("Building app", cyan(appEntrypoint));
