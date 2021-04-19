@@ -106,8 +106,9 @@ jobs:
           GIT_REF=${GITHUB_TAG:-"latest"}
 
           if [[ "\${GIT_REF}" != "latest" ]]; then
+            git fetch origin release
             git checkout release
-            git rebase "${GITHUB_BRANCH}"
+            git merge origin/"${GITHUB_BRANCH}"
           fi
 
           cat <<EOF | docker run \
@@ -136,7 +137,7 @@ jobs:
           EOF
 
           if [[ "\${GIT_REF}" != "latest" ]]; then
-            git add .
+            git add -A
             git commit -m "Release \${GIT_REF}"
             git push origin release
           fi
