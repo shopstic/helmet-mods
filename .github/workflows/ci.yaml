@@ -40,6 +40,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Github ref name
+        id: ref_name
+        run: |
+          if [[ "${GITHUB_REF}" =~ ^refs/heads/.* ]]; then
+            echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
+          fi
+
+          if [[ "${GITHUB_REF}" =~ ^refs/tags/.* ]]; then
+            echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+          fi
+
       - name: Cache deno
         uses: actions/cache@v2
         with:
@@ -58,22 +69,13 @@ jobs:
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
+        if: steps.ref_name.outputs.branch == 'main'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - run: chmod +r ~/.docker/config.json
-
-      - name: Github ref name
-        id: ref_name
-        run: |
-          if [[ "${GITHUB_REF}" =~ ^refs/heads/.* ]]; then
-            echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
-          fi
-
-          if [[ "${GITHUB_REF}" =~ ^refs/tags/.* ]]; then
-            echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
-          fi
+        if: steps.ref_name.outputs.branch == 'main'
 
       - name: Start buildkitd
         run: |
