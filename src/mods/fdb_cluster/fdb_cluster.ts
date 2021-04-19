@@ -15,15 +15,13 @@ import {
   createFdbStatefulResources,
   FdbStatefulConfig,
 } from "./lib/fdb_stateful.ts";
-import { createFdbEntrypointConfigMap } from "./lib/fdb_entrypoint.ts";
-import { stableHash } from "../../libs/hash_utils.ts";
 import { createFdbStatelessResources } from "./lib/fdb_stateless.ts";
 import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources } from "./lib/fdb_exporter.ts";
 import { fdbVersion } from "./lib/fdb_images.ts";
 
 export default defineChartInstance(
-  async (
+  (
     {
       storageEngine,
       redundancyMode,
@@ -58,25 +56,11 @@ export default defineChartInstance(
       key: "connectionString",
     };
 
-    const entrypointConfigMap = await createFdbEntrypointConfigMap({
-      name: `${baseName}-entrypoint`,
-      fileName: "entrypoint.sh",
-    });
-
-    const entrypointConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector = {
-      name: entrypointConfigMap.metadata.name,
-      key: "entrypoint.sh",
-    };
-
-    const dependencyHash = stableHash(entrypointConfigMap);
-
     const statefulResources = createFdbStatefulResources({
       baseName,
       baseLabels: labels,
       configs: stateful,
       connectionStringConfigMapRef,
-      entrypointConfigMapRef,
-      dependencyHash,
       dataVolumeFactory,
     });
 
@@ -86,8 +70,6 @@ export default defineChartInstance(
       replicas: stateless.proxyCount,
       baseLabels: labels,
       connectionStringConfigMapRef,
-      entrypointConfigMapRef,
-      dependencyHash,
       port: 4500,
     });
 
@@ -98,8 +80,6 @@ export default defineChartInstance(
       replicas: stateless.resolverCount + stateless.standbyCount + 4,
       baseLabels: labels,
       connectionStringConfigMapRef,
-      entrypointConfigMapRef,
-      dependencyHash,
       port: 4500,
       // data_distributor needs more than the default 8GiB limit
       // when the cluster is hammered with > 1M writes / s
@@ -187,7 +167,6 @@ export default defineChartInstance(
       version: fdbVersion,
       labels,
       resources: [
-        entrypointConfigMap,
         ...statefulResources,
         ...proxyResources,
         ...statelessResources,
