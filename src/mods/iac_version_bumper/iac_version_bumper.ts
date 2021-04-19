@@ -22,6 +22,7 @@ export default defineChartInstance(
       name = defaultName,
       namespace = defaultName,
       image = defaultImage,
+      createNamespace,
       gitBranch,
       gitRepoUri,
       checkIntervalSeconds,
@@ -32,6 +33,7 @@ export default defineChartInstance(
     }: {
       name?: string;
       namespace?: string;
+      createNamespace: boolean;
       image?: string;
       committerName: string;
       committerEmail: string;
@@ -141,6 +143,7 @@ export default defineChartInstance(
     return createResourceGroup({
       name,
       namespace,
+      createNamespace,
       version,
       labels,
       resources: [
