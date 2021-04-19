@@ -27,6 +27,7 @@ start_buildkitd() {
 
   docker run \
     "${ARG[@]}" \
+    --init \
     --net=host \
     --security-opt seccomp=unconfined \
     --security-opt apparmor=unconfined \

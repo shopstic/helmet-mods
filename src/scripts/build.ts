@@ -61,7 +61,7 @@ const buildImage = createCliAction(
         "--output",
         `type=image,"name=${taggedImageRefs.join(",")}",push=true`,
         "--export-cache",
-        `type=registry,ref=${imageRef}:${cacheTag}`,
+        `type=registry,ref=${imageRef}:${cacheTag},mode=max`,
         "--import-cache",
         `type=registry,ref=${imageRef}:${cacheTag}`,
       ];
