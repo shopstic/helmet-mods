@@ -4,6 +4,8 @@ on:
   push:
     branches-ignore:
       - release
+    tags:
+      - '*'
   pull_request:
 
 defaults:
