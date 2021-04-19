@@ -81,11 +81,11 @@ jobs:
         run: |
           BUILDKITD_CONTAINER_ID=$(./cli.sh start_buildkitd -d)
 
-          for i in {1..50}; do
-            if docker logs "${BUILDKITD_CONTAINER_ID}" | grep "running server on"; then
+          for i in {1..10}; do
+            if docker logs "${BUILDKITD_CONTAINER_ID}" 2>&1 | grep "running server on"; then
               exit 0
             fi
-            sleep 0.1
+            sleep 0.5
           done
           
           echo "Timed out waiting for buildkitd container to be ready. Logs:"
