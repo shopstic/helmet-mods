@@ -61,7 +61,7 @@ jobs:
 
       - name: Build
         env:
-          SHELL_IMAGE: ${{ needs.build-env.outputs.image }}
+          SHELL_IMAGE: ghcr.io/shopstic/helmet-mods-ci:${{ hashFiles('shell/*') }}
           DENO_DIR: ${{ github.workspace }}/.cache/deno
           GIT_REF: ${{ github.event.inputs.version }}
         run: |-
