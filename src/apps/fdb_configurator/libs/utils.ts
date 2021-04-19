@@ -11,7 +11,7 @@ import {
 import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
-import { loggerWithContext } from "./logger.ts";
+import { loggerWithContext } from "../../../libs/logger.ts";
 
 const logger = loggerWithContext("utils");
 

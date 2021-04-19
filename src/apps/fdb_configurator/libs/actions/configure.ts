@@ -1,6 +1,6 @@
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { Type } from "../../../../deps/typebox.ts";
-import { loggerWithContext } from "../logger.ts";
+import { loggerWithContext } from "../../../../libs/logger.ts";
 import {
   FdbDatabaseConfig,
   FdbStatus,

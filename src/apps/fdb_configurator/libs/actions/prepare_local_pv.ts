@@ -8,7 +8,7 @@ import {
   kubectlInherit,
   toRootElevatedCommand,
 } from "../utils.ts";
-import { loggerWithContext } from "../logger.ts";
+import { loggerWithContext } from "../../../../libs/logger.ts";
 
 const logger = loggerWithContext("main");
 

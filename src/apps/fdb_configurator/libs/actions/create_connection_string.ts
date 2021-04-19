@@ -6,7 +6,7 @@ import {
   readCurrentNamespace,
   updateConnectionStringConfigMap,
 } from "../utils.ts";
-import { loggerWithContext } from "../logger.ts";
+import { loggerWithContext } from "../../../../libs/logger.ts";
 import { NonEmptyString } from "../types.ts";
 
 const logger = loggerWithContext("main");
