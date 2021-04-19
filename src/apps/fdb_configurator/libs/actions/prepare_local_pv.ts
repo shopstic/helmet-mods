@@ -1,8 +1,8 @@
-import { createCliAction, ExitCode } from "../deps/cli-utils.ts";
-import { joinPath } from "../deps/std-path.ts";
-import { Type } from "../deps/typebox.ts";
+import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
+import { joinPath } from "../../../../deps/std_path.ts";
+import { Type } from "../../../../deps/typebox.ts";
 import { NonEmptyString } from "../types.ts";
-import { captureExec, inheritExec } from "../deps/exec-utils.ts";
+import { captureExec, inheritExec } from "../../../../deps/exec_utils.ts";
 import {
   kubectlGetJson,
   kubectlInherit,

@@ -1,8 +1,8 @@
 import configure from "./libs/actions/configure.ts";
-import createConnectionString from "./libs/actions/create-connection-string.ts";
-import syncConnectionString from "./libs/actions/sync-connection-string.ts";
-import prepareLocalPv from "./libs/actions/prepare-local-pv.ts";
-import { CliProgram } from "./libs/deps/cli-utils.ts";
+import createConnectionString from "./libs/actions/create_connection_string.ts";
+import syncConnectionString from "./libs/actions/sync_connection_string.ts";
+import prepareLocalPv from "./libs/actions/prepare_local_pv.ts";
+import { CliProgram } from "../../deps/cli_utils.ts";
 
 await new CliProgram()
   .addAction("prepare-local-pv", prepareLocalPv)

@@ -1,12 +1,17 @@
-import { captureExec, inheritExec } from "./deps/exec-utils.ts";
-import { validate } from "./deps/validation-utils.ts";
-import { memoizePromise } from "./deps/async-utils.ts";
-import { Static, TObject, TProperties, TSchema, Type } from "./deps/typebox.ts";
-import { createK8sConfigMap } from "./deps/k8s-utils.ts";
+import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
+import { validate } from "../../../deps/validation_utils.ts";
+import { memoizePromise } from "../../../deps/async_utils.ts";
+import {
+  Static,
+  TObject,
+  TProperties,
+  TSchema,
+  Type,
+} from "../../../deps/typebox.ts";
+import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
 import { loggerWithContext } from "./logger.ts";
-import { readLines } from "./deps/std-io.ts";
 
 const logger = loggerWithContext("utils");
 

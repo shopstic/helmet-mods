@@ -1,6 +1,6 @@
-import { delay } from "../deps/async-utils.ts";
-import { createCliAction } from "../deps/cli-utils.ts";
-import { Type } from "../deps/typebox.ts";
+import { delay } from "../../../../deps/async_utils.ts";
+import { createCliAction } from "../../../../deps/cli_utils.ts";
+import { Type } from "../../../../deps/typebox.ts";
 import { loggerWithContext } from "../logger.ts";
 import { NonEmptyString } from "../types.ts";
 import {

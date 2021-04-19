@@ -10,7 +10,7 @@ import {
   K8sResource,
 } from "../../../../deps/helmet.ts";
 
-import { FdbDatabaseConfig } from "../../../../deps/fdb_configurator.ts";
+import { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
 import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb_images.ts";
 
 export function createFdbConfigureResources(

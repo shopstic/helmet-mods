@@ -28,13 +28,13 @@ jobs:
         id: buildkit
         uses: shopstic/buildkit-action@1.0.10
         with:
-          context: ${{ github.workspace }}/images/shell
-          image: ghcr.io/shopstic/helmet-ci
-          tag: ${{ hashFiles('images/shell/*') }}
+          context: ${{ github.workspace }}/shell
+          image: ghcr.io/shopstic/helmet-mods-ci
+          tag: ${{ hashFiles('shell/*') }}
           skipIfExists: true
 
-  build-app:
-    name: Build app image
+  build-apps:
+    name: Build apps
     needs: build-env
     runs-on: ubuntu-20.04
     steps:
@@ -75,23 +75,46 @@ jobs:
             echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
           fi
 
+      - name: Start buildkitd
+        run: |
+          BUILDKITD_CONTAINER_ID=$(./cli.sh start_buildkitd -d)
+
+          for i in {1..50}; do
+            if docker logs "${BUILDKITD_CONTAINER_ID}" | grep "running server on"; then
+              exit 0
+            fi
+            sleep 0.1
+          done
+          
+          echo "Timed out waiting for buildkitd container to be ready. Logs:"
+          docker logs "${BUILDKITD_CONTAINER_ID}"
+          exit 1
+
       - name: Build
         env:
           SHELL_IMAGE: ${{ needs.build-env.outputs.image }}
           DENO_DIR: ${{ github.workspace }}/.cache/deno
+          GITHUB_BRANCH: ${{ steps.ref_name.outputs.branch }}
           GITHUB_TAG: ${{ steps.ref_name.outputs.tag }}
         run: |-
           if ls "${DENO_DIR}" > /dev/null 2>&1; then
             du -sh "${DENO_DIR}"
           fi
 
-          RELEASE_VERSION=${GITHUB_TAG:-GITHUB_SHA}
+          GIT_REF=${GITHUB_TAG:-"latest"}
+
+          if [[ "\${GIT_REF}" != "latest" ]]; then
+            git checkout release
+            git rebase "${GITHUB_BRANCH}"
+          fi
 
           cat <<EOF | docker run \
             --workdir /repo \
             -i \
             --rm \
+            --net=host \
             --init \
+            -e "GIT_REF=${GIT_REF}" \
             -v "${GITHUB_WORKSPACE}:/repo" \
             -v "${DENO_DIR}:/root/.cache/deno" \
             -e "DENO_DIR=/root/.cache/deno" \
@@ -100,34 +123,18 @@ jobs:
           set -euo pipefail
 
           ./cli.sh code_quality
-          ./cli.sh build "${RELEASE_VERSION}"
+          ./cli.sh test
 
-          mkdir -p /usr/lib/helmet/
-          cp ./images/release/helmet.js /usr/lib/helmet/
-
-          # Test that the bundle works fine
-          if [[ "\$(./images/release/helmet version)" != "${RELEASE_VERSION}" ]]; then
-            echo "Bundle test failed"
-            exit 1
+          if [[ "\${GIT_REF}" == "latest" ]]; then
+            ./cli.sh build_apps --output dev_null
+          else
+            ./cli.sh build_apps --output registry
           fi
 
           EOF
 
-      - name: Build and push app Docker image to latest
-        uses: shopstic/buildkit-action@1.0.10
-        if: steps.ref_name.outputs.branch == 'main'
-        with:
-          context: ${{ github.workspace }}/images/release
-          image: shopstic/bin-helmet
-          tag: ${{ github.sha }}
-          additionalTags: latest
-          skipIfExists: false
-
-      - name: Build and push app Docker image to tag
-        uses: shopstic/buildkit-action@1.0.10
-        if: steps.ref_name.outputs.tag != ''
-        with:
-          context: ${{ github.workspace }}/images/release
-          image: shopstic/bin-helmet
-          tag: ${{ steps.ref_name.outputs.tag }}
-          skipIfExists: false
+          if [[ "\${GIT_REF}" != "latest" ]]; then
+            git add .
+            git commit -m "Release \${GIT_REF}"
+            git push origin release
+          fi

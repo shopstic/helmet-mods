@@ -18,7 +18,7 @@ import {
 import { createFdbEntrypointConfigMap } from "./lib/fdb_entrypoint.ts";
 import { stableHash } from "../../libs/hash_utils.ts";
 import { createFdbStatelessResources } from "./lib/fdb_stateless.ts";
-import { FdbDatabaseConfig } from "../../deps/fdb_configurator.ts";
+import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources } from "./lib/fdb_exporter.ts";
 import { fdbVersion } from "./lib/fdb_images.ts";
 

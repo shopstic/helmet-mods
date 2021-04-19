@@ -1,5 +1,5 @@
-import { TObject, TProperties, Type } from "./deps/typebox.ts";
-import type { Static } from "./deps/typebox.ts";
+import { TObject, TProperties, Type } from "../../../deps/typebox.ts";
+import type { Static } from "../../../deps/typebox.ts";
 
 export function NonEmptyString() {
   return Type.String({ minLength: 1 });

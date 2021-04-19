@@ -1,4 +1,4 @@
-import { ConsoleStream, Logger, TokenReplacer } from "./deps/optic.ts";
+import { ConsoleStream, Logger, TokenReplacer } from "../../../deps/optic.ts";
 
 export function loggerWithContext(ctx: string): Logger {
   return new Logger()

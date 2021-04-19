@@ -1,1 +1,8 @@
-export * from "https://deno.land/x/helmet@1.2.0/deps/std_path.ts";
+export {
+  basename,
+  dirname,
+  extname,
+  fromFileUrl,
+  join as joinPath,
+  resolve as resolvePath,
+} from "https://deno.land/std@0.93.0/path/mod.ts";
