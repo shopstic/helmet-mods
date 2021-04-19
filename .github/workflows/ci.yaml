@@ -119,6 +119,11 @@ jobs:
             git merge origin/main
           fi
 
+          if ! test -f ${HOME}/.docker/config.json; then
+            mkdir -p "${HOME}/.docker"
+            touch "${HOME}/.docker/config.json"
+          fi
+
           cat <<EOF | docker run \
             --workdir /repo \
             -i \
@@ -127,6 +132,7 @@ jobs:
             --init \
             -e "GIT_REF=${GIT_REF}" \
             -v "${GITHUB_WORKSPACE}:/repo" \
+            -v "${HOME}/.docker/config.json:/root/.docker/config.json:ro" \
             -v "${DENO_DIR}:/root/.cache/deno" \
             -e "DENO_DIR=/root/.cache/deno" \
             "${SHELL_IMAGE}" \
