@@ -18,7 +18,6 @@ export function createFdbContainer(
     processClass,
     image,
     imagePullPolicy,
-    command,
     connectionStringConfigMapRef,
     volumeMounts,
     port,
@@ -28,7 +27,6 @@ export function createFdbContainer(
     processClass: FdbConfiguredProcessClass;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    command: string[];
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
     port: number;
@@ -122,7 +120,6 @@ export function createFdbContainer(
         }]
         : []),
     ],
-    command,
     volumeMounts,
   };
 }

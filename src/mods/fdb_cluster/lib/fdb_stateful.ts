@@ -95,8 +95,6 @@ export function createFdbStatefulResources(
     baseLabels,
     baseName,
     connectionStringConfigMapRef,
-    entrypointConfigMapRef,
-    dependencyHash,
     configs,
     dataVolumeFactory,
     image = fdbImage,
@@ -105,8 +103,6 @@ export function createFdbStatefulResources(
     baseName: string;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    entrypointConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    dependencyHash: string;
     configs: Record<string, FdbStatefulConfig>;
     dataVolumeFactory: (name: string) => Omit<IoK8sApiCoreV1Volume, "name">;
     image?: string;
@@ -115,8 +111,6 @@ export function createFdbStatefulResources(
 ): K8sResource[] {
   const volumeName = "data";
   const volumeMountPath = "/app/data";
-  const entrypointFileName = entrypointConfigMapRef.key;
-  const entrypointMountPath = `/app/${entrypointFileName}`;
 
   const resources = Object.entries(configs).flatMap(
     (
@@ -159,13 +153,7 @@ export function createFdbStatefulResources(
               name: volumeName,
               mountPath: volumeMountPath,
             },
-            {
-              name: "entrypoint",
-              mountPath: entrypointMountPath,
-              subPath: entrypointFileName,
-            },
           ],
-          command: [entrypointMountPath],
           connectionStringConfigMapRef,
           serviceName: service.metadata.name,
           port,
@@ -186,9 +174,6 @@ export function createFdbStatefulResources(
           template: {
             metadata: {
               labels: statefulLabels,
-              annotations: {
-                "shopstic.com/dependency-hash": dependencyHash,
-              },
             },
             spec: {
               containers,
@@ -202,13 +187,6 @@ export function createFdbStatefulResources(
                 {
                   name: volumeName,
                   ...dataVolumeFactory(resourceName),
-                },
-                {
-                  name: "entrypoint",
-                  configMap: {
-                    name: entrypointConfigMapRef.name,
-                    defaultMode: 511,
-                  },
                 },
               ],
             },

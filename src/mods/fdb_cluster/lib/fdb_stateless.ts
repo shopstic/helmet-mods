@@ -15,8 +15,6 @@ export function createFdbStatelessResources(
     replicas,
     baseLabels,
     connectionStringConfigMapRef,
-    entrypointConfigMapRef,
-    dependencyHash,
     port,
     image = fdbImage,
     imagePullPolicy = fdbImagePullPolicy,
@@ -27,8 +25,6 @@ export function createFdbStatelessResources(
     replicas: number;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    entrypointConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    dependencyHash: string;
     port: number;
     image?: string;
     imagePullPolicy?: K8sImagePullPolicy;
@@ -43,8 +39,6 @@ export function createFdbStatelessResources(
 
   const volumeName = "data";
   const volumeMountPath = "/app/data";
-  const entrypointFileName = entrypointConfigMapRef.key;
-  const entrypointMountPath = `/app/${entrypointFileName}`;
 
   const container = createFdbContainer({
     processClass,
@@ -55,13 +49,7 @@ export function createFdbStatelessResources(
         name: volumeName,
         mountPath: volumeMountPath,
       },
-      {
-        name: "entrypoint",
-        mountPath: entrypointMountPath,
-        subPath: entrypointFileName,
-      },
     ],
-    command: [entrypointMountPath],
     connectionStringConfigMapRef,
     port,
     memoryGiBs: processMemoryGiBs,
@@ -87,9 +75,6 @@ export function createFdbStatelessResources(
       template: {
         metadata: {
           labels: statelessLabels,
-          annotations: {
-            "shopstic.com/dependency-hash": dependencyHash,
-          },
         },
         spec: {
           containers: [container],
@@ -102,13 +87,6 @@ export function createFdbStatelessResources(
             {
               name: volumeName,
               emptyDir: {},
-            },
-            {
-              name: "entrypoint",
-              configMap: {
-                name: entrypointConfigMapRef.name,
-                defaultMode: 511,
-              },
             },
           ],
           topologySpreadConstraints: [

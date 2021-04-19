@@ -69,6 +69,8 @@ jobs:
             du -sh "${DENO_DIR}"
           fi
 
+          git config --global user.email "ci-runner@shopstic.com"
+          git config --global user.name "CI Runner"
           git fetch origin release
           git checkout release
           git merge origin/main
@@ -94,8 +96,6 @@ jobs:
 
           EOF
 
-          git config --global user.email "ci-runner@shopstic.com"
-          git config --global user.name "CI Runner"
           git add ./src/apps/*/meta.ts
           git commit -m "Release ${GIT_REF}"
           git tag "${GIT_REF}"
