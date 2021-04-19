@@ -20,7 +20,7 @@ RUN \
   chown -R app:app /home/app/.ssh && \
   chmod 700 /home/app/.ssh
 
-COPY ./version-bumper.js /home/app/app.js
+COPY ./iac-version-bumper.js /home/app/app.js
 COPY ./entrypoint.sh /home/app/entrypoint.sh
 
 ENTRYPOINT ["/home/app/entrypoint.sh"]
