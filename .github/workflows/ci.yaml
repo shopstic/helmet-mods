@@ -1,6 +1,10 @@
 name: CI Workflow
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - release
+  pull_request:
 
 defaults:
   run:
@@ -107,7 +111,7 @@ jobs:
 
           GIT_REF=${GITHUB_TAG:-"latest"}
 
-          if [[ "\${GIT_REF}" != "latest" ]]; then
+          if [[ "${GIT_REF}" != "latest" ]]; then
             git fetch origin release
             git checkout release
             git merge origin/"${GITHUB_BRANCH}"
@@ -138,8 +142,10 @@ jobs:
 
           EOF
 
-          if [[ "\${GIT_REF}" != "latest" ]]; then
+          if [[ "${GIT_REF}" != "latest" ]]; then
+            git config --global user.email "ci-runner@shopstic.com"
+            git config --global user.name "CI Runner"
             git add -A
-            git commit -m "Release \${GIT_REF}"
+            git commit -m "Release ${GIT_REF}"
             git push origin release
           fi
