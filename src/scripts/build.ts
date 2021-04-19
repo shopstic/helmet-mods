@@ -114,9 +114,9 @@ const buildApps = createCliAction(
         const appEntrypoint = joinPath(appPath, `${appName}.ts`);
         const metaPath = joinPath(appPath, "meta.ts");
         const meta = await import(metaPath);
-        const { imageName } = meta;
+        const { autoVersioning, version, imageName } = meta;
 
-        const tag = gitRef;
+        const tag = autoVersioning ? gitRef : version;
 
         if (await fsExists(appEntrypoint)) {
           console.error("Building app", cyan(appEntrypoint));
@@ -144,7 +144,11 @@ const buildApps = createCliAction(
           metaPath,
           `export const version = ${
             JSON.stringify(tag)
-          };\nexport const imageName = ${JSON.stringify(imageName)};\n`,
+          };\nexport const imageName = ${
+            JSON.stringify(imageName)
+          };\nexport const autoVersioning = ${
+            JSON.stringify(autoVersioning)
+          };\n`,
         );
 
         return exitCode;
