@@ -106,6 +106,11 @@ export default defineChartInstance(
             labels,
           },
           spec: {
+            securityContext: {
+              runAsUser: 5000,
+              runAsGroup: 5000,
+              fsGroup: 5000,
+            },
             containers: [{
               name,
               image,
