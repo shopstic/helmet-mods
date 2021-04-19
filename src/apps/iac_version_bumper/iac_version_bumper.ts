@@ -1,6 +1,6 @@
 import { captureExec, inheritExec } from "../../deps/exec_utils.ts";
 import { fsExists } from "../../deps/std_fs.ts";
-import { joinPath } from "../../deps/std_path.ts";
+import { dirname, joinPath } from "../../deps/std_path.ts";
 import { CliProgram, createCliAction } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import { readAll } from "../../deps/std_io.ts";
@@ -78,8 +78,14 @@ export async function autoBumpVersions(
     changes
       .map(async (change) => {
         const { versionFilePath, digest } = change!;
+        const toWritePath = joinPath(repoPath, versionFilePath);
+
+        if (!await fsExists(toWritePath)) {
+          await Deno.mkdir(dirname(toWritePath), { recursive: true });
+        }
+
         await Deno.writeTextFile(
-          joinPath(repoPath, versionFilePath),
+          toWritePath,
           `export default ${JSON.stringify(digest)};\n`,
         );
       }),
