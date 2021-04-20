@@ -7,9 +7,9 @@ export BUILDKIT_HOST=${BUILDKIT_HOST:-"tcp://localhost:${BUILDKITD_TCP_PORT}"}
 
 code_quality() {
   echo "Checking formatting..."
-  deno fmt --unstable --ignore="**/*.js" --check ./src
+  deno fmt --unstable --ignore=./src/apps/fdb_configurator/build,./src/apps/iac_version_bumper/build --check ./src
   echo "Linting..."
-  deno lint --unstable --ignore="**/*.js" ./src
+  deno lint --unstable --ignore=./src/apps/fdb_configurator/build,./src/apps/iac_version_bumper/build ./src
 }
 
 test() {
