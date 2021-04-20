@@ -142,8 +142,9 @@ const buildApps = createCliAction(
           });
         }
 
+        const appBuildHash = await deepHash(appBuildPath);
+
         if (output === BuildImageOutput.Registry) {
-          const appBuildHash = await deepHash(appBuildPath);
           const imageRef = `${registryRepo}/${imageName}:${appBuildHash}`;
 
           const manifestExists = await (async () => {
@@ -190,7 +191,7 @@ const buildApps = createCliAction(
             buildContext: appBuildPath,
             registryRepo,
             imageName,
-            tag: latestVersion,
+            tag: appBuildHash,
             output,
           });
         }
