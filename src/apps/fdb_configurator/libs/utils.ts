@@ -99,7 +99,7 @@ export async function fetchStatus(
       return JSON.parse(json);
     } catch (e) {
       logger.error(json);
-      throw new Error(`Failed parsing status JSON`);
+      throw e;
     }
   })();
 
