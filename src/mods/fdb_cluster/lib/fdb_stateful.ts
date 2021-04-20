@@ -99,6 +99,7 @@ export function createFdbStatefulResources(
     dataVolumeFactory,
     image = fdbImage,
     imagePullPolicy = fdbImagePullPolicy,
+    args,
   }: {
     baseName: string;
     baseLabels: Record<string, string>;
@@ -107,6 +108,7 @@ export function createFdbStatefulResources(
     dataVolumeFactory: (name: string) => Omit<IoK8sApiCoreV1Volume, "name">;
     image?: string;
     imagePullPolicy?: K8sImagePullPolicy;
+    args: string[];
   },
 ): K8sResource[] {
   const volumeName = "data";
@@ -157,6 +159,7 @@ export function createFdbStatefulResources(
           connectionStringConfigMapRef,
           serviceName: service.metadata.name,
           port,
+          args,
         })
       );
 

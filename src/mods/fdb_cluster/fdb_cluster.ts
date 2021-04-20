@@ -30,6 +30,7 @@ export default defineChartInstance(
       baseName,
       namespace,
       createNamespace,
+      containerArgs = [],
       dataVolumeFactory,
     }: {
       baseName: string;
@@ -43,6 +44,7 @@ export default defineChartInstance(
         standbyCount: number;
       };
       stateful: Record<string, FdbStatefulConfig>;
+      containerArgs?: string[];
       dataVolumeFactory: (name: string) => Omit<IoK8sApiCoreV1Volume, "name">;
     },
   ) => {
@@ -61,6 +63,7 @@ export default defineChartInstance(
       baseLabels: labels,
       configs: stateful,
       connectionStringConfigMapRef,
+      args: containerArgs,
       dataVolumeFactory,
     });
 
@@ -70,6 +73,7 @@ export default defineChartInstance(
       replicas: stateless.proxyCount,
       baseLabels: labels,
       connectionStringConfigMapRef,
+      args: containerArgs,
       port: 4500,
     });
 
@@ -81,6 +85,7 @@ export default defineChartInstance(
       baseLabels: labels,
       connectionStringConfigMapRef,
       port: 4500,
+      args: containerArgs,
       // data_distributor needs more than the default 8GiB limit
       // when the cluster is hammered with > 1M writes / s
       processMemoryGiBs: 12,
