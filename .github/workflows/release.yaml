@@ -96,7 +96,7 @@ jobs:
 
           EOF
 
-          git add ./src/apps/*/meta.ts
+          git add ./src/apps/*/meta.ts ./src/version.ts
           git commit -m "Release ${GIT_REF}"
           git tag "${GIT_REF}"
           git push origin release --tags
