@@ -112,6 +112,7 @@ export async function fetchStatus(
 export function toFdbcliCommand(command: string) {
   return [
     "fdbcli",
+    "--no-status",
     "--exec",
     `option on PRIORITY_SYSTEM_IMMEDIATE; ${command}`,
   ];
