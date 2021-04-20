@@ -150,7 +150,7 @@ await new CliProgram()
         await inheritExec({ run: { cmd: gitCloneCmd } });
 
         while (true) {
-          logger.error(
+          logger.info(
             `Reading targets config from: ${
               targetsConfigFile === "-" ? "stdin" : targetsConfigFile
             }`,
