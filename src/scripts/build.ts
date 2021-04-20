@@ -126,7 +126,7 @@ const buildApps = createCliAction(
         const appEntrypoint = joinPath(appPath, `${appName}.ts`);
         const metaPath = joinPath(appPath, "meta.ts");
         const meta = await import(metaPath);
-        const { imageName, version: latestVersion } = meta;
+        const { imageName } = meta;
 
         if (await fsExists(appEntrypoint)) {
           console.error("Building app", cyan(appEntrypoint));
