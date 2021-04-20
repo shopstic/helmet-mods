@@ -1,5 +1,7 @@
+ARG BUILD_VERSION
+
 FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
-FROM foundationdb/foundationdb:6.2.30
+FROM foundationdb/foundationdb:${BUILD_VERSION}
 
 WORKDIR /app
 RUN \

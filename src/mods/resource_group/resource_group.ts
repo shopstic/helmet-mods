@@ -1,6 +1,7 @@
 import { createK8sNamespace, K8sResource } from "../../deps/helmet.ts";
 import { defineChartInstance } from "../../deps/helmet.ts";
 import { K8sCrd } from "../../deps/helmet.ts";
+import releaseVersion from "../../version.ts";
 
 export interface ResourceGroupParams {
   name: string;
@@ -21,7 +22,7 @@ export default defineChartInstance(
       crds = [],
       createNamespace = true,
       labels = {},
-      version = "1.0.0",
+      version = releaseVersion,
     }: ResourceGroupParams,
   ) => {
     const seedLabels = {

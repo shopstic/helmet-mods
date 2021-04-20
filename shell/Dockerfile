@@ -21,7 +21,15 @@ ENV LANG=C.UTF-8
 ENV TERM=xterm-256color
 
 RUN \
-  apt-get update && apt-get install -y ca-certificates
+  apt-get update && apt-get install -y ca-certificates curl
+
+RUN \
+  mkdir /temp && \
+  cd /temp && \
+  curl -Lo - https://download.docker.com/linux/static/stable/x86_64/docker-20.10.6.tgz | tar -xz -C /temp/ --strip-components=1 && \
+  mv /temp/docker /usr/bin/docker && \
+  chmod +x /usr/bin/docker && \
+  rm -Rf /temp
 
 COPY --from=bin-dumb-init / /
 COPY --from=bin-kubectl / /

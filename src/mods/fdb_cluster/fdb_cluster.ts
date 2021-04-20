@@ -19,8 +19,8 @@ import {
 import { createFdbStatelessResources } from "./lib/fdb_stateless.ts";
 import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources } from "./lib/fdb_exporter.ts";
-import { fdbVersion } from "./lib/fdb_images.ts";
 import { createFdbBackupResources } from "./lib/fdb_backup.ts";
+import releaseVersion from "../../version.ts";
 
 export default defineChartInstance(
   (
@@ -192,7 +192,7 @@ export default defineChartInstance(
       name: baseName,
       namespace,
       createNamespace,
-      version: fdbVersion,
+      version: releaseVersion,
       labels,
       resources: [
         ...statefulResources,
