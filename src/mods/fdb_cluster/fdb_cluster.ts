@@ -1,6 +1,7 @@
 import {
   defineChartInstance,
   IoK8sApiCoreV1Volume,
+  IoK8sApiCoreV1VolumeMount,
 } from "../../deps/helmet.ts";
 import { IoK8sApiCoreV1ConfigMapKeySelector } from "../../deps/helmet.ts";
 import { createFdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
@@ -19,6 +20,7 @@ import { createFdbStatelessResources } from "./lib/fdb_stateless.ts";
 import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources } from "./lib/fdb_exporter.ts";
 import { fdbVersion } from "./lib/fdb_images.ts";
+import { createFdbBackupResources } from "./lib/fdb_backup.ts";
 
 export default defineChartInstance(
   (
@@ -27,10 +29,11 @@ export default defineChartInstance(
       redundancyMode,
       stateless,
       stateful,
+      backup,
       baseName,
       namespace,
       createNamespace,
-      containerArgs = [],
+      serverArgs = [],
       dataVolumeFactory,
     }: {
       baseName: string;
@@ -43,8 +46,15 @@ export default defineChartInstance(
         resolverCount: number;
         standbyCount: number;
       };
+      backup?: {
+        podCount: number;
+        agentCountPerPod: number;
+        volumeMounts: IoK8sApiCoreV1VolumeMount[];
+        volumes: IoK8sApiCoreV1Volume[];
+        args: string[];
+      };
       stateful: Record<string, FdbStatefulConfig>;
-      containerArgs?: string[];
+      serverArgs?: string[];
       dataVolumeFactory: (name: string) => Omit<IoK8sApiCoreV1Volume, "name">;
     },
   ) => {
@@ -58,12 +68,25 @@ export default defineChartInstance(
       key: "connectionString",
     };
 
+    const backupResources = backup
+      ? createFdbBackupResources({
+        replicas: backup.podCount,
+        baseName,
+        processCountPerPod: backup.agentCountPerPod,
+        baseLabels: labels,
+        connectionStringConfigMapRef,
+        volumeMounts: backup.volumeMounts,
+        volumes: backup.volumes,
+        args: backup.args,
+      })
+      : [];
+
     const statefulResources = createFdbStatefulResources({
       baseName,
       baseLabels: labels,
       configs: stateful,
       connectionStringConfigMapRef,
-      args: containerArgs,
+      args: serverArgs,
       dataVolumeFactory,
     });
 
@@ -73,7 +96,7 @@ export default defineChartInstance(
       replicas: stateless.proxyCount,
       baseLabels: labels,
       connectionStringConfigMapRef,
-      args: containerArgs,
+      args: serverArgs,
       port: 4500,
     });
 
@@ -85,7 +108,7 @@ export default defineChartInstance(
       baseLabels: labels,
       connectionStringConfigMapRef,
       port: 4500,
-      args: containerArgs,
+      args: serverArgs,
       // data_distributor needs more than the default 8GiB limit
       // when the cluster is hammered with > 1M writes / s
       processMemoryGiBs: 12,
@@ -179,6 +202,7 @@ export default defineChartInstance(
         ...configureResources,
         ...syncConnectionStringResources,
         ...exporterResources,
+        ...backupResources,
       ],
     });
   },
