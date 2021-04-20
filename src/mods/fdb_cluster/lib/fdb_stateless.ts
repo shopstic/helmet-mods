@@ -18,6 +18,7 @@ export function createFdbStatelessResources(
     port,
     image = fdbImage,
     imagePullPolicy = fdbImagePullPolicy,
+    args,
     processMemoryGiBs,
   }: {
     baseName: string;
@@ -28,6 +29,7 @@ export function createFdbStatelessResources(
     port: number;
     image?: string;
     imagePullPolicy?: K8sImagePullPolicy;
+    args: string[];
     processMemoryGiBs?: number;
   },
 ): K8sResource[] {
@@ -53,6 +55,7 @@ export function createFdbStatelessResources(
     connectionStringConfigMapRef,
     port,
     memoryGiBs: processMemoryGiBs,
+    args,
   });
 
   const deployment = createK8sDeployment({

@@ -21,6 +21,7 @@ export function createFdbContainer(
     connectionStringConfigMapRef,
     volumeMounts,
     port,
+    args,
     serviceName,
     memoryGiBs,
   }: {
@@ -30,6 +31,7 @@ export function createFdbContainer(
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
     port: number;
+    args: string[];
     memoryGiBs?: number;
     serviceName?: string;
   },
