@@ -73,6 +73,8 @@ if [[ "${FDB_PROCESS_MEMORY}" != "" ]]; then
   ARGS+=(--memory "${FDB_PROCESS_MEMORY}")
 fi
 
+ARGS+=("$@")
+
 echo "/usr/bin/fdbserver ${ARGS[*]}"
 
 exec /usr/bin/fdbserver "${ARGS[@]}"
