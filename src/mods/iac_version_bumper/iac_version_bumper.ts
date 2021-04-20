@@ -12,6 +12,7 @@ import type {
   VersionBumpTargets,
 } from "../../apps/iac_version_bumper/libs/types.ts";
 import { imageName, version } from "../../apps/iac_version_bumper/meta.ts";
+import releaseVersion from "../../version.ts";
 
 export const defaultName = "iac-version-bumper";
 export const defaultImage = `shopstic/${imageName}:${version}`;
@@ -149,7 +150,7 @@ export default defineChartInstance(
       name,
       namespace,
       createNamespace,
-      version,
+      version: releaseVersion,
       labels,
       resources: [
         targetsConfigMap,

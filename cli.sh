@@ -38,8 +38,8 @@ start_buildkitd() {
 }
 
 build_apps() {
-  local GIT_REF=${GIT_REF:-"latest"}
-  deno run --unstable -A ./src/scripts/build.ts build-apps --registryRepo "${CONTAINER_REGISTRY_REPO}" --gitRef "${GIT_REF}" "$@"
+  local VERSION=${VERSION:-"latest"}
+  deno run --unstable -A ./src/scripts/build.ts build-apps --registryRepo "${CONTAINER_REGISTRY_REPO}" --version "${VERSION}" "$@"
 }
 
 "$@"
