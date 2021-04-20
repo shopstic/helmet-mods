@@ -65,8 +65,6 @@ async function buildImage(
         `context=${buildContext}`,
         "--local",
         `dockerfile=${buildContext}`,
-        "--opt",
-        `build-arg:BUILD_VERSION=${tags[0]}`,
         ...outputArgs,
       ],
     },
@@ -191,7 +189,7 @@ const buildApps = createCliAction(
             buildContext: appBuildPath,
             registryRepo,
             imageName,
-            tag: appBuildHash,
+            tag: appBuildPath,
             output,
           });
         }
