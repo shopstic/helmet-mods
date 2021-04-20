@@ -1,3 +1,3 @@
-export const version = "6.2.30.3";
+export const version = "6.3.12";
 export const imageName = "fdb";
 export const autoVersioning = false;
