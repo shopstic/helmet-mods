@@ -93,7 +93,15 @@ export async function fetchStatus(
   timeoutMs = 30000,
 ): Promise<FdbStatus> {
   const json = await fdbcliCaptureExec("status json", timeoutMs);
-  const parsed = JSON.parse(json);
+
+  const parsed = (() => {
+    try {
+      return JSON.parse(json);
+    } catch (e) {
+      logger.error(json);
+      throw new Error(`Failed parsing status JSON`);
+    }
+  })();
 
   const statusValidation = validate(FdbStatusSchema, parsed);
 
