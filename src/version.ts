@@ -1,1 +1,1 @@
-export default "latest";
+export const version = "latest";
