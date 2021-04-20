@@ -200,7 +200,7 @@ const buildApps = createCliAction(
 
     await Deno.writeTextFile(
       "./src/version.ts",
-      `export const version = ${JSON.stringify(version)};\n`,
+      `export default ${JSON.stringify(version)};\n`,
     );
 
     return ExitCode.Zero;
