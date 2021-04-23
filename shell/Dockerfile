@@ -4,6 +4,7 @@ FROM shopstic/bin-deno:1.9.0 as bin-deno
 FROM shopstic/bin-helm:3.5.3 as bin-helm
 FROM shopstic/bin-yq:4.6.3 as bin-yq
 FROM shopstic/bin-buildctl:0.8.2 as bin-buildctl
+FROM shopstic/bin-docker:20.10.6 as bin-docker
 
 
 # kube-ps1 ------------------------------------------------------------------
@@ -23,20 +24,13 @@ ENV TERM=xterm-256color
 RUN \
   apt-get update && apt-get install -y ca-certificates curl
 
-RUN \
-  mkdir /temp && \
-  cd /temp && \
-  curl -Lo - https://download.docker.com/linux/static/stable/x86_64/docker-20.10.6.tgz | tar -xz -C /temp/ --strip-components=1 && \
-  mv /temp/docker /usr/bin/docker && \
-  chmod +x /usr/bin/docker && \
-  rm -Rf /temp
-
 COPY --from=bin-dumb-init / /
 COPY --from=bin-kubectl / /
 COPY --from=bin-helm / /
 COPY --from=bin-deno / /
 COPY --from=bin-yq / /
 COPY --from=bin-buildctl / /
+COPY --from=bin-docker / /
 COPY --from=kube-ps1 /root/kube-ps1.sh /root/kube-ps1.sh
 
 COPY ./.profile /root/.profile

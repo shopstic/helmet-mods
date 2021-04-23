@@ -31,6 +31,9 @@ export default defineChartInstance(
       committerEmail,
       sshPrivateKey,
       targets,
+      dockerConfig = {
+        auths: {},
+      },
     }: {
       name?: string;
       namespace?: string;
@@ -40,6 +43,10 @@ export default defineChartInstance(
       committerEmail: string;
       sshPrivateKey: string;
       targets: VersionBumpTargets;
+      dockerConfig?: {
+        auths: Record<string, unknown>;
+        [k: string]: unknown;
+      };
     } & Omit<VersionBumpParams, "targetsConfigFile">,
   ) => {
     const labels = {
@@ -53,7 +60,16 @@ export default defineChartInstance(
         name: `${name}-targets`,
       },
       data: {
-        [targetsConfigFileName]: JSON.stringify(targets),
+        [targetsConfigFileName]: JSON.stringify(targets, null, 2),
+      },
+    });
+
+    const dockerConfigSecret = createK8sSecret({
+      metadata: {
+        name: `${name}-docker-config`,
+      },
+      data: {
+        "config.json": btoa(JSON.stringify(dockerConfig, null, 2)),
       },
     });
 
@@ -77,6 +93,18 @@ export default defineChartInstance(
           mode: 256,
         }],
       },
+    });
+
+    const dockerConfigVolume = createK8sVolume({
+      name: "docker-config",
+      secret: {
+        secretName: dockerConfigSecret.metadata.name,
+      },
+    });
+
+    const dockerConfigVolumeMount = createK8sVolumeMount({
+      name: dockerConfigVolume.name,
+      mountPath: "/home/app/.docker",
     });
 
     const targetsConfigVolume = createK8sVolume({
@@ -123,6 +151,7 @@ export default defineChartInstance(
               ],
               volumeMounts: [
                 targetsConfigVolumeMount,
+                dockerConfigVolumeMount,
                 {
                   name: sshPrivateKeyVolume.name,
                   mountPath: "/home/app/.ssh/id_rsa",
@@ -139,6 +168,7 @@ export default defineChartInstance(
             }],
             volumes: [
               targetsConfigVolume,
+              dockerConfigVolume,
               sshPrivateKeyVolume,
             ],
           },
@@ -154,6 +184,7 @@ export default defineChartInstance(
       labels,
       resources: [
         targetsConfigMap,
+        dockerConfigSecret,
         sshPrivateKeySecret,
         deployment,
       ],
