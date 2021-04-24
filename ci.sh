@@ -35,6 +35,7 @@ cat <<EOF | docker run \
   bash -l
 set -euo pipefail
 
+./cli.sh update_cache
 ./cli.sh code_quality
 ./cli.sh test
 ./cli.sh build_apps
@@ -69,6 +70,7 @@ cat <<EOF | docker run \
   bash -l
 set -euo pipefail
 
+./cli.sh update_cache
 ./cli.sh code_quality
 ./cli.sh test
 ./cli.sh build_apps
