@@ -13,6 +13,30 @@ export interface ResourceGroupParams {
   crds?: K8sCrd[];
 }
 
+export function extractK8sResources(value: unknown): K8sResource[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((v) => extractK8sResources(v));
+  } else if (typeof value === "object" && value !== null) {
+    const dict = value as Record<string, unknown>;
+
+    if (
+      typeof dict.apiVersion === "string" && dict.apiVersion.length > 0 &&
+      typeof dict.kind === "string" && dict.kind.length > 0 &&
+      typeof dict.metadata === "object" && dict.metadata !== null
+    ) {
+      const metadata = dict.metadata as Record<string, unknown>;
+
+      if (typeof metadata.name === "string" && metadata.name.length > 0) {
+        return [value as K8sResource];
+      }
+    }
+
+    return Object.values(value).flatMap((v) => extractK8sResources(v));
+  }
+
+  return [];
+}
+
 export default defineChartInstance(
   (
     {
