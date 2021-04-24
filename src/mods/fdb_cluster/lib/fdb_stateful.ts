@@ -27,8 +27,8 @@ export interface FdbStatefulConfig {
   nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
 }
 
-export const STATEFUL_ID_LABEL = "shopstic.com/fdb-stateful-id";
-export const FDB_COMPONENT_LABEL = "shopstic.com/fdb-component";
+export const STATEFUL_ID_LABEL = "helmet.run/fdb-stateful-id";
+export const FDB_COMPONENT_LABEL = "helmet.run/fdb-component";
 
 function createStatefulLabels(
   { id, baseLabels, processClass }: {

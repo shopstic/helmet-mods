@@ -16,11 +16,11 @@ export const PENDING_LABEL_VALUE_NO = "no";
 export const ROOT_MOUNT_PATH = "/mnt/fdb";
 
 export function createPendingLabelName(releaseName: string) {
-  return `shopstic.com/${releaseName}-local-pv-pending`;
+  return `helmet.run/${releaseName}-local-pv-pending`;
 }
 
 export function createPendingDeviceIdsAnnotationName(releaseName: string) {
-  return `shopstic.com/${releaseName}-local-pv-device-ids`;
+  return `helmet.run/${releaseName}-local-pv-device-ids`;
 }
 
 export interface FdbPrepareLocalPvResources {
