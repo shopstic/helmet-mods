@@ -53,6 +53,22 @@ build_apps() {
   build build-apps "$@"
 }
 
+test_run_apps() {
+  test_run_app ./src/apps/fdb_configurator/build/fdb_configurator.js
+  test_run_app ./src/apps/iac_version_bumper/build/iac_version_bumper.js
+}
+
+test_run_app() {
+  local OUT
+  if ! OUT=$(deno run -A --unstable "$@" 2>&1); then
+    if ! echo "$OUT" | grep -q "No command provided"; then
+      echo "App run failed, output:"
+      echo "${OUT}"
+      exit 1
+    fi
+  fi
+}
+
 build_images() {
   local GIT_REF=${GIT_REF:-"latest"}
   build build-images --registryRepo "${CONTAINER_REGISTRY_REPO}" --version "${GIT_REF}" "$@"
