@@ -49,7 +49,7 @@ export const fdbConfiguratorImage =
 export const fdbExporterImage =
   `shopstic/fdb-prometheus-exporter:${fdbExporterVersion}`;
 
-interface FdbClusterResources {
+export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;
   proxyDeployment?: K8sDeployment;
   statefulServices: K8sService[];
