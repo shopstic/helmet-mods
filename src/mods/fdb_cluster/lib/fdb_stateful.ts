@@ -3,16 +3,16 @@ import {
   createK8sService,
   createK8sStatefulSet,
   IoK8sApiCoreV1ConfigMapKeySelector,
-  IoK8sApiCoreV1Volume,
   K8sImagePullPolicy,
-  K8sResource,
+  K8sPvc,
+  K8sService,
+  K8sStatefulSet,
 } from "../../../deps/helmet.ts";
 import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
 import {
   createFdbContainer,
   FdbConfiguredProcessClass,
 } from "./fdb_container.ts";
-import { fdbImage, fdbImagePullPolicy } from "./fdb_images.ts";
 
 export interface FdbStatefulServer {
   port: number;
@@ -53,7 +53,7 @@ export function createFdbStatefulPersistentVolumeClaims({
   baseName: string;
   baseLabels: Record<string, string>;
   configs: Record<string, FdbStatefulConfig>;
-}): K8sResource[] {
+}): K8sPvc[] {
   return Object
     .entries(configs)
     .flatMap(
@@ -96,21 +96,20 @@ export function createFdbStatefulResources(
     baseName,
     connectionStringConfigMapRef,
     configs,
-    dataVolumeFactory,
-    image = fdbImage,
-    imagePullPolicy = fdbImagePullPolicy,
-    args,
+    image,
+    imagePullPolicy,
   }: {
     baseName: string;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     configs: Record<string, FdbStatefulConfig>;
-    dataVolumeFactory: (name: string) => Omit<IoK8sApiCoreV1Volume, "name">;
-    image?: string;
-    imagePullPolicy?: K8sImagePullPolicy;
-    args: string[];
+    image: string;
+    imagePullPolicy: K8sImagePullPolicy;
   },
-): K8sResource[] {
+): {
+  services: K8sService[];
+  statefulSets: K8sStatefulSet[];
+} {
   const volumeName = "data";
   const volumeMountPath = "/app/data";
 
@@ -159,7 +158,6 @@ export function createFdbStatefulResources(
           connectionStringConfigMapRef,
           serviceName: service.metadata.name,
           port,
-          args,
         })
       );
 
@@ -189,7 +187,9 @@ export function createFdbStatefulResources(
               volumes: [
                 {
                   name: volumeName,
-                  ...dataVolumeFactory(resourceName),
+                  persistentVolumeClaim: {
+                    claimName: resourceName,
+                  },
                 },
               ],
             },
@@ -197,12 +197,15 @@ export function createFdbStatefulResources(
         },
       });
 
-      return [
+      return {
         service,
         statefulSet,
-      ];
+      };
     },
   );
 
-  return resources;
+  return {
+    services: resources.map(({ service }) => service),
+    statefulSets: resources.map(({ statefulSet }) => statefulSet),
+  };
 }

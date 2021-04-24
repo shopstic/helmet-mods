@@ -4,11 +4,12 @@ import {
   createK8sContainer,
   createK8sDaemonSet,
   createK8sServiceAccount,
+  K8sClusterRole,
+  K8sClusterRoleBinding,
+  K8sDaemonSet,
   K8sImagePullPolicy,
-  K8sResource,
+  K8sServiceAccount,
 } from "../../../../deps/helmet.ts";
-
-import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb_images.ts";
 
 export const PENDING_LABEL_VALUE_YES = "yes";
 export const PENDING_LABEL_VALUE_NO = "no";
@@ -22,19 +23,26 @@ export function createPendingDeviceIdsAnnotationName(releaseName: string) {
   return `shopstic.com/${releaseName}-local-pv-device-ids`;
 }
 
+export interface FdbPrepareLocalPvResources {
+  daemonSet: K8sDaemonSet;
+  serviceAccount: K8sServiceAccount;
+  clusterRole: K8sClusterRole;
+  clusterRoleBinding: K8sClusterRoleBinding;
+}
+
 export function createFdbPrepareLocalPvResources({
   baseLabels,
   baseName,
   namespace,
-  image = fdbConfiguratorImage,
-  imagePullPolicy = fdbImagePullPolicy,
+  image,
+  imagePullPolicy,
 }: {
   baseName: string;
   namespace: string;
   baseLabels: Record<string, string>;
-  image?: string;
-  imagePullPolicy?: K8sImagePullPolicy;
-}): K8sResource[] {
+  image: string;
+  imagePullPolicy: K8sImagePullPolicy;
+}): FdbPrepareLocalPvResources {
   const component = "prepare-local-pv";
   const resourceName = `${baseName}-${component}`;
 
@@ -146,5 +154,5 @@ export function createFdbPrepareLocalPvResources({
     },
   });
 
-  return [daemonSet, serviceAccount, clusterRole, clusterRoleBinding];
+  return { daemonSet, serviceAccount, clusterRole, clusterRoleBinding };
 }

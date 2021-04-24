@@ -2,9 +2,15 @@ import {
   createK8sDeployment,
   createK8sService,
   IoK8sApiCoreV1ConfigMapKeySelector,
-  K8sResource,
+  K8sDeployment,
+  K8sImagePullPolicy,
+  K8sService,
 } from "../../../deps/helmet.ts";
-import { fdbExporterImage } from "./fdb_images.ts";
+
+export interface FdbExporterResources {
+  service: K8sService;
+  deployment: K8sDeployment;
+}
 
 export function createFdbExporterResources(
   {
@@ -12,15 +18,17 @@ export function createFdbExporterResources(
     name,
     dedupProxyImage,
     connectionStringConfigMapRef,
-    image = fdbExporterImage,
+    image,
+    imagePullPolicy,
   }: {
     name: string;
     dedupProxyImage: string;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    image?: string;
+    image: string;
+    imagePullPolicy: K8sImagePullPolicy;
   },
-): K8sResource[] {
+): FdbExporterResources {
   const labels = {
     ...baseLabels,
     "app.kubernetes.io/component": "exporter",
@@ -60,6 +68,7 @@ export function createFdbExporterResources(
           containers: [{
             name: "exporter",
             image,
+            imagePullPolicy,
             livenessProbe: probe,
             readinessProbe: probe,
             env: [
@@ -115,8 +124,8 @@ export function createFdbExporterResources(
     },
   });
 
-  return [
+  return {
     deployment,
     service,
-  ];
+  };
 }
