@@ -37,9 +37,25 @@ start_buildkitd() {
     --addr "tcp://0.0.0.0:${BUILDKITD_TCP_PORT}"
 }
 
+update_cache() {
+  deno cache --lock=lock.json ./src/deps/*
+}
+
+update_lock() {
+  deno cache ./src/deps/* --lock ./lock.json --lock-write
+}
+
+build() {
+  deno run --cached-only --unstable -A ./src/scripts/build.ts "$@"
+}
+
 build_apps() {
+  build build-apps "$@"
+}
+
+build_images() {
   local GIT_REF=${GIT_REF:-"latest"}
-  deno run --unstable -A ./src/scripts/build.ts build-apps --registryRepo "${CONTAINER_REGISTRY_REPO}" --version "${GIT_REF}" "$@"
+  build build-images --registryRepo "${CONTAINER_REGISTRY_REPO}" --version "${GIT_REF}" "$@"
 }
 
 "$@"

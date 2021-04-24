@@ -30,7 +30,7 @@ jobs:
 
       - name: Build and push shell Docker image
         id: buildkit
-        uses: shopstic/buildkit-action@1.0.10
+        uses: shopstic/buildkit-action@1.0.12
         with:
           context: ${{ github.workspace }}/shell
           image: ghcr.io/shopstic/helmet-mods-ci
@@ -62,18 +62,7 @@ jobs:
 
       - name: Start buildkitd
         run: |
-          BUILDKITD_CONTAINER_ID=$(./cli.sh start_buildkitd -d)
-
-          for i in {1..10}; do
-            if docker logs "${BUILDKITD_CONTAINER_ID}" 2>&1 | grep "running server on"; then
-              exit 0
-            fi
-            sleep 0.5
-          done
-          
-          echo "Timed out waiting for buildkitd container to be ready. Logs:"
-          docker logs "${BUILDKITD_CONTAINER_ID}"
-          exit 1
+          ./ci.sh start_buildkitd
 
       - name: Build
         env:
@@ -81,26 +70,4 @@ jobs:
           DENO_DIR: ${{ github.workspace }}/.cache/deno
           GIT_REF: latest
         run: |-
-          if ls "${DENO_DIR}" > /dev/null 2>&1; then
-            du -sh "${DENO_DIR}"
-          fi
-
-          cat <<EOF | docker run \
-            --workdir /repo \
-            -i \
-            --rm \
-            --net=host \
-            --init \
-            -e "GIT_REF=${GIT_REF}" \
-            -v "${GITHUB_WORKSPACE}:/repo" \
-            -v "${DENO_DIR}:/root/.cache/deno" \
-            -e "DENO_DIR=/root/.cache/deno" \
-            "${SHELL_IMAGE}" \
-            bash -l
-          set -euo pipefail
-
-          ./cli.sh code_quality
-          ./cli.sh test
-          ./cli.sh build_apps --output dev_null
-
-          EOF
+          ./ci.sh build_dev

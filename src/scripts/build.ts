@@ -99,8 +99,61 @@ async function deepHash(path: string): Promise<string> {
     .toString();
 }
 
+const DEFAULT_APPS_PATH = "./src/apps";
+
+function resolveAppPaths(appsRootPath: string): string[] {
+  return Array
+    .from(expandGlobSync(`${appsRootPath}/*`))
+    .filter((e) => e.isDirectory)
+    .map((e) => e.path);
+}
+
 const buildApps = createCliAction(
   Type.Object({
+    path: Type.Optional(Type.String({
+      description: `Apps path, defaults to ${DEFAULT_APPS_PATH}`,
+      default: DEFAULT_APPS_PATH,
+    })),
+  }),
+  async ({ path = DEFAULT_APPS_PATH }) => {
+    const appPaths = resolveAppPaths(path);
+
+    const promises: Array<Promise<void>> = appPaths.map((
+      appPath,
+    ) =>
+      (async () => {
+        const appName = basename(appPath);
+        const appBuildPath = joinPath(appPath, "build");
+        const appEntrypoint = joinPath(appPath, `${appName}.ts`);
+
+        if (await fsExists(appEntrypoint)) {
+          console.error("Building app", cyan(appEntrypoint));
+          await inheritExec({
+            run: {
+              cmd: ["bash", "-euo", "pipefail"],
+            },
+            stdin: `deno bundle ${JSON.stringify(appEntrypoint)} > ${
+              joinPath(appBuildPath, `${appName}.js`)
+            }`,
+            stderrTag: gray(`[$ deno bundle ${appName}.ts]`),
+            stdoutTag: gray(`[$ deno bundle ${appName}.ts]`),
+          });
+        }
+      })()
+    );
+
+    await Promise.all(promises);
+
+    return ExitCode.Zero;
+  },
+);
+
+const buildImages = createCliAction(
+  Type.Object({
+    path: Type.Optional(Type.String({
+      description: `Apps path, defaults to ${DEFAULT_APPS_PATH}`,
+      default: DEFAULT_APPS_PATH,
+    })),
     registryRepo: NonEmptyString({
       description: "Container registry repository reference",
       examples: ["docker.io/shopstic"],
@@ -111,34 +164,17 @@ const buildApps = createCliAction(
     }),
     output: outputArgumentType,
   }),
-  async ({ registryRepo, output, version }) => {
-    const appPaths = Array
-      .from(expandGlobSync("./src/apps/*"))
-      .filter((e) => e.isDirectory)
-      .map((e) => e.path);
+  async (
+    { path: appsRootPath = DEFAULT_APPS_PATH, registryRepo, output, version },
+  ) => {
+    const appPaths = resolveAppPaths(appsRootPath);
 
-    const promises = appPaths.map((appPath) =>
+    const promises: Array<Promise<void>> = appPaths.map((appPath) =>
       (async () => {
-        const appName = basename(appPath);
         const appBuildPath = joinPath(appPath, "build");
-        const appEntrypoint = joinPath(appPath, `${appName}.ts`);
         const metaPath = joinPath(appPath, "meta.ts");
         const meta = await import(metaPath);
         const { imageName } = meta;
-
-        if (await fsExists(appEntrypoint)) {
-          console.error("Building app", cyan(appEntrypoint));
-          await inheritExec({
-            run: {
-              cmd: ["bash"],
-            },
-            stdin: `deno bundle "${appEntrypoint}" > ${
-              joinPath(appBuildPath, `${appName}.js`)
-            }`,
-            stderrTag: gray(`[$ deno bundle ${appName}.ts]`),
-            stdoutTag: gray(`[$ deno bundle ${appName}.ts]`),
-          });
-        }
 
         const appBuildHash = await deepHash(appBuildPath);
 
@@ -149,12 +185,7 @@ const buildApps = createCliAction(
             try {
               await inheritExec({
                 run: {
-                  cmd: [
-                    "docker",
-                    "manifest",
-                    "inspect",
-                    imageRef,
-                  ],
+                  cmd: ["docker", "manifest", "inspect", imageRef],
                 },
                 ignoreStderr: true,
                 ignoreStdout: true,
@@ -209,4 +240,5 @@ const buildApps = createCliAction(
 
 await new CliProgram()
   .addAction("build-apps", buildApps)
+  .addAction("build-images", buildImages)
   .run(Deno.args);
