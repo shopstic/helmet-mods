@@ -4,10 +4,9 @@ import {
   IoK8sApiCoreV1Container,
   IoK8sApiCoreV1Volume,
   IoK8sApiCoreV1VolumeMount,
+  K8sDeployment,
   K8sImagePullPolicy,
-  K8sResource,
 } from "../../../deps/helmet.ts";
-import { fdbImage, fdbImagePullPolicy } from "./fdb_images.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
 export function createFdbBackupAgentContainer(
@@ -17,14 +16,12 @@ export function createFdbBackupAgentContainer(
     imagePullPolicy,
     connectionStringConfigMapRef,
     volumeMounts,
-    args,
   }: {
     index: number;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
-    args: string[];
   },
 ): IoK8sApiCoreV1Container {
   return {
@@ -45,35 +42,32 @@ export function createFdbBackupAgentContainer(
     ],
     volumeMounts,
     command: ["/usr/bin/backup_agent.sh"],
-    args,
   };
 }
 
-export function createFdbBackupResources(
+export function createFdbBackupDeployment(
   {
     replicas,
     baseName,
     processCountPerPod,
-    image = fdbImage,
-    imagePullPolicy = fdbImagePullPolicy,
+    image,
+    imagePullPolicy,
     baseLabels,
     connectionStringConfigMapRef,
     volumeMounts,
     volumes,
-    args,
   }: {
     replicas: number;
     baseName: string;
     processCountPerPod: number;
-    image?: string;
-    imagePullPolicy?: K8sImagePullPolicy;
+    image: string;
+    imagePullPolicy: K8sImagePullPolicy;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
     volumes: IoK8sApiCoreV1Volume[];
     baseLabels: Record<string, string>;
-    args: string[];
   },
-): K8sResource[] {
+): K8sDeployment {
   const labels = {
     ...baseLabels,
     "app.kubernetes.io/component": "backup",
@@ -87,11 +81,10 @@ export function createFdbBackupResources(
       imagePullPolicy,
       connectionStringConfigMapRef,
       volumeMounts,
-      args,
     })
   );
 
-  const deployment = createK8sDeployment({
+  return createK8sDeployment({
     metadata: {
       name: `${baseName}-backup`,
       labels,
@@ -134,6 +127,4 @@ export function createFdbBackupResources(
       },
     },
   });
-
-  return [deployment];
 }

@@ -1,9 +1,9 @@
 import { FdbStatefulConfig } from "./lib/fdb_stateful.ts";
-import { assert } from "../../deps/std_testing.ts";
+import { assertEquals, assertNotEquals } from "../../deps/std_testing.ts";
 
-import createFdbCluster from "./fdb_cluster.ts";
+import { createFdbClusterResources } from "./fdb_cluster.ts";
 
-Deno.test("fdb_cluster should work", async () => {
+Deno.test("fdb_cluster should work", () => {
   const baseName = "test";
   const namespace = "test";
 
@@ -31,24 +31,22 @@ Deno.test("fdb_cluster should work", async () => {
     },
   };
 
-  const cluster = await createFdbCluster({
+  const cluster = createFdbClusterResources({
     baseName,
     namespace,
-    createNamespace: false,
     storageEngine: "ssd-2",
     redundancyMode: "single",
     stateless: {
+      mode: "prod",
       proxyCount: 1,
       resolverCount: 1,
       standbyCount: 0,
     },
     stateful: fdbStatefulConfigs,
-    dataVolumeFactory: (claimName) => ({
-      persistentVolumeClaim: {
-        claimName,
-      },
-    }),
   });
 
-  assert(cluster.resources.length > 0);
+  assertEquals(cluster.statefulSets.length, 3);
+  assertEquals(cluster.backupDeployment, undefined);
+  assertNotEquals(cluster.proxyDeployment, undefined);
+  assertEquals(cluster.statelessDeployment.spec?.replicas, 5);
 });

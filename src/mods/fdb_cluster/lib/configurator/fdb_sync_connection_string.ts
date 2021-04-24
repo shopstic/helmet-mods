@@ -5,27 +5,35 @@ import {
   createK8sRoleBinding,
   createK8sServiceAccount,
   IoK8sApiCoreV1ConfigMapKeySelector,
+  K8sDeployment,
   K8sImagePullPolicy,
-  K8sResource,
+  K8sRole,
+  K8sRoleBinding,
+  K8sServiceAccount,
 } from "../../../../deps/helmet.ts";
 
-import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb_images.ts";
+export interface FdbSyncConnectionStringResources {
+  deployment: K8sDeployment;
+  serviceAccount: K8sServiceAccount;
+  role: K8sRole;
+  roleBinding: K8sRoleBinding;
+}
 
 export function createFdbSyncConnectionStringResources({
   baseLabels,
   releaseName,
   namespace,
   connectionStringConfigMapRef,
-  image = fdbConfiguratorImage,
-  imagePullPolicy = fdbImagePullPolicy,
+  image,
+  imagePullPolicy,
 }: {
   releaseName: string;
   namespace: string;
   baseLabels: Record<string, string>;
   connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-  image?: string;
-  imagePullPolicy?: K8sImagePullPolicy;
-}): K8sResource[] {
+  image: string;
+  imagePullPolicy: K8sImagePullPolicy;
+}): FdbSyncConnectionStringResources {
   const resourceName = `${releaseName}-sync-connection-string`;
 
   const labels = {
@@ -124,5 +132,5 @@ export function createFdbSyncConnectionStringResources({
     },
   });
 
-  return [deployment, serviceAccount, role, roleBinding];
+  return { deployment, serviceAccount, role, roleBinding };
 }

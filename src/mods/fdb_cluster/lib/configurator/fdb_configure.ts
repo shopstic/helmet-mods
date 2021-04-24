@@ -6,12 +6,23 @@ import {
   createK8sRoleBinding,
   createK8sServiceAccount,
   IoK8sApiCoreV1ConfigMapKeySelector,
+  K8sConfigMap,
   K8sImagePullPolicy,
-  K8sResource,
+  K8sJob,
+  K8sRole,
+  K8sRoleBinding,
+  K8sServiceAccount,
 } from "../../../../deps/helmet.ts";
 
 import { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
-import { fdbConfiguratorImage, fdbImagePullPolicy } from "../fdb_images.ts";
+
+export interface FdbConfigureResources {
+  job: K8sJob;
+  serviceAccount: K8sServiceAccount;
+  role: K8sRole;
+  roleBinding: K8sRoleBinding;
+  databaseConfigMap: K8sConfigMap;
+}
 
 export function createFdbConfigureResources(
   {
@@ -20,18 +31,18 @@ export function createFdbConfigureResources(
     namespace,
     connectionStringConfigMapRef,
     databaseConfig,
-    image = fdbConfiguratorImage,
-    imagePullPolicy = fdbImagePullPolicy,
+    image,
+    imagePullPolicy,
   }: {
     baseName: string;
     namespace: string;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     databaseConfig: FdbDatabaseConfig;
-    image?: string;
-    imagePullPolicy?: K8sImagePullPolicy;
+    image: string;
+    imagePullPolicy: K8sImagePullPolicy;
   },
-): K8sResource[] {
+): FdbConfigureResources {
   const resourceName = `${baseName}-configure`;
 
   const jobLabels = {
@@ -151,5 +162,5 @@ export function createFdbConfigureResources(
     },
   });
 
-  return [databaseConfigMap, job, serviceAccount, role, roleBinding];
+  return { databaseConfigMap, job, serviceAccount, role, roleBinding };
 }

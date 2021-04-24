@@ -1,14 +1,13 @@
 import {
   createK8sDeployment,
   IoK8sApiCoreV1ConfigMapKeySelector,
+  K8sDeployment,
   K8sImagePullPolicy,
-  K8sResource,
 } from "../../../deps/helmet.ts";
 import { createFdbContainer } from "./fdb_container.ts";
-import { fdbImage, fdbImagePullPolicy } from "./fdb_images.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
-export function createFdbStatelessResources(
+export function createFdbStatelessDeployment(
   {
     baseName,
     processClass,
@@ -16,10 +15,8 @@ export function createFdbStatelessResources(
     baseLabels,
     connectionStringConfigMapRef,
     port,
-    image = fdbImage,
-    imagePullPolicy = fdbImagePullPolicy,
-    args,
-    processMemoryGiBs,
+    image,
+    imagePullPolicy,
   }: {
     baseName: string;
     processClass: "proxy" | "stateless";
@@ -27,12 +24,10 @@ export function createFdbStatelessResources(
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     port: number;
-    image?: string;
-    imagePullPolicy?: K8sImagePullPolicy;
-    args: string[];
-    processMemoryGiBs?: number;
+    image: string;
+    imagePullPolicy: K8sImagePullPolicy;
   },
-): K8sResource[] {
+): K8sDeployment {
   const statelessLabels = {
     ...baseLabels,
     "app.kubernetes.io/component": processClass,
@@ -54,8 +49,6 @@ export function createFdbStatelessResources(
     ],
     connectionStringConfigMapRef,
     port,
-    memoryGiBs: processMemoryGiBs,
-    args,
   });
 
   const deployment = createK8sDeployment({
@@ -107,5 +100,5 @@ export function createFdbStatelessResources(
     },
   });
 
-  return [deployment];
+  return deployment;
 }

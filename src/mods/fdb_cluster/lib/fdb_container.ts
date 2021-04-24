@@ -1,8 +1,8 @@
 import { toSnakeCase } from "../../../deps/case.ts";
 import {
   IoK8sApiCoreV1ConfigMapKeySelector,
-  IoK8sApiCoreV1Container,
   IoK8sApiCoreV1VolumeMount,
+  K8sContainer,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
 
@@ -21,9 +21,7 @@ export function createFdbContainer(
     connectionStringConfigMapRef,
     volumeMounts,
     port,
-    args,
     serviceName,
-    memoryGiBs,
   }: {
     processClass: FdbConfiguredProcessClass;
     image: string;
@@ -31,11 +29,9 @@ export function createFdbContainer(
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
     port: number;
-    args: string[];
-    memoryGiBs?: number;
     serviceName?: string;
   },
-): IoK8sApiCoreV1Container {
+): K8sContainer {
   const serviceNameUpperSnakeCased = serviceName
     ? toSnakeCase(serviceName).toUpperCase()
     : "";
@@ -115,14 +111,7 @@ export function createFdbContainer(
         },
       },
       ...serviceEnv,
-      ...((memoryGiBs !== undefined)
-        ? [{
-          name: "FDB_PROCESS_MEMORY",
-          value: `${memoryGiBs}GiB`,
-        }]
-        : []),
     ],
-    args,
     volumeMounts,
   };
 }
