@@ -1,1 +1,1 @@
-export * from "https://raw.githubusercontent.com/shopstic/deno-utils/1.6.0/src/exec_utils.ts";
+export * from "https://deno.land/x/helmet@1.2.1/deps/exec_utils.ts";
