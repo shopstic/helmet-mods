@@ -39,6 +39,7 @@ set -euo pipefail
 ./cli.sh code_quality
 ./cli.sh test
 ./cli.sh build_apps
+./cli.sh test_run_apps
 ./cli.sh build_images --output dev_null
 
 EOF
@@ -74,6 +75,7 @@ set -euo pipefail
 ./cli.sh code_quality
 ./cli.sh test
 ./cli.sh build_apps
+./cli.sh test_run_apps
 ./cli.sh build_images --output registry
 
 EOF
