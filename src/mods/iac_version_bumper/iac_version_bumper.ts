@@ -13,6 +13,7 @@ import type {
   VersionBumpTargets,
 } from "../../apps/iac_version_bumper/libs/types.ts";
 import { imageName, version } from "../../apps/iac_version_bumper/meta.ts";
+import { stableHash } from "../../libs/hash_utils.ts";
 
 export const defaultName = "iac-version-bumper";
 export const defaultImage = `shopstic/${imageName}:${version}`;
@@ -96,7 +97,7 @@ export function createIacVersionBumperResources({
   });
 
   const dockerConfigVolume = createK8sVolume({
-    name: "docker-config",
+    name: `docker-config-${stableHash(targetsConfigMap)}`,
     secret: {
       secretName: dockerConfigSecret.metadata.name,
     },
@@ -108,7 +109,7 @@ export function createIacVersionBumperResources({
   });
 
   const targetsConfigVolume = createK8sVolume({
-    name: "targets-config",
+    name: `targets-config-${stableHash(targetsConfigMap)}`,
     configMap: {
       name: targetsConfigMap.metadata.name,
     },

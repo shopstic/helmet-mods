@@ -4,7 +4,7 @@ set -euo pipefail
 export DOCKER_BUILDKIT=1
 
 docker build ./shell
-IMAGE_ID=$(docker build -q ./shell)
+IMAGE_ID=$(docker build -q ./shell | head -n1)
 
 docker run \
   -it --rm \
