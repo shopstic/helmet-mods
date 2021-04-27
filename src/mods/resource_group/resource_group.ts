@@ -1,5 +1,4 @@
-import { K8sResource } from "../../deps/helmet.ts";
-import { defineChartInstance } from "../../deps/helmet.ts";
+import { defineChart, K8sResource } from "../../deps/helmet.ts";
 import { K8sCrd } from "../../deps/helmet.ts";
 import releaseVersion from "../../version.ts";
 
@@ -36,7 +35,7 @@ export function extractK8sResources(value: unknown): K8sResource[] {
   return [];
 }
 
-export default defineChartInstance(
+export default defineChart(
   (
     {
       name,
