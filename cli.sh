@@ -58,6 +58,12 @@ test_run_apps() {
   test_run_app ./src/apps/iac_version_bumper/build/iac_version_bumper.js
 }
 
+smoke_test() {
+  code_quality
+  build_apps "$@"
+  test_run_apps
+}
+
 test_run_app() {
   local OUT
   if ! OUT=$(deno run -A --unstable "$@" 2>&1); then

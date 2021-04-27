@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.3.4/deps/validation_utils.ts";
+export * from "https://deno.land/x/helmet@1.4.0/deps/validation_utils.ts";
