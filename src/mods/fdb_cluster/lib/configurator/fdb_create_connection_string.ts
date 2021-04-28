@@ -67,7 +67,7 @@ export function createFdbCreateConnectionStringResources(
     metadata: {
       name: resourceName,
       annotations: {
-        "helm.sh/hook": "post-install",
+        "helm.sh/hook": "post-install,post-upgrade",
         "helm.sh/hook-weight": "1",
         "helm.sh/hook-delete-policy": "hook-succeeded",
       },
