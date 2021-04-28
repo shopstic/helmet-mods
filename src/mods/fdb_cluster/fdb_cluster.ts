@@ -200,7 +200,9 @@ export function createFdbClusterResources(
     imagePullPolicy,
   });
 
-  const proxyCount = stateless.mode === "prod" ? stateless.proxyCount : 1;
+  const proxyCount = stateless.mode === "prod"
+    ? stateless.proxyCount
+    : stateless.count ?? 1;
   const resolverCount = stateless.mode === "prod" ? stateless.resolverCount : 1;
 
   const databaseConfig: FdbDatabaseConfig = {
