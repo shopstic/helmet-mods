@@ -86,6 +86,7 @@ export function createFdbClusterResources(
       standbyCount: number;
     } | {
       mode: "dev";
+      count?: number;
     };
     backup?: {
       podCount: number;
@@ -152,7 +153,7 @@ export function createFdbClusterResources(
     processClass: "stateless",
     replicas: (stateless.mode === "prod")
       ? stateless.resolverCount + stateless.standbyCount + 4
-      : 1,
+      : stateless.count ?? 1,
     baseLabels: labels,
     connectionStringConfigMapRef,
     port: 4500,
