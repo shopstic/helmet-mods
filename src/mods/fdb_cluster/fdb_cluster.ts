@@ -73,6 +73,7 @@ export function createFdbClusterResources(
     image = fdbImage,
     configuratorImage = fdbConfiguratorImage,
     exporterImage = fdbExporterImage,
+    createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
   }: {
     baseName: string;
@@ -98,6 +99,7 @@ export function createFdbClusterResources(
     image?: string;
     configuratorImage?: string;
     exporterImage?: string;
+    createServiceMonitor: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
   },
 ): FdbClusterResources {
@@ -236,12 +238,14 @@ export function createFdbClusterResources(
 
   const exporter = createFdbExporterResources({
     name: `${baseName}-exporter`,
+    namespace,
     baseLabels: labels,
     dedupProxyImage:
       "shopstic/dedup-proxy:cde8f002fee7962e1da76e9243a19d3409e93299",
     connectionStringConfigMapRef,
     image: exporterImage,
     imagePullPolicy,
+    createServiceMonitor,
   });
 
   return {
