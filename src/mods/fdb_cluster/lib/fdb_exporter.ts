@@ -6,27 +6,36 @@ import {
   K8sImagePullPolicy,
   K8sService,
 } from "../../../deps/helmet.ts";
+import {
+  createServiceMonitorV1,
+  ServiceMonitorV1,
+} from "../../prometheus_operator/prometheus_operator.ts";
 
 export interface FdbExporterResources {
   service: K8sService;
   deployment: K8sDeployment;
+  serviceMonitor?: ServiceMonitorV1;
 }
 
 export function createFdbExporterResources(
   {
     baseLabels,
     name,
+    namespace,
     dedupProxyImage,
     connectionStringConfigMapRef,
     image,
     imagePullPolicy,
+    createServiceMonitor,
   }: {
     name: string;
+    namespace: string;
     dedupProxyImage: string;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
+    createServiceMonitor: boolean;
   },
 ): FdbExporterResources {
   const labels = {
@@ -107,7 +116,7 @@ export function createFdbExporterResources(
 
   const service = createK8sService({
     metadata: {
-      name: name,
+      name,
       labels,
     },
     spec: {
@@ -124,8 +133,42 @@ export function createFdbExporterResources(
     },
   });
 
+  const serviceMonitor = createServiceMonitor
+    ? createServiceMonitorV1({
+      metadata: {
+        name,
+      },
+      spec: {
+        endpoints: [
+          {
+            honorLabels: true,
+            interval: "10s",
+            metricRelabelings: [
+              { action: "keep", regex: "^fdb_.+", sourceLabels: ["__name__"] },
+            ],
+            path: "/metrics",
+            port: "metrics",
+            relabelings: [
+              { action: "labeldrop", regex: "^pod$" },
+              { replacement: "fdb-exporter", targetLabel: "instance" },
+            ],
+            scheme: "http",
+            scrapeTimeout: "10s",
+          },
+        ],
+        namespaceSelector: {
+          matchNames: [namespace],
+        },
+        selector: {
+          matchLabels: service.metadata.labels,
+        },
+      },
+    })
+    : undefined;
+
   return {
     deployment,
     service,
+    serviceMonitor,
   };
 }

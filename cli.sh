@@ -62,6 +62,7 @@ smoke_test() {
   code_quality
   build_apps "$@"
   test_run_apps
+  test
 }
 
 test_run_app() {
