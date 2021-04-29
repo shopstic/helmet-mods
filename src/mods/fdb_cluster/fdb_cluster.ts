@@ -99,7 +99,7 @@ export function createFdbClusterResources(
     image?: string;
     configuratorImage?: string;
     exporterImage?: string;
-    createServiceMonitor: boolean;
+    createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
   },
 ): FdbClusterResources {
