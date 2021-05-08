@@ -13,7 +13,6 @@ import {
 
 export const PENDING_LABEL_VALUE_YES = "yes";
 export const PENDING_LABEL_VALUE_NO = "no";
-export const ROOT_MOUNT_PATH = "/mnt/fdb";
 
 export function createPendingLabelName(releaseName: string) {
   return `helmet.run/${releaseName}-local-pv-pending`;
@@ -36,12 +35,14 @@ export function createFdbPrepareLocalPvResources({
   namespace,
   image,
   imagePullPolicy,
+  rootMountPath = "/mnt/fdb",
 }: {
   baseName: string;
   namespace: string;
   baseLabels: Record<string, string>;
   image: string;
   imagePullPolicy: K8sImagePullPolicy;
+  rootMountPath?: string;
 }): FdbPrepareLocalPvResources {
   const component = "prepare-local-pv";
   const resourceName = `${baseName}-${component}`;
@@ -70,7 +71,7 @@ export function createFdbPrepareLocalPvResources({
       `--pendingLabelName=${pendingLabelName}`,
       `--pendingLabelCompletedValue=${PENDING_LABEL_VALUE_NO}`,
       `--pendingDeviceIdsAnnotationName=${pendingDeviceIdsAnnotationName}`,
-      `--rootMountPath=${ROOT_MOUNT_PATH}`,
+      `--rootMountPath=${rootMountPath}`,
     ],
     env: [
       {
