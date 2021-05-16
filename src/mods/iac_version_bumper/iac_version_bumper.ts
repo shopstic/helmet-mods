@@ -31,6 +31,7 @@ export function createIacVersionBumperResources({
   gitBranch,
   gitRepoUri,
   checkIntervalSeconds,
+  groupingDelaySeconds,
   committerName,
   committerEmail,
   sshPrivateKey,
@@ -148,6 +149,7 @@ export function createIacVersionBumperResources({
               `--gitRepoUri=${gitRepoUri}`,
               `--gitBranch=${gitBranch}`,
               `--checkIntervalSeconds=${checkIntervalSeconds}`,
+              `--groupingDelaySeconds=${groupingDelaySeconds}`,
               `--targetsConfigFile=${targetsConfigVolumeMount.mountPath}/${targetsConfigFileName}`,
             ],
             volumeMounts: [

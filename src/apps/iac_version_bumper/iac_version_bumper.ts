@@ -13,17 +13,10 @@ import {
 
 const logger = loggerWithContext("main");
 
-export async function autoBumpVersions(
-  { repoPath, gitBranch, targets }: {
-    repoPath: string;
-    gitBranch: string;
-    targets: VersionBumpTargets;
-  },
-) {
-  const gitPullCmd = ["git", "pull", "--rebase", "origin", gitBranch];
-
-  await inheritExec({ run: { cmd: gitPullCmd, cwd: repoPath } });
-
+async function updateDigests({ repoPath, targets }: {
+  repoPath: string;
+  targets: VersionBumpTargets;
+}) {
   const promises = targets
     .map(async ({ name, versionFilePath, image }) => {
       const fullVersionFilePath = joinPath(repoPath, versionFilePath);
@@ -91,6 +84,31 @@ export async function autoBumpVersions(
       }),
   );
 
+  return changes;
+}
+
+export async function autoBumpVersions(
+  { repoPath, gitBranch, targets, groupingDelayMs }: {
+    repoPath: string;
+    gitBranch: string;
+    targets: VersionBumpTargets;
+    groupingDelayMs: number;
+  },
+) {
+  const gitPullCmd = ["git", "pull", "--rebase", "origin", gitBranch];
+
+  await inheritExec({ run: { cmd: gitPullCmd, cwd: repoPath } });
+
+  const changes = await updateDigests({ repoPath, targets });
+
+  if (changes.length > 0) {
+    logger.info(
+      `Got ${changes.length} changes so far, going to check once more after ${groupingDelayMs}ms to group more changes`,
+    );
+    await delay(groupingDelayMs);
+    await updateDigests({ repoPath, targets });
+  }
+
   const gitStatus = await captureExec(
     { run: { cmd: ["git", "status"], cwd: repoPath } },
   );
@@ -142,7 +160,13 @@ await new CliProgram()
     createCliAction(
       VersionBumpParamsSchema,
       async (
-        { gitBranch, gitRepoUri, targetsConfigFile, checkIntervalSeconds },
+        {
+          gitBranch,
+          gitRepoUri,
+          targetsConfigFile,
+          checkIntervalSeconds,
+          groupingDelaySeconds,
+        },
       ) => {
         const repoPath = await Deno.makeTempDir();
         const gitCloneCmd = ["git", "clone", gitRepoUri, repoPath];
@@ -182,7 +206,12 @@ await new CliProgram()
 
           const targets = targetsConfigResult.value;
 
-          await autoBumpVersions({ repoPath, gitBranch, targets });
+          await autoBumpVersions({
+            repoPath,
+            gitBranch,
+            targets,
+            groupingDelayMs: groupingDelaySeconds * 1000,
+          });
           await delay(checkIntervalSeconds * 1000);
         }
       },
