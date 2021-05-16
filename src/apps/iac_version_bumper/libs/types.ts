@@ -13,6 +13,7 @@ export const VersionBumpParamsSchema = Type.Object({
   gitRepoUri: Type.String({ minLength: 1 }),
   gitBranch: Type.String({ minLength: 1 }),
   checkIntervalSeconds: Type.Number({ minimum: 0 }),
+  groupingDelaySeconds: Type.Number({ minimum: 0 }),
   targetsConfigFile: Type.String({ minLength: 1 }),
 });
 
