@@ -43,10 +43,14 @@ Deno.test("fdb_cluster should work", () => {
       standbyCount: 0,
     },
     stateful: fdbStatefulConfigs,
+    labels: {
+      foo: "bar",
+    },
   });
 
   assertEquals(cluster.statefulSets.length, 3);
   assertEquals(cluster.backupDeployment, undefined);
   assertNotEquals(cluster.proxyDeployment, undefined);
   assertEquals(cluster.statelessDeployment.spec?.replicas, 5);
+  assertEquals(cluster.statelessDeployment.metadata.labels?.foo, "bar");
 });

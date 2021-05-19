@@ -75,6 +75,7 @@ export function createFdbClusterResources(
     exporterImage = fdbExporterImage,
     createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
+    labels: extraLabels = {},
   }: {
     baseName: string;
     namespace: string;
@@ -101,11 +102,13 @@ export function createFdbClusterResources(
     exporterImage?: string;
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
+    labels?: Record<string, string>;
   },
 ): FdbClusterResources {
   const labels = {
     "app.kubernetes.io/name": baseName,
     "app.kubernetes.io/instance": baseName,
+    ...extraLabels,
   };
 
   const connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector = {
