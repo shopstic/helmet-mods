@@ -7,6 +7,7 @@ export function NonEmptyString() {
 
 export const FdbDatabaseConfigSchema = RelaxedObject({
   storageEngine: Type.Union([
+    Type.Literal("memory"),
     Type.Literal("ssd-2"),
     Type.Literal("ssd-redwood-experimental"),
   ]),
@@ -14,6 +15,8 @@ export const FdbDatabaseConfigSchema = RelaxedObject({
     Type.Literal("single"),
     Type.Literal("double"),
     Type.Literal("triple"),
+    Type.Literal("three_datacenter"),
+    Type.Literal("three_data_hall"),
   ]),
   logCount: Type.Number({ minimum: 1 }),
   proxyCount: Type.Number({ minimum: 1 }),
