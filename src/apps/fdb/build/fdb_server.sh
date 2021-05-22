@@ -18,23 +18,9 @@ FDB_PROCESS_LOG_DIR=${FDB_PROCESS_LOG_DIR:-"/app/data/log"}
 
 mkdir -p "${FDB_PROCESS_DATA_DIR}" "${FDB_PROCESS_LOG_DIR}"
 
-AVAILABILITY_ZONE=${AVAILABILITY_ZONE:-""}
-
-if [[ "${AVAILABILITY_ZONE}" == "" ]]; then
-  AVAILABILITY_ZONE=${NODE_LABEL_FAILURE_DOMAIN_BETA_KUBERNETES_IO_ZONE:-""}
-fi
-
-if [[ "${AVAILABILITY_ZONE}" == "" ]]; then
-  AVAILABILITY_ZONE=${NODE_LABEL_TOPOLOGY_KUBERNETES_IO_ZONE:-""} 
-fi
-
-if [[ "${AVAILABILITY_ZONE}" == "" ]]; then
-  AVAILABILITY_ZONE=${FDB_MACHINE_ID}
-fi
-
-FDB_ZONE_ID=${FDB_ZONE_ID:-"${AVAILABILITY_ZONE}"}
-FDB_DATACENTER_ID=${FDB_DATACENTER_ID:-"${AVAILABILITY_ZONE}"}
-FDB_DATA_HALL=${FDB_DATA_HALL:-"${AVAILABILITY_ZONE}"}
+FDB_ZONE_ID=${FDB_ZONE_ID:-""}
+FDB_DATACENTER_ID=${FDB_DATACENTER_ID:-""}
+FDB_DATA_HALL=${FDB_DATA_HALL:-""}
 
 FDB_PUBLIC_ADDRESS=""
 
@@ -65,11 +51,20 @@ ARGS=(--class "${FDB_PROCESS_CLASS}" \
   --datadir "${FDB_PROCESS_DATA_DIR}" \
   --listen_address "0.0.0.0:${FDB_PROCESS_PORT}" \
   --locality_machineid "${FDB_MACHINE_ID}" \
-  --locality_zoneid "${FDB_ZONE_ID}" \
-  --locality_dcid "${FDB_DATACENTER_ID}" \
-  --locality_data_hall "${FDB_DATA_HALL}" \
   --logdir "${FDB_PROCESS_LOG_DIR}" \
   --public_address "${FDB_PUBLIC_ADDRESS}")
+
+if [[ -n "${FDB_ZONE_ID}" ]]; then
+  ARGS+=(--locality_zoneid "${FDB_ZONE_ID}")
+fi
+
+if [[ -n "${FDB_DATACENTER_ID}" ]]; then
+  ARGS+=(--locality_dcid "${FDB_DATACENTER_ID}")
+fi
+
+if [[ -n "${FDB_DATA_HALL}" ]]; then
+  ARGS+=(--locality_data_hall "${FDB_DATA_HALL}")
+fi
 
 if [[ "${FDB_PROCESS_MEMORY}" != "" ]]; then
   ARGS+=(--memory "${FDB_PROCESS_MEMORY}")
