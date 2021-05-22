@@ -4,6 +4,7 @@ import {
   K8sDeployment,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
 import { createFdbContainer } from "./fdb_container.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
@@ -17,6 +18,7 @@ export function createFdbStatelessDeployment(
     port,
     image,
     imagePullPolicy,
+    nodeSelector,
   }: {
     baseName: string;
     processClass: "proxy" | "stateless";
@@ -26,6 +28,7 @@ export function createFdbStatelessDeployment(
     port: number;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
+    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
   },
 ): K8sDeployment {
   const statelessLabels = {
@@ -73,11 +76,13 @@ export function createFdbStatelessDeployment(
           labels: statelessLabels,
         },
         spec: {
+          nodeSelector,
           containers: [container],
           securityContext: {
             runAsUser: 1001,
             runAsGroup: 1001,
             fsGroup: 1001,
+            fsGroupChangePolicy: "OnRootMismatch",
           },
           volumes: [
             {
