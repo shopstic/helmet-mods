@@ -39,6 +39,7 @@ import {
   imageName as fdbConfiguratorImageName,
   version as fdbConfiguratorVersion,
 } from "../../apps/fdb_configurator/meta.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export { fdbConfiguratorVersion, fdbVersion };
 
@@ -86,9 +87,11 @@ export function createFdbClusterResources(
       proxyCount: number;
       resolverCount: number;
       standbyCount: number;
+      nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
     } | {
       mode: "dev";
       count?: number;
+      nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
     };
     backup?: {
       podCount: number;
@@ -150,6 +153,7 @@ export function createFdbClusterResources(
       port: 4500,
       image,
       imagePullPolicy,
+      nodeSelector: stateless.nodeSelector,
     })
     : undefined;
 
@@ -164,6 +168,7 @@ export function createFdbClusterResources(
     port: 4500,
     image,
     imagePullPolicy,
+    nodeSelector: stateless.nodeSelector,
   });
 
   const coordinatorServiceNames = Object

@@ -141,6 +141,7 @@ export function createIacVersionBumperResources({
             runAsUser: 5000,
             runAsGroup: 5000,
             fsGroup: 5000,
+            fsGroupChangePolicy: "OnRootMismatch",
           },
           containers: [{
             name,

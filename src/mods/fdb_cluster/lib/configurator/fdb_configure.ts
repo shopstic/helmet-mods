@@ -117,6 +117,7 @@ export function createFdbConfigureResources(
             runAsUser: 5000,
             runAsGroup: 5000,
             fsGroup: 5000,
+            fsGroupChangePolicy: "OnRootMismatch",
           },
           volumes: [
             {

@@ -182,6 +182,7 @@ export function createFdbStatefulResources(
                 runAsUser: 1001,
                 runAsGroup: 1001,
                 fsGroup: 1001,
+                fsGroupChangePolicy: "OnRootMismatch",
               },
               nodeSelector,
               volumes: [

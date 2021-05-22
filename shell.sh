@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export DOCKER_SCAN_SUGGEST=false
 export DOCKER_BUILDKIT=1
 
-docker build ./shell
-IMAGE_ID=$(docker build -q ./shell | head -n1)
+TEMP_FILE=$(mktemp)
+trap "rm -f ${TEMP_FILE}" EXIT
+
+docker build ./shell --iidfile "${TEMP_FILE}"
+IMAGE_ID=$(cat "${TEMP_FILE}")
 
 docker run \
   -it --rm \
