@@ -1,10 +1,12 @@
 import { toSnakeCase } from "../../../deps/case.ts";
 import {
   IoK8sApiCoreV1ConfigMapKeySelector,
+  IoK8sApiCoreV1EnvVar,
   IoK8sApiCoreV1VolumeMount,
   K8sContainer,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
+import { IoK8sApiCoreV1ResourceRequirements } from "../../../deps/k8s_utils.ts";
 
 export type FdbConfiguredProcessClass =
   | "coordinator"
@@ -12,6 +14,13 @@ export type FdbConfiguredProcessClass =
   | "storage"
   | "log"
   | "stateless";
+
+export type FdbLocalityMode = "none" | "dcid" | "data_hall" | "zone";
+
+function throwOnUnknownLocalityMode(mode: never): never;
+function throwOnUnknownLocalityMode(mode: FdbLocalityMode) {
+  throw new Error(`Unknown FDB locality mode: ${mode}`);
+}
 
 export function createFdbContainer(
   {
@@ -22,6 +31,9 @@ export function createFdbContainer(
     volumeMounts,
     port,
     serviceName,
+    locality,
+    args,
+    resourceRequirements,
   }: {
     processClass: FdbConfiguredProcessClass;
     image: string;
@@ -29,7 +41,10 @@ export function createFdbContainer(
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
     port: number;
+    locality: FdbLocalityMode;
     serviceName?: string;
+    args?: string[];
+    resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
   },
 ): K8sContainer {
   const serviceNameUpperSnakeCased = serviceName
@@ -57,6 +72,36 @@ export function createFdbContainer(
         value: "false",
       },
     ];
+
+  const localityEnv: Array<IoK8sApiCoreV1EnvVar> = (() => {
+    switch (locality) {
+      case "none":
+        return [];
+      case "dcid":
+        return [
+          {
+            name: "FDB_DATACENTER_ID",
+            value: "$(NODE_LABEL_TOPOLOGY_KUBERNETES_IO_ZONE)",
+          },
+        ];
+      case "data_hall":
+        return [
+          {
+            name: "FDB_DATA_HALL",
+            value: "$(NODE_LABEL_TOPOLOGY_KUBERNETES_IO_ZONE)",
+          },
+        ];
+      case "zone":
+        return [
+          {
+            name: "FDB_ZONE_ID",
+            value: "$(NODE_LABEL_TOPOLOGY_KUBERNETES_IO_ZONE)",
+          },
+        ];
+    }
+
+    return throwOnUnknownLocalityMode(locality);
+  })();
 
   return {
     name: `${processClass}-${port}`,
@@ -111,7 +156,10 @@ export function createFdbContainer(
         },
       },
       ...serviceEnv,
+      ...localityEnv,
     ],
     volumeMounts,
+    args,
+    resources: resourceRequirements,
   };
 }

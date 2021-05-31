@@ -145,6 +145,11 @@ export function createFdbExporterResources(
             interval: "10s",
             metricRelabelings: [
               { action: "keep", regex: "^fdb_.+", sourceLabels: ["__name__"] },
+              {
+                action: "replace",
+                sourceLabels: ["machine_id"],
+                targetLabel: "node",
+              },
             ],
             path: "/metrics",
             port: "metrics",

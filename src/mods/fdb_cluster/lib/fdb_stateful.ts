@@ -8,10 +8,15 @@ import {
   K8sService,
   K8sStatefulSet,
 } from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
+import {
+  IoK8sApiCoreV1Affinity,
+  IoK8sApiCoreV1PodSpec,
+  IoK8sApiCoreV1ResourceRequirements,
+} from "../../../deps/k8s_utils.ts";
 import {
   createFdbContainer,
   FdbConfiguredProcessClass,
+  FdbLocalityMode,
 } from "./fdb_container.ts";
 
 export interface FdbStatefulServer {
@@ -25,6 +30,9 @@ export interface FdbStatefulConfig {
   volumeSize: string;
   storageClassName: string;
   nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+  args?: string[];
+  affinity?: IoK8sApiCoreV1Affinity;
+  resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
 }
 
 export const STATEFUL_ID_LABEL = "helmet.run/fdb-stateful-id";
@@ -98,6 +106,7 @@ export function createFdbStatefulResources(
     configs,
     image,
     imagePullPolicy,
+    locality,
   }: {
     baseName: string;
     baseLabels: Record<string, string>;
@@ -105,6 +114,7 @@ export function createFdbStatefulResources(
     configs: Record<string, FdbStatefulConfig>;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
+    locality: FdbLocalityMode;
   },
 ): {
   services: K8sService[];
@@ -117,7 +127,14 @@ export function createFdbStatefulResources(
     (
       [
         id,
-        { processClass, nodeSelector, servers },
+        {
+          processClass,
+          servers,
+          nodeSelector,
+          affinity,
+          args,
+          resourceRequirements,
+        },
       ],
     ) => {
       const statefulLabels = createStatefulLabels({
@@ -158,6 +175,9 @@ export function createFdbStatefulResources(
           connectionStringConfigMapRef,
           serviceName: service.metadata.name,
           port,
+          args,
+          resourceRequirements,
+          locality,
         })
       );
 
@@ -178,6 +198,7 @@ export function createFdbStatefulResources(
             },
             spec: {
               containers,
+              affinity,
               securityContext: {
                 runAsUser: 1001,
                 runAsGroup: 1001,

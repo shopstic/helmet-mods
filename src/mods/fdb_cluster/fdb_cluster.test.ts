@@ -28,6 +28,11 @@ Deno.test("fdb_cluster should work", () => {
       nodeSelector: {},
       volumeSize: "1Gi",
       storageClassName: "local-path",
+      resourceRequirements: {
+        requests: {
+          cpu: "2",
+        },
+      },
     },
   };
 
@@ -46,6 +51,7 @@ Deno.test("fdb_cluster should work", () => {
     labels: {
       foo: "bar",
     },
+    locality: "data_hall",
   });
 
   assertEquals(cluster.statefulSets.length, 3);
@@ -53,4 +59,25 @@ Deno.test("fdb_cluster should work", () => {
   assertNotEquals(cluster.proxyDeployment, undefined);
   assertEquals(cluster.statelessDeployment.spec?.replicas, 5);
   assertEquals(cluster.statelessDeployment.metadata.labels?.foo, "bar");
+
+  assertEquals(
+    cluster.statefulSets.find((s) => s.metadata.name.includes("storage")!)?.spec
+      ?.template.spec?.containers.filter((c) =>
+        c.resources?.requests !== undefined
+      ).length,
+    1,
+  );
+
+  const allContainers = [
+    ...(cluster.statelessDeployment.spec!.template.spec!.containers),
+    ...(cluster.proxyDeployment!.spec!.template.spec!.containers),
+    ...(cluster.statefulSets.flatMap((s) => s.spec!.template.spec!.containers)),
+  ];
+
+  allContainers.forEach((container) => {
+    assertNotEquals(
+      container.env!.find(({ name }) => name === "FDB_DATA_HALL"),
+      undefined,
+    );
+  });
 });
