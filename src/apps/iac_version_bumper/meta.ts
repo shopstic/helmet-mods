@@ -1,2 +1,2 @@
-export const version = "efaa3c5ec513c0055e8b59805b6088737eb7d44a";
+export const version = "69e64a3af0e703e86d63b9bf9faab6840d1d38ad";
 export const imageName = "iac-version-bumper";
