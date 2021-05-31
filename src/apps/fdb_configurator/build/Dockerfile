@@ -1,10 +1,10 @@
 FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
 FROM shopstic/bin-kubectl:1.20.4 as bin-kubectl
-FROM shopstic/bin-deno:1.9.2 as bin-deno
+FROM shopstic/bin-deno:1.10.3 as bin-deno
 
 FROM shopstic/curl-tar-unzip:1.0.1 as fdb-clients
 
-ENV FDB_VERSION "6.2.30"
+ENV FDB_VERSION "6.2.22"
 
 RUN \
   curl -Lko /tmp/fdb-clients.deb https://www.foundationdb.org/downloads/${FDB_VERSION}/ubuntu/installers/foundationdb-clients_${FDB_VERSION}-1_amd64.deb

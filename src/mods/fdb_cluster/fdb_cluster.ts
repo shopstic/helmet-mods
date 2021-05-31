@@ -40,6 +40,7 @@ import {
   version as fdbConfiguratorVersion,
 } from "../../apps/fdb_configurator/meta.ts";
 import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
+import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorVersion, fdbVersion };
 
@@ -71,6 +72,7 @@ export function createFdbClusterResources(
     backup,
     baseName,
     namespace,
+    locality = "none",
     image = fdbImage,
     configuratorImage = fdbConfiguratorImage,
     exporterImage = fdbExporterImage,
@@ -100,6 +102,7 @@ export function createFdbClusterResources(
       volumes: IoK8sApiCoreV1Volume[];
     };
     stateful: Record<string, FdbStatefulConfig>;
+    locality?: FdbLocalityMode;
     image?: string;
     configuratorImage?: string;
     exporterImage?: string;
@@ -141,6 +144,7 @@ export function createFdbClusterResources(
       connectionStringConfigMapRef,
       image,
       imagePullPolicy,
+      locality,
     });
 
   const proxyDeployment = (stateless.mode === "prod")
@@ -154,6 +158,7 @@ export function createFdbClusterResources(
       image,
       imagePullPolicy,
       nodeSelector: stateless.nodeSelector,
+      locality,
     })
     : undefined;
 
@@ -169,6 +174,7 @@ export function createFdbClusterResources(
     image,
     imagePullPolicy,
     nodeSelector: stateless.nodeSelector,
+    locality,
   });
 
   const coordinatorServiceNames = Object

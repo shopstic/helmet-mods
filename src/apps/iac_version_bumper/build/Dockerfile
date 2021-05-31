@@ -1,5 +1,5 @@
 FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
-FROM shopstic/bin-deno:1.9.2 as bin-deno
+FROM shopstic/bin-deno:1.10.3 as bin-deno
 
 FROM ubuntu:20.10
 
