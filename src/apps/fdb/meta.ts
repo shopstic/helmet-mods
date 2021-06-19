@@ -1,2 +1,2 @@
-export const version = "6.3.15";
+export const version = "latest";
 export const imageName = "fdb";
