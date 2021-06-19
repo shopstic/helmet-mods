@@ -4,7 +4,7 @@ FROM shopstic/bin-deno:1.10.3 as bin-deno
 
 FROM shopstic/curl-tar-unzip:1.0.1 as fdb-clients
 
-ENV FDB_VERSION "6.2.22"
+ENV FDB_VERSION "6.3.15"
 
 RUN \
   curl -Lko /tmp/fdb-clients.deb https://www.foundationdb.org/downloads/${FDB_VERSION}/ubuntu/installers/foundationdb-clients_${FDB_VERSION}-1_amd64.deb
