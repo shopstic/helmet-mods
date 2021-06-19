@@ -1,5 +1,5 @@
 FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
-FROM foundationdb/foundationdb:6.2.22
+FROM foundationdb/foundationdb:6.3.15
 
 WORKDIR /app
 RUN \
