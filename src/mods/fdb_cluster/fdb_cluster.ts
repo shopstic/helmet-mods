@@ -44,7 +44,7 @@ import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorVersion, fdbVersion };
 
-export const fdbExporterVersion = "1.1.0";
+export const fdbExporterVersion = "1.3.0";
 export const fdbImage = `shopstic/${fdbImageName}:${fdbVersion}`;
 export const fdbConfiguratorImage =
   `shopstic/${fdbConfiguratorImageName}:${fdbConfiguratorVersion}`;
