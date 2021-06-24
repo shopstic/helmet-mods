@@ -15,7 +15,12 @@ export type FdbConfiguredProcessClass =
   | "log"
   | "stateless";
 
-export type FdbLocalityMode = "none" | "dcid" | "data_hall" | "zone";
+export type FdbLocalityMode =
+  | "none"
+  | "dcid"
+  | "data_hall"
+  | "zone"
+  | "node_as_zone";
 
 function throwOnUnknownLocalityMode(mode: never): never;
 function throwOnUnknownLocalityMode(mode: FdbLocalityMode) {
@@ -96,6 +101,14 @@ export function createFdbContainer(
           {
             name: "FDB_ZONE_ID",
             value: "$(NODE_LABEL_TOPOLOGY_KUBERNETES_IO_ZONE)",
+          },
+        ];
+
+      case "node_as_zone":
+        return [
+          {
+            name: "FDB_ZONE_ID",
+            value: "$(NODE_LABEL_KUBERNETES_IO_HOSTNAME)",
           },
         ];
     }
