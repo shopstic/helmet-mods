@@ -1,12 +1,3 @@
-FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
-FROM shopstic/bin-kubectl:1.21.0 as bin-kubectl
-FROM shopstic/bin-deno:1.11.0 as bin-deno
-FROM shopstic/bin-helm:3.6.0 as bin-helm
-FROM shopstic/bin-yq:4.6.3 as bin-yq
-FROM shopstic/bin-buildctl:0.8.3 as bin-buildctl
-FROM shopstic/bin-docker:20.10.6 as bin-docker
-
-
 # kube-ps1 ------------------------------------------------------------------
 FROM shopstic/curl-tar-unzip:1.0.1 as kube-ps1
 
@@ -24,13 +15,13 @@ ENV TERM=xterm-256color
 RUN \
   apt-get update && apt-get install -y ca-certificates curl
 
-COPY --from=bin-dumb-init / /
-COPY --from=bin-kubectl / /
-COPY --from=bin-helm / /
-COPY --from=bin-deno / /
-COPY --from=bin-yq / /
-COPY --from=bin-buildctl / /
-COPY --from=bin-docker / /
+COPY --from=shopstic/bin-dumb-init:1.2.2 / /
+COPY --from=shopstic/bin-kubectl:1.21.4 / /
+COPY --from=shopstic/bin-helm:3.6.3 / /
+COPY --from=shopstic/bin-deno:1.13.2 / /
+COPY --from=shopstic/bin-yq:4.12.1 / /
+COPY --from=shopstic/bin-buildctl:0.9.0 / /
+COPY --from=shopstic/bin-docker:20.10.8 / /
 COPY --from=kube-ps1 /root/kube-ps1.sh /root/kube-ps1.sh
 
 COPY ./.profile /root/.profile

@@ -1,5 +1,5 @@
-import { walk, WalkEntry } from "https://deno.land/std@0.98.0/fs/mod.ts";
-import { dirname, join } from "https://deno.land/std@0.98.0/path/mod.ts";
+import { walk, WalkEntry } from "https://deno.land/std@0.106.0/fs/mod.ts";
+import { dirname, join } from "https://deno.land/std@0.106.0/path/mod.ts";
 
 const tsFiles: WalkEntry[] = [];
 const directories: WalkEntry[] = [];
