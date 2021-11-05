@@ -1,2 +1,4 @@
 /shell/.history
 /src/apps/*/build/*.js
+/.zsh_history
+/.direnv
