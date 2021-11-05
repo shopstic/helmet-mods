@@ -13,7 +13,6 @@ defaults:
 jobs:
   build-apps:
     name: Build apps
-    needs: build-env
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
