@@ -11,32 +11,6 @@ defaults:
     shell: bash
 
 jobs:
-  build-env:
-    name: Build CI environment image
-    runs-on: ubuntu-20.04
-    outputs:
-      image: ${{ steps.buildkit.outputs.image }}:${{ steps.buildkit.outputs.tag }}    
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
-      - run: chmod +r ~/.docker/config.json
-
-      - name: Build and push shell Docker image
-        id: buildkit
-        uses: shopstic/buildkit-action@1.0.12
-        with:
-          context: ${{ github.workspace }}/shell
-          image: ghcr.io/shopstic/helmet-mods-ci
-          tag: ${{ hashFiles('shell/*') }}
-          skipIfExists: true
-
   build-apps:
     name: Build apps
     needs: build-env
@@ -44,21 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache deno
-        uses: actions/cache@v2
+      - uses: nixbuild/nix-quick-install-action@v7
         with:
-          path: |
-            ${{ github.workspace }}/.cache
-          key: deno-${{ github.sha }}
-          restore-keys: |
-            deno-
-            
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+          nix_version: 2.4pre20210908_3c56f62
+          nix_conf: |
+            experimental-features = nix-command flakes
 
       - name: Start buildkitd
         run: |
@@ -66,8 +30,6 @@ jobs:
 
       - name: Build
         env:
-          SHELL_IMAGE: ${{ needs.build-env.outputs.image }}
-          DENO_DIR: ${{ github.workspace }}/.cache/deno
           GIT_REF: latest
         run: |-
-          ./ci.sh build_dev
+          nix develop -v -c ./ci.sh build_dev

@@ -17,74 +17,38 @@ start_buildkitd() {
 }
 
 build_dev() {
-if ls "${DENO_DIR}" > /dev/null 2>&1; then
-  du -sh "${DENO_DIR}"
-fi
-
-cat <<EOF | docker run \
-  --workdir /repo \
-  -i \
-  --rm \
-  --net=host \
-  --init \
-  -e "GIT_REF=${GIT_REF}" \
-  -v "${GITHUB_WORKSPACE}:/repo" \
-  -v "${DENO_DIR}:/root/.cache/deno" \
-  -e "DENO_DIR=/root/.cache/deno" \
-  "${SHELL_IMAGE}" \
-  bash -l
-set -euo pipefail
-
-./cli.sh update_cache
-./cli.sh code_quality
-./cli.sh test
-./cli.sh build_apps
-./cli.sh test_run_apps
-./cli.sh build_images --output dev_null
-
-EOF
+  ./cli.sh update_cache
+  ./cli.sh code_quality
+  ./cli.sh test
+  ./cli.sh build_apps
+  ./cli.sh test_run_apps
+  ./cli.sh build_images --output dev_null
 }
 
 build_release() {
-if ls "${DENO_DIR}" > /dev/null 2>&1; then
-  du -sh "${DENO_DIR}"
-fi
+  if ls "${DENO_DIR}" > /dev/null 2>&1; then
+    du -sh "${DENO_DIR}"
+  fi
 
-git config --global user.email "ci-runner@shopstic.com"
-git config --global user.name "CI Runner"
-git fetch origin release
-git checkout release
-git merge origin/main
+  git config --global user.email "ci-runner@shopstic.com"
+  git config --global user.name "CI Runner"
+  git fetch origin release
+  git checkout release
+  git merge origin/main
 
-cat <<EOF | docker run \
-  --workdir /repo \
-  -i \
-  --rm \
-  --net=host \
-  --init \
-  -e "GIT_REF=${GIT_REF}" \
-  -v "${GITHUB_WORKSPACE}:/repo" \
-  -v "${HOME}/.docker/config.json:/root/.docker/config.json:ro" \
-  -v "${DENO_DIR}:/root/.cache/deno" \
-  -e "DENO_DIR=/root/.cache/deno" \
-  "${SHELL_IMAGE}" \
-  bash -l
-set -euo pipefail
+  set -euo pipefail
 
-./cli.sh update_cache
-./cli.sh code_quality
-./cli.sh test
-./cli.sh build_apps
-./cli.sh test_run_apps
-./cli.sh build_images --output registry
+  ./cli.sh update_cache
+  ./cli.sh code_quality
+  ./cli.sh test
+  ./cli.sh build_apps
+  ./cli.sh test_run_apps
+  ./cli.sh build_images --output registry
 
-EOF
-
-git add ./src/apps/*/meta.ts ./src/version.ts
-git commit -m "Release ${GIT_REF}"
-git tag "${GIT_REF}"
-git push origin release --tags
-
+  git add ./src/apps/*/meta.ts ./src/version.ts
+  git commit -m "Release ${GIT_REF}"
+  git tag "${GIT_REF}"
+  git push origin release --tags
 }
 
 "$@"

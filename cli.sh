@@ -28,7 +28,7 @@ start_buildkitd() {
   docker run \
     "${ARG[@]}" \
     --init \
-    --net=host \
+    -p "${BUILDKITD_TCP_PORT}:${BUILDKITD_TCP_PORT}" \
     --security-opt seccomp=unconfined \
     --security-opt apparmor=unconfined \
     --device /dev/fuse \
