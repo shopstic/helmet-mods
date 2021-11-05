@@ -2,6 +2,7 @@
 set -euo pipefail
 
 start_buildkitd() {
+  local BUILDKITD_CONTAINER_ID
   BUILDKITD_CONTAINER_ID=$(./cli.sh start_buildkitd -d)
 
   for i in {1..10}; do
@@ -26,9 +27,7 @@ build_dev() {
 }
 
 build_release() {
-  if ls "${DENO_DIR}" > /dev/null 2>&1; then
-    du -sh "${DENO_DIR}"
-  fi
+  local GIT_REF=${GIT_REF:?"GIT_REF env variable is required"}
 
   git config --global user.email "ci-runner@shopstic.com"
   git config --global user.name "CI Runner"
