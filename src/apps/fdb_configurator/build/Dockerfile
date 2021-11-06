@@ -1,6 +1,6 @@
 FROM shopstic/bin-dumb-init:1.2.2 as bin-dumb-init
 FROM shopstic/bin-kubectl:1.21.4 as bin-kubectl
-FROM shopstic/bin-deno:1.13.2 as bin-deno
+FROM shopstic/bin-deno:1.14.3 as bin-deno
 FROM foundationdb/foundationdb:6.3.15 as fdb
 
 FROM debian:stable-20210408-slim
