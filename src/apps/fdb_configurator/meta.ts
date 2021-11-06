@@ -1,2 +1,2 @@
-export const version = "8a8ccf80cc411c392630b76c84e40ab17ffe1243";
+export const version = "9f6f7878175e1102b6a548fc5d340d546c45347a";
 export const imageName = "k8s-fdb-configurator";
