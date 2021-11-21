@@ -31,4 +31,4 @@ jobs:
 
       - name: Build
         run: |-
-          nix build -L -v '.#packages.${{ matrix.arch }}-linux' 
+          nix build -L -v '.#defaultPackage.${{ matrix.arch }}-linux' 
