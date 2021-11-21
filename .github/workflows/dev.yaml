@@ -11,24 +11,24 @@ defaults:
     shell: bash
 
 jobs:
-  build-apps:
-    name: Build apps
+  build:
+    name: Build
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        arch:
+          - x86_64
+          - aarch64
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
 
-      - uses: nixbuild/nix-quick-install-action@v7
+      - name: Setup
+        uses: shopstic/tailscale-nix-builder/setup@9f19de9453fa4aee80e1ad404fb45af87ecbbd15
+        timeout-minutes: 1
         with:
-          nix_version: 2.4pre20210908_3c56f62
-          nix_conf: |
-            experimental-features = nix-command flakes
-
-      - name: Start buildkitd
-        run: |
-          ./ci.sh start_buildkitd
+          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
 
       - name: Build
-        env:
-          GIT_REF: latest
         run: |-
-          nix develop -v -c ./ci.sh build_dev
+          nix build -L -v .#packages.${{ matrix.arch }}-linux' 

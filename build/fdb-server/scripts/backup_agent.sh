@@ -1,5 +1,4 @@
-#!/usr/bin/dumb-init /bin/bash
-# shellcheck shell=bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 FDB_CONNECTION_STRING=${FDB_CONNECTION_STRING:?"FDB_CONNECTION_STRING env variable is required"}
@@ -9,6 +8,6 @@ echo "${FDB_CONNECTION_STRING}" > "${FDB_CLUSTER_FILE}"
 
 ARGS=(-C "${FDB_CLUSTER_FILE}" "$@")
 
-echo "/usr/bin/backup_agent ${ARGS[*]}"
+echo "backup_agent ${ARGS[*]}"
 
-exec /usr/bin/backup_agent "${ARGS[@]}"
+exec backup_agent "${ARGS[@]}"

@@ -108,8 +108,10 @@ interface FdbProcessInfo {
 function prettyPrintProcessInfo(
   { id, machineId, processClass, address }: FdbProcessInfo,
 ): string {
-  return `   - machine=${machineId ||
-    "unknown"} id=${id} class=${processClass} address=${address}`;
+  return `   - machine=${
+    machineId ||
+    "unknown"
+  } id=${id} class=${processClass} address=${address}`;
 }
 
 async function excludeAndIncludeProcesses(
@@ -160,12 +162,12 @@ async function excludeAndIncludeProcesses(
 
   const processByAddressMap = Object.fromEntries(
     Object.entries(status.cluster.processes || {})
-      .map(([id, p]) => ([p.address, {
+      .map(([id, p]) => [p.address, {
         id,
         processClass: p.class_type,
         machineId: p.machine_id,
         address: p.address,
-      }])),
+      }]),
   );
 
   const nonexistentExcludedAddresses = desiredExcludedAddresses.filter((a) =>

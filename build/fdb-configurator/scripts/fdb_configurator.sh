@@ -1,5 +1,4 @@
-#!/usr/bin/dumb-init /bin/bash
-# shellcheck shell=bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 FDB_CONNECTION_STRING=${FDB_CONNECTION_STRING:-""}
