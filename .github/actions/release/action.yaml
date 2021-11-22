@@ -1,0 +1,52 @@
+name: Release
+description: ""
+inputs:
+  x86_64_digests:
+    description: ""
+    required: true
+  aarch64_digests:
+    description: ""
+    required: true
+  dockerHubUsername:
+    description: ""
+    required: true
+  dockerHubToken:
+    description: ""
+    required: true    
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      shell: bash
+      with:
+        username: ${{ inputs.dockerHubUsername }}
+        password: ${{ inputs.dockerHubToken }}
+
+    - shell: bash
+      run: chmod +r ~/.docker/config.json
+
+    - name: Push multi-arch manifests
+      shell: bash
+      env:
+        x86_64_digests: ${{ inputs.x86_64-digests }}
+        aarch64_digests: ${{ inputs.aarch64-digests }}
+      run: |-
+        declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
+
+        iac_version_bumper_digest=$(./release.sh push_multi_arch_manifest \
+          docker.io/shopstic/iac-version-bumper latest \
+          "$(printenv x86_64_digests | jq -r '.iac_version_bumper')" \
+          "$(printenv aarch64_digests | jq -r '.iac_version_bumper')")
+
+        fdb_server_digest=$(./release.sh push_multi_arch_manifest \
+          docker.io/shopstic/fdb-server latest \
+          "$(printenv x86_64_digests | jq -r '.fdb_server')" \
+          "$(printenv aarch64_digests | jq -r '.fdb_server')")
+
+        fdb_configurator_digest=$(./release.sh push_multi_arch_manifest \
+          docker.io/shopstic/fdb-configurator latest \
+          "$(printenv x86_64_digests | jq -r '.fdb_configurator')" \
+          "$(printenv aarch64_digests | jq -r '.fdb_configurator')")

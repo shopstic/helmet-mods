@@ -28,7 +28,7 @@ push_multi_arch_manifest() {
     FLAGS+=("--amend" "${IMAGE}@${DIGEST}")
   done
 
-  docker manifest create "${IMAGE}:${TAG}" "${FLAGS[@]}"
+  docker manifest create "${IMAGE}:${TAG}" "${FLAGS[@]}" 1>&2
   docker manifest push "${IMAGE}:${TAG}"
 }
 
