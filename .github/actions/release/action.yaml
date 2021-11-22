@@ -28,8 +28,8 @@ runs:
     - name: Push multi-arch manifests
       shell: bash
       env:
-        x86_64_digests: ${{ inputs.x86_64-digests }}
-        aarch64_digests: ${{ inputs.aarch64-digests }}
+        x86_64_digests: ${{ inputs.x86_64_digests }}
+        aarch64_digests: ${{ inputs.aarch64_digests }}
       run: |-
         declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
 
