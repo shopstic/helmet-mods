@@ -71,6 +71,9 @@ jobs:
           OUTPUT_x86_64: ${{ needs.build.outputs.x86_64 }}
           OUTPUT_aarch64: ${{ needs.build.outputs.aarch64 }}
         run: |-
+          which jq
+          printenv OUTPUT_x86_64 | jq -r '.iac_version_bumper'
+          
           ./release.sh push_multi_arch_manifest \
             docker.io/shopstic/iac-version-bumper latest \
             "$(printenv OUTPUT_x86_64 | jq -r '.iac_version_bumper')" \
