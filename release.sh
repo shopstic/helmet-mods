@@ -17,8 +17,8 @@ push_image() {
 
 push_multi_arch_manifest() {
   local IMAGE=${1:?"Image is required"}
-  shift
   local TAG=${2:?"Tag is required"}
+  shift
   shift
 
   local FLAGS=()
