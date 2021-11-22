@@ -25,7 +25,6 @@ runs:
   steps:
     - name: Setup
       uses: shopstic/tailscale-nix-builder/setup@9f19de9453fa4aee80e1ad404fb45af87ecbbd15
-      shell: bash
       with:
         tailscaleAuthKey: ${{ inputs.tailscaleAuthKey }}
         nixBuildSshKey: ${{ inputs.nixBuildSshKey }}
@@ -37,7 +36,6 @@ runs:
 
     - name: Login to Docker Hub
       uses: docker/login-action@v1
-      shell: bash
       with:
         username: ${{ inputs.dockerHubUsername }}
         password: ${{ inputs.dockerHubToken }}
