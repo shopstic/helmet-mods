@@ -51,16 +51,10 @@
           buildInputs = builtins.attrValues
             {
               inherit deno;
-            };
-        };
-        devShells = {
-          skopeo = pkgs.mkShellNoCC {
-            buildInputs = builtins.attrValues
-              {
                 inherit (pkgs)
-                  skopeo;
-              };
-          };
+                  skopeo
+                  ;
+            };
         };
         packages = {
           inherit deps fdbConfigurator iacVersionBumper;

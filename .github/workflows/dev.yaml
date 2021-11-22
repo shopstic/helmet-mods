@@ -19,6 +19,10 @@ jobs:
         arch:
           - x86_64
           - aarch64
+    outputs:
+      x86_64: ${{ steps.push.outputs.x86_64 }}
+      aarch64: ${{ steps.push.outputs.aarch64 }}
+
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
 
@@ -32,3 +36,50 @@ jobs:
       - name: Build
         run: |-
           nix build -L -v '.#defaultPackage.${{ matrix.arch }}-linux' 
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - run: chmod +r ~/.docker/config.json
+      
+      - name: Push
+        shell: nix develop -v -c bash {0} 
+        id: push
+        run: |-
+          iac_version_bumper_digest=$(./release.sh push_image iac-version-bumper latest-${{ matrix.arch }})
+          fdb_server_digest=$(./release.sh push_image fdb-server latest-${{ matrix.arch }})
+          fdb_configurator_digest=$(./release.sh push_image fdb-configurator latest-${{ matrix.arch }})
+
+          output='{"iac_version_bumper":"${iac_version_bumper_digest}","fdb_server":"${fdb_server_digest}","fdb_configurator":"${fdb_configurator_digest}"}'
+
+          echo "::set-output name=${{ matrix.arch }}::'${output}'"
+          
+  release:
+    name: Release
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+
+      - name: Push multi-arch manifests
+        env:
+          OUTPUT_x86_64: ${{ needs.build.outputs.x86_64 }}
+          OUTPUT_aarch64: ${{ needs.build.outputs.aarch64 }}
+        run: |-
+          ./release.sh push_multi_arch_manifest \
+            docker.io/shopstic/iac-version-bumper latest \
+            "$(printenv OUTPUT_x86_64 | jq -r '.iac_version_bumper')" \
+            "$(printenv OUTPUT_aarch64 | jq -r '.iac_version_bumper')"
+
+          ./release.sh push_multi_arch_manifest \
+            docker.io/shopstic/fdb-server latest \
+            "$(printenv OUTPUT_x86_64 | jq -r '.fdb_server')" \
+            "$(printenv OUTPUT_aarch64 | jq -r '.fdb_server')"
+
+          ./release.sh push_multi_arch_manifest \
+            docker.io/shopstic/fdb-configurator latest \
+            "$(printenv OUTPUT_x86_64 | jq -r '.fdb_configurator')" \
+            "$(printenv OUTPUT_aarch64 | jq -r '.fdb_configurator')"

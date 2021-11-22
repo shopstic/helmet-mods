@@ -45,9 +45,12 @@ import { FdbLocalityMode } from "./lib/fdb_container.ts";
 export { fdbConfiguratorVersion, fdbVersion };
 
 export const fdbExporterVersion = "1.3.0";
-export const fdbImage = `shopstic/${fdbImageName}:${fdbVersion}`;
-export const fdbConfiguratorImage =
-  `shopstic/${fdbConfiguratorImageName}:${fdbConfiguratorVersion}`;
+export const fdbImage = `shopstic/${fdbImageName}${
+  fdbVersion === "latest" ? ":latest" : `@${fdbVersion}`
+}`;
+export const fdbConfiguratorImage = `shopstic/${fdbConfiguratorImageName}${
+  fdbConfiguratorVersion === "latest" ? ":latest" : `@${fdbConfiguratorVersion}`
+}`;
 export const fdbExporterImage =
   `shopstic/fdb-prometheus-exporter:${fdbExporterVersion}`;
 
