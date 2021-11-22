@@ -23,8 +23,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
-
     - name: Setup
       uses: shopstic/tailscale-nix-builder/setup@9f19de9453fa4aee80e1ad404fb45af87ecbbd15
       shell: bash

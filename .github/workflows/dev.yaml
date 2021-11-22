@@ -17,6 +17,7 @@ jobs:
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
       - uses: ./.github/actions/build
         id: build
         with:
@@ -32,6 +33,7 @@ jobs:
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
       - uses: ./.github/actions/build
         id: build
         with:
@@ -46,6 +48,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [build-x86_64, build-aarch64]
     steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
       - uses: ./.github/actions/release
         with:
           dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
