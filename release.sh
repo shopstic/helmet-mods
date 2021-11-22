@@ -32,27 +32,33 @@ push_multi_arch_manifest() {
   docker manifest push "${IMAGE}:${TAG}"
 }
 
-release() {
-  GIT_REF=${GIT_REF:?"GIT_REF env variable is required"}
+patch_app_meta() {
+  local PATH=${1:?"Path is required"}
+  local IMAGE_NAME=${2:?"Image name is required"}
+  local VERSION=${3:?"Version is required"}
 
-  local IAC_VERSION_BUMPER_DIGEST
+  cat <<EOF > "${PATH}"
+export const version = "${VERSION}";
+export const imageName = "${IMAGE_NAME}";
 
+EOF
+}
+
+before_commit() {
   git config --global user.email "ci-runner@shopstic.com"
   git config --global user.name "CI Runner"
   git fetch origin release
   git checkout release
   git merge origin/main
+}
 
-  ./cli.sh update_cache
-  ./cli.sh code_quality
-  ./cli.sh test
-  ./cli.sh build_apps
-  ./cli.sh test_run_apps
-  ./cli.sh build_images --output registry
+commit() {
+  local VERSION=${1:?"Version is required"}
+  echo "export default \"${VERSION}\";" > ./src/version.ts
 
   git add ./src/apps/*/meta.ts ./src/version.ts
-  git commit -m "Release ${GIT_REF}"
-  git tag "${GIT_REF}"
+  git commit -m "Release ${VERSION}"
+  git tag "${VERSION}"
   git push origin release --tags
 }
 

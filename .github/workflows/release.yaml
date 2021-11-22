@@ -12,34 +12,48 @@ defaults:
     shell: bash
 
 jobs:
-  release:
-    name: Build and release
+  build-x86_64:
+    name: Build x86_64
     runs-on: ubuntu-20.04
+    outputs:
+      digests: ${{ steps.build.outputs.digests }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+      - uses: ./.github/actions/build
+        id: build
         with:
-          fetch-depth: 0
+          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
+          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
+          arch: x86_64
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
+  build-aarch64:
+    name: Build aarch64
+    runs-on: ubuntu-20.04
+    outputs:
+      digests: ${{ steps.build.outputs.digests }}
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
+      - uses: ./.github/actions/build
+        id: build
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
+          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
+          arch: aarch64
 
-      - run: chmod +r ~/.docker/config.json
-
-      - name: Start buildkitd
-        run: |
-          ./ci.sh start_buildkitd
-
-      - uses: nixbuild/nix-quick-install-action@v7
+  release:
+    name: Release
+    runs-on: ubuntu-20.04
+    needs: [build-x86_64, build-aarch64]
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
+      - uses: ./.github/actions/release
         with:
-          nix_version: 2.4pre20210908_3c56f62
-          nix_conf: |
-            experimental-features = nix-command flakes
-
-      - name: Build
-        env:
-          GIT_REF: ${{ github.event.inputs.version }}
-        run: |-
-          nix develop -v -c ./ci.sh build_release
+          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
+          x86_64_digests: ${{ needs.build-x86_64.outputs.digests }}
+          aarch64_digests: ${{ needs.build-aarch64.outputs.digests }}
+          releaseVersion: ${{ github.event.inputs.version }}

@@ -12,7 +12,11 @@ inputs:
     required: true
   dockerHubToken:
     description: ""
-    required: true    
+    required: true
+  releaseTag:
+    description: ""
+    required: false
+    default: "latest"
 runs:
   using: composite
   steps:
@@ -30,20 +34,29 @@ runs:
       env:
         x86_64_digests: ${{ inputs.x86_64_digests }}
         aarch64_digests: ${{ inputs.aarch64_digests }}
+        release_tag: ${{ inputs.releaseTag }}
       run: |-
         declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
 
         iac_version_bumper_digest=$(./release.sh push_multi_arch_manifest \
-          docker.io/shopstic/iac-version-bumper latest \
+          docker.io/shopstic/iac-version-bumper "${release_tag}" \
           "$(printenv x86_64_digests | jq -r '.iac_version_bumper')" \
           "$(printenv aarch64_digests | jq -r '.iac_version_bumper')")
 
         fdb_server_digest=$(./release.sh push_multi_arch_manifest \
-          docker.io/shopstic/fdb-server latest \
+          docker.io/shopstic/fdb-server "${release_tag}" \
           "$(printenv x86_64_digests | jq -r '.fdb_server')" \
           "$(printenv aarch64_digests | jq -r '.fdb_server')")
 
         fdb_configurator_digest=$(./release.sh push_multi_arch_manifest \
-          docker.io/shopstic/fdb-configurator latest \
+          docker.io/shopstic/fdb-configurator "${release_tag}" \
           "$(printenv x86_64_digests | jq -r '.fdb_configurator')" \
           "$(printenv aarch64_digests | jq -r '.fdb_configurator')")
+
+        if [[ "${release_tag}" != "latest" ]]; then
+          ./release.sh before_commit
+          ./release.sh patch_app_meta ./src/apps/fdb/meta.ts fdb-server "${fdb_server_digest}"
+          ./release.sh patch_app_meta ./src/apps/fdb_configurator/meta.ts fdb-configurator "${fdb_configurator_digest}"
+          ./release.sh patch_app_meta ./src/apps/iac_version_bumper/meta.ts iac-version-bumper "${iac_version_bumper_digest}"
+          ./release.sh commit "${release_tag}"
+        fi
