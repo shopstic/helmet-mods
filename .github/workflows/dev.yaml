@@ -55,7 +55,7 @@ jobs:
           fdb_server_digest=$(./release.sh push_image fdb-server latest-${{ matrix.arch }})
           fdb_configurator_digest=$(./release.sh push_image fdb-configurator latest-${{ matrix.arch }})
 
-          output='{"iac_version_bumper":"${iac_version_bumper_digest}","fdb_server":"${fdb_server_digest}","fdb_configurator":"${fdb_configurator_digest}"}'
+          output='{"iac_version_bumper":"'${iac_version_bumper_digest}'","fdb_server":"'${fdb_server_digest}'","fdb_configurator":"'${fdb_configurator_digest}'"}'
 
           echo "::set-output name=${{ matrix.arch }}::'${output}'"
           
