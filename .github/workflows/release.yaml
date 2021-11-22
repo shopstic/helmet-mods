@@ -56,4 +56,4 @@ jobs:
           dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
           x86_64_digests: ${{ needs.build-x86_64.outputs.digests }}
           aarch64_digests: ${{ needs.build-aarch64.outputs.digests }}
-          releaseVersion: ${{ github.event.inputs.version }}
+          releaseTag: ${{ github.event.inputs.version }}
