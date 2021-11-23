@@ -37,11 +37,16 @@ patch_app_meta() {
   local IMAGE_NAME=${2:?"Image name is required"}
   local VERSION=${3:?"Version is required"}
 
+printenv PATH
+which cat
+
 cat <<EOF > "${PATH}"
 export const version = "${VERSION}";
 export const imageName = "${IMAGE_NAME}";
 
 EOF
+
+
 }
 
 before_commit() {
