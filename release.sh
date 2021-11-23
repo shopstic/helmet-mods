@@ -48,9 +48,11 @@ release() {
   FDB_CONFIGURATOR_MANIFEST=$(manifest-tool inspect --raw docker.io/shopstic/fdb-configurator:"${IMAGE_TAG}" | jq -r '.digest')
   IAC_VERSION_BUMPER_MANIFEST=$(manifest-tool inspect --raw docker.io/shopstic/iac-version-bumper:"${IMAGE_TAG}" | jq -r '.digest')
 
+  local RELEASE_BRANCH="releases/${RELEASE_VERSION}"
+
   git config --global user.email "ci-runner@shopstic.com"
   git config --global user.name "CI Runner"
-  git checkout -b releases/"${RELEASE_VERSION}"
+  git checkout -b "${RELEASE_BRANCH}"
 
   patch_app_meta ./src/apps/fdb/meta.ts fdb-server "${FDB_SERVER_MANIFEST}"
   patch_app_meta ./src/apps/fdb_configurator/meta.ts fdb-configurator "${FDB_CONFIGURATOR_MANIFEST}"
@@ -60,7 +62,9 @@ release() {
 
   git add ./src/apps/*/meta.ts ./src/version.ts
   git commit -m "Release ${RELEASE_VERSION}"
-  git push origin releases/"${RELEASE_VERSION}"
+  git push origin "${RELEASE_BRANCH}"
+
+  gh release create "${RELEASE_VERSION}" --title "Release ${RELEASE_VERSION}" --notes "" --target "${RELEASE_BRANCH}"
 }
 
 patch_app_meta() {

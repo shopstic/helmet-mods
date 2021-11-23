@@ -60,6 +60,9 @@
           release = pkgs.mkShellNoCC {
             buildInputs = builtins.attrValues
               {
+                inherit (pkgs)
+                  gh
+                  ;
                 inherit (hotPotPkgs)
                   manifest-tool
                   ;
