@@ -37,7 +37,7 @@ patch_app_meta() {
   local IMAGE_NAME=${2:?"Image name is required"}
   local VERSION=${3:?"Version is required"}
 
-  cat <<EOF > "${PATH}"
+cat <<EOF > "${PATH}"
 export const version = "${VERSION}";
 export const imageName = "${IMAGE_NAME}";
 
@@ -49,7 +49,7 @@ before_commit() {
   git config --global user.name "CI Runner"
   git fetch origin release
   git checkout release
-  git merge origin/main
+  git merge -Xtheirs origin/main
 }
 
 commit() {
