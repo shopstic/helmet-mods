@@ -1,9 +1,10 @@
-name: CI Workflow
+name: Dev
 
 on:
   push:
     branches-ignore:
       - release
+      - 'releases/*'
   pull_request:
 
 defaults:
