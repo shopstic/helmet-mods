@@ -28,7 +28,7 @@ jobs:
           tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
           nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
 
-      - shell: "nix develop '.#release' -v -c bash {0}"
+      - name: Release
         env:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
         run: |
@@ -38,4 +38,4 @@ jobs:
             IMAGE_TAG="dev-${REFERENCE_SHA}"
           fi
 
-          ./release.sh release "${{ github.event.inputs.version }}" "${IMAGE_TAG}"
+          nix develop '.#release' -v -c ./release.sh release "${{ github.event.inputs.version }}" "${IMAGE_TAG}"
