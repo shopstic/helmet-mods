@@ -6,54 +6,21 @@ on:
       version:
         description: 'Release version'
         required: true
+      sha:
+        description: 'Reference commit'
+        required: false
+        default: ""
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  build-x86_64:
-    name: Build x86_64
-    runs-on: ubuntu-20.04
-    outputs:
-      digests: ${{ steps.build.outputs.digests }}
-    steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
-      - uses: ./.github/actions/build
-        id: build
-        with:
-          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
-          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
-          arch: x86_64
-
-  build-aarch64:
-    name: Build aarch64
-    runs-on: ubuntu-20.04
-    outputs:
-      digests: ${{ steps.build.outputs.digests }}
-    steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
-      - uses: ./.github/actions/build
-        id: build
-        with:
-          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
-          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
-          arch: aarch64
-
   release:
     name: Release
     runs-on: ubuntu-20.04
-    needs: [build-x86_64, build-aarch64]
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
-      - uses: ./.github/actions/release
-        with:
-          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
-          x86_64_digests: ${{ needs.build-x86_64.outputs.digests }}
-          aarch64_digests: ${{ needs.build-aarch64.outputs.digests }}
-          releaseTag: ${{ github.event.inputs.version }}
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+      - shell: nix develop '.#release' -v -c bash {0}
+        run: |-
+          ./release.sh release "${{ github.event.inputs.version }}" "${{ github.event.inputs.sha }}"

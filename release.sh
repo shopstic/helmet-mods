@@ -32,6 +32,37 @@ push_multi_arch_manifest() {
   docker manifest push "${IMAGE}:${TAG}"
 }
 
+release() {
+  RELEASE_VERSION=${1:?"Release version is required"}
+
+  local CURRENT_SHA
+  CURRENT_SHA=$(git rev-parse HEAD)
+
+  IMAGE_TAG=${2:-"dev-${CURRENT_SHA}"}
+
+  local FDB_SERVER_MANIFEST
+  local FDB_CONFIGURATOR_MANIFEST
+  local IAC_VERSION_BUMPER_MANIFEST
+
+  FDB_SERVER_MANIFEST=$(manifest-tool inspect --raw docker.io/shopstic/fdb-server:"${RELEASE_TAG}" | jq -r '.digest')
+  FDB_CONFIGURATOR_MANIFEST=$(manifest-tool inspect --raw docker.io/shopstic/fdb-configurator:"${RELEASE_TAG}" | jq -r '.digest')
+  IAC_VERSION_BUMPER_MANIFEST=$(manifest-tool inspect --raw docker.io/shopstic/iac-version-bumper:"${RELEASE_TAG}" | jq -r '.digest')
+
+  git config --global user.email "ci-runner@shopstic.com"
+  git config --global user.name "CI Runner"
+  git checkout -b releases/"${RELEASE_VERSION}"
+
+  patch_app_meta ./src/apps/fdb/meta.ts fdb-server "${FDB_SERVER_MANIFEST}"
+  patch_app_meta ./src/apps/fdb-configurator/meta.ts fdb-configurator "${FDB_CONFIGURATOR_MANIFEST}"
+  patch_app_meta ./src/apps/iac-version-bumper/meta.ts iac-version-bumper "${IAC_VERSION_BUMPER_MANIFEST}"
+
+  echo "export default \"${RELEASE_VERSION}\";" > ./src/version.ts
+
+  git add ./src/apps/*/meta.ts ./src/version.ts
+  git commit -m "Release ${RELEASE_VERSION}"
+  git push origin releases/"${RELEASE_VERSION}"
+}
+
 patch_app_meta() {
   local PATH=${1:?"Path is required"}
   local IMAGE_NAME=${2:?"Image name is required"}
@@ -45,24 +76,6 @@ export const version = "${VERSION}";
 export const imageName = "${IMAGE_NAME}";
 
 EOF
-}
-
-before_commit() {
-  git config --global user.email "ci-runner@shopstic.com"
-  git config --global user.name "CI Runner"
-  git fetch origin release
-  git checkout release
-  git merge --allow-unrelated-histories -Xtheirs origin/main
-}
-
-commit() {
-  local VERSION=${1:?"Version is required"}
-  echo "export default \"${VERSION}\";" > ./src/version.ts
-
-  git add ./src/apps/*/meta.ts ./src/version.ts
-  git commit -m "Release ${VERSION}"
-  git tag "${VERSION}"
-  git push origin release --tags
 }
 
 "$@"
