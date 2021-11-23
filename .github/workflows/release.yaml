@@ -40,3 +40,5 @@ jobs:
           fi
 
           nix develop '.#release' -v -c ./release.sh release "${{ github.event.inputs.version }}" "${IMAGE_TAG}"
+
+      - run: sudo tailscale logout

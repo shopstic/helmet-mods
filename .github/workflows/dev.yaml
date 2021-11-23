@@ -27,6 +27,7 @@ jobs:
           dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
           arch: x86_64
+      - run: sudo tailscale logout
 
   build-aarch64:
     name: Build aarch64
@@ -43,6 +44,7 @@ jobs:
           dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
           arch: aarch64
+      - run: sudo tailscale logout
 
   push:
     name: Push
