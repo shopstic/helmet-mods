@@ -28,10 +28,10 @@ jobs:
           tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
           nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
 
-      - shell: nix develop '.#release' -v -c bash {0}
+      - shell: "nix develop '.#release' -v -c bash {0}"
         env:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
-        run: |-
+        run: |
           IMAGE_TAG=""
 
           if [[ "${REFERENCE_SHA}" != "" ]]; then
