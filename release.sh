@@ -49,7 +49,7 @@ before_commit() {
   git config --global user.name "CI Runner"
   git fetch origin release
   git checkout release
-  git merge -Xtheirs origin/main
+  git merge --allow-unrelated-histories -Xtheirs origin/main
 }
 
 commit() {
