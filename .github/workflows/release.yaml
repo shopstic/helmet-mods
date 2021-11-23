@@ -21,6 +21,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+
+      - name: Setup
+        uses: shopstic/tailscale-nix-builder/setup@9f19de9453fa4aee80e1ad404fb45af87ecbbd15
+        with:
+          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
+          
       - shell: nix develop '.#release' -v -c bash {0}
         run: |-
           ./release.sh release "${{ github.event.inputs.version }}" "${{ github.event.inputs.sha }}"
