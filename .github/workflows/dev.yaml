@@ -43,8 +43,8 @@ jobs:
           dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
           arch: aarch64
 
-  release:
-    name: Release
+  push:
+    name: Push
     runs-on: ubuntu-20.04
     needs: [build-x86_64, build-aarch64]
     steps:
