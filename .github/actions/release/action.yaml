@@ -36,6 +36,7 @@ runs:
         aarch64_digests: ${{ inputs.aarch64_digests }}
         release_tag: ${{ inputs.releaseTag }}
       run: |-
+        which cat
         declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
 
         iac_version_bumper_digest=$(./release.sh push_multi_arch_manifest \
