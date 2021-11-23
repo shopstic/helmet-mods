@@ -45,8 +45,6 @@ export const version = "${VERSION}";
 export const imageName = "${IMAGE_NAME}";
 
 EOF
-
-
 }
 
 before_commit() {

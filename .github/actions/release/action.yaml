@@ -1,10 +1,10 @@
 name: Release
 description: ""
 inputs:
-  x86_64_digests:
+  amd64Digests:
     description: ""
     required: true
-  aarch64_digests:
+  arm64Digests:
     description: ""
     required: true
   dockerHubUsername:
@@ -13,10 +13,6 @@ inputs:
   dockerHubToken:
     description: ""
     required: true
-  releaseTag:
-    description: ""
-    required: false
-    default: "latest"
 runs:
   using: composite
   steps:
@@ -32,32 +28,21 @@ runs:
     - name: Push multi-arch manifests
       shell: bash
       env:
-        x86_64_digests: ${{ inputs.x86_64_digests }}
-        aarch64_digests: ${{ inputs.aarch64_digests }}
-        release_tag: ${{ inputs.releaseTag }}
+        AMD64_DIGESTS: ${{ inputs.amd64Digests }}
+        ARM64_DIGESTS: ${{ inputs.arm64Digests }}
+        IMAGE_TAG: dev-${{ github.sha }}
       run: |-
-        which cat
-        declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
+        ./release.sh push_multi_arch_manifest \
+          docker.io/shopstic/iac-version-bumper "${IMAGE_TAG}" \
+          "$(printenv AMD64_DIGESTS | jq -r '.iac_version_bumper')" \
+          "$(printenv ARM64_DIGESTS | jq -r '.iac_version_bumper')"
 
-        iac_version_bumper_digest=$(./release.sh push_multi_arch_manifest \
-          docker.io/shopstic/iac-version-bumper "${release_tag}" \
-          "$(printenv x86_64_digests | jq -r '.iac_version_bumper')" \
-          "$(printenv aarch64_digests | jq -r '.iac_version_bumper')")
+        ./release.sh push_multi_arch_manifest \
+          docker.io/shopstic/fdb-server "${IMAGE_TAG}" \
+          "$(printenv AMD64_DIGESTS | jq -r '.fdb_server')" \
+          "$(printenv ARM64_DIGESTS | jq -r '.fdb_server')"
 
-        fdb_server_digest=$(./release.sh push_multi_arch_manifest \
-          docker.io/shopstic/fdb-server "${release_tag}" \
-          "$(printenv x86_64_digests | jq -r '.fdb_server')" \
-          "$(printenv aarch64_digests | jq -r '.fdb_server')")
-
-        fdb_configurator_digest=$(./release.sh push_multi_arch_manifest \
-          docker.io/shopstic/fdb-configurator "${release_tag}" \
-          "$(printenv x86_64_digests | jq -r '.fdb_configurator')" \
-          "$(printenv aarch64_digests | jq -r '.fdb_configurator')")
-
-        if [[ "${release_tag}" != "latest" ]]; then
-          ./release.sh before_commit
-          ./release.sh patch_app_meta ./src/apps/fdb/meta.ts fdb-server "${fdb_server_digest}"
-          ./release.sh patch_app_meta ./src/apps/fdb_configurator/meta.ts fdb-configurator "${fdb_configurator_digest}"
-          ./release.sh patch_app_meta ./src/apps/iac_version_bumper/meta.ts iac-version-bumper "${iac_version_bumper_digest}"
-          ./release.sh commit "${release_tag}"
-        fi
+        ./release.sh push_multi_arch_manifest \
+          docker.io/shopstic/fdb-configurator "${IMAGE_TAG}" \
+          "$(printenv AMD64_DIGESTS | jq -r '.fdb_configurator')" \
+          "$(printenv ARM64_DIGESTS | jq -r '.fdb_configurator')"

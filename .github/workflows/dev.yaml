@@ -49,9 +49,31 @@ jobs:
     needs: [build-x86_64, build-aarch64]
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
-      - uses: ./.github/actions/release
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
         with:
-          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
-          x86_64_digests: ${{ needs.build-x86_64.outputs.digests }}
-          aarch64_digests: ${{ needs.build-aarch64.outputs.digests }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - run: chmod +r ~/.docker/config.json
+
+      - name: Push multi-arch manifests
+        env:
+          AMD64_DIGESTS: ${{ needs.build-x86_64.outputs.digests }}
+          ARM64_DIGESTS: ${{ needs.build-aarch64.outputs.digests }}
+          IMAGE_TAG: dev-${{ github.sha }}
+        run: |-
+          ./release.sh push_multi_arch_manifest \
+            docker.io/shopstic/iac-version-bumper "${IMAGE_TAG}" \
+            "$(printenv AMD64_DIGESTS | jq -r '.iac_version_bumper')" \
+            "$(printenv ARM64_DIGESTS | jq -r '.iac_version_bumper')"
+
+          ./release.sh push_multi_arch_manifest \
+            docker.io/shopstic/fdb-server "${IMAGE_TAG}" \
+            "$(printenv AMD64_DIGESTS | jq -r '.fdb_server')" \
+            "$(printenv ARM64_DIGESTS | jq -r '.fdb_server')"
+
+          ./release.sh push_multi_arch_manifest \
+            docker.io/shopstic/fdb-configurator "${IMAGE_TAG}" \
+            "$(printenv AMD64_DIGESTS | jq -r '.fdb_configurator')" \
+            "$(printenv ARM64_DIGESTS | jq -r '.fdb_configurator')"

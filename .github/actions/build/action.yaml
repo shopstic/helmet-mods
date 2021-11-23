@@ -46,12 +46,14 @@ runs:
     - name: Push
       shell: nix develop -v -c bash {0}
       id: push
+      env:
+        IMAGE_TAG: dev-${{ inputs.arch }}-${{ github.sha }}
       run: |-
         declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
 
-        iac_version_bumper_digest=$(./release.sh push_image iac-version-bumper latest-${{ inputs.arch }})
-        fdb_server_digest=$(./release.sh push_image fdb-server latest-${{ inputs.arch }})
-        fdb_configurator_digest=$(./release.sh push_image fdb-configurator latest-${{ inputs.arch }})
+        iac_version_bumper_digest=$(./release.sh push_image iac-version-bumper "${IMAGE_TAG}")
+        fdb_server_digest=$(./release.sh push_image fdb-server "${IMAGE_TAG}")
+        fdb_configurator_digest=$(./release.sh push_image fdb-configurator "${IMAGE_TAG}")
 
         output='{"iac_version_bumper":"'${iac_version_bumper_digest}'","fdb_server":"'${fdb_server_digest}'","fdb_configurator":"'${fdb_configurator_digest}'"}'
 
