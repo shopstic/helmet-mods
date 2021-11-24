@@ -80,6 +80,9 @@
           };
           iacVersionBumperImage = pkgs.callPackage ./build/iac-version-bumper {
             inherit iacVersionBumper buildahBuild deno;
+            inherit (hotPotPkgs)
+              manifest-tool
+              ;
           };
         };
         defaultPackage = pkgs.linkFarmFromDrvs "helmet-mods-all" (pkgs.lib.attrValues packages);

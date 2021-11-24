@@ -37,7 +37,22 @@ async function updateDigests({ repoPath, targets }: {
 
       logger.info("Fetching digest for", image);
 
-      const digest = (await captureExec({
+      const digest: string = JSON
+        .parse(
+          await captureExec({
+            run: {
+              cmd: [
+                "manifest-tool",
+                "inspect",
+                "--raw",
+                image,
+              ],
+            },
+          }),
+        )
+        .digest;
+
+      /* const digest = (await captureExec({
         run: {
           cmd: [
             "skopeo",
@@ -47,7 +62,7 @@ async function updateDigests({ repoPath, targets }: {
             `docker://${image}`,
           ],
         },
-      })).trim();
+      })).trim(); */
 
       logger.info(
         `Got digest for ${image}: ${digest} vs. ${currentDigest || "unknown"}`,

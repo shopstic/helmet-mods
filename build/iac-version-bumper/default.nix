@@ -2,8 +2,10 @@
 , stdenv
 , deno
 , dumb-init
+, cacert
 , gitMinimal
-, skopeo
+# , skopeo
+, manifest-tool
 , runCommand
 , writeTextFile
 , buildahBuild
@@ -46,14 +48,21 @@ let
       exec dumb-init -- deno run --cached-only --unstable -A ${iacVersionBumper} auto-bump-versions "$@"
     '';
   };
+  baseImageWithDeps = dockerTools.buildImage {
+    name = name;
+    fromImage = baseImage;
+    config = {
+      Env = [
+        "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal manifest-tool ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        "SSL_CERT_FILE=${cacert.out}/etc/ssl/certs/ca-bundle.crt"
+      ];
+    };
+  };
 in
 dockerTools.buildLayeredImage {
   name = name;
-  fromImage = baseImage;
+  fromImage = baseImageWithDeps;
   config = {
-    Env = [
-      "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal skopeo ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-    ];
     Entrypoint = [ entrypoint ];
   };
 }
