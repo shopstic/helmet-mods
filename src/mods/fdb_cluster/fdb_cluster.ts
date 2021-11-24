@@ -38,6 +38,8 @@ import {
 import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
+export { fdbConfiguratorImage };
+
 export const fdbExporterVersion = "1.3.0";
 export const fdbExporterImage =
   `shopstic/fdb-prometheus-exporter:${fdbExporterVersion}`;
