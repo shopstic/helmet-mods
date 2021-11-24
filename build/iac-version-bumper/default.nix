@@ -3,6 +3,7 @@
 , deno
 , dumb-init
 , gitMinimal
+, skopeo
 , runCommand
 , writeTextFile
 , buildahBuild
@@ -51,7 +52,7 @@ dockerTools.buildLayeredImage {
   fromImage = baseImage;
   config = {
     Env = [
-      "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal skopeo ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
     ];
     Entrypoint = [ entrypoint ];
   };
