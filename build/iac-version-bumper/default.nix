@@ -32,8 +32,6 @@ let
       #!/usr/bin/env bash
       set -euo pipefail
 
-      export PATH="${lib.makeBinPath [ dumb-init deno ]}:$PATH"
-  
       COMMITTER_NAME=''${COMMITTER_NAME:?"COMMITTER_NAME env variable is required"}
       COMMITTER_EMAIL=''${COMMITTER_EMAIL:?"COMMITTER_EMAIL env variable is required"}
   
@@ -51,6 +49,9 @@ dockerTools.buildLayeredImage {
   name = name;
   fromImage = baseImage;
   config = {
+    Env = [
+      "PATH=${lib.makeBinPath [ dumb-init deno ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ];
     Entrypoint = [ entrypoint ];
   };
 }

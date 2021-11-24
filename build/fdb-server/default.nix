@@ -35,8 +35,6 @@ let
       SCRIPT_NAME=''${1:?"Script name is required (either fdb_server.sh or backup_agent.sh"}
       shift
 
-      export PATH="${lib.makeBinPath [ dumb-init fdb ]}:$PATH"
-
       exec dumb-init -- "${scripts}/$SCRIPT_NAME" "$@"
     '';
   };
@@ -46,6 +44,7 @@ dockerTools.buildLayeredImage {
   fromImage = baseImage;
   config = {
     Entrypoint = [ entrypoint ];
+    Env = [ "PATH=${lib.makeBinPath [ dumb-init fdb ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" ];
     Cmd = [ "fdb_server.sh" ];
   };
 }
