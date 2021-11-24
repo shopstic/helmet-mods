@@ -1,2 +1,1 @@
-export const version = "latest";
-export const imageName = "fdb-server";
+export const image = "docker.io/shopstic/fdb-server:latest";

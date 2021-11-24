@@ -70,13 +70,9 @@ release() {
 patch_app_meta() {
   local META_PATH=${1:?"Path is required"}
   local IMAGE_NAME=${2:?"Image name is required"}
-  local VERSION=${3:?"Version is required"}
+  local DIGEST=${3:?"Digest is required"}
 
-cat <<EOF > "${META_PATH}"
-export const version = "${VERSION}";
-export const imageName = "${IMAGE_NAME}";
-
-EOF
+  echo "export const image = \"docker.io/shopstic/${IMAGE_NAME}@${DIGEST}\";" > "${META_PATH}"
 }
 
 "$@"

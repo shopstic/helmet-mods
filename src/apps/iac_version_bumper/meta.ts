@@ -1,2 +1,1 @@
-export const version = "latest";
-export const imageName = "iac-version-bumper";
+export const image = "docker.io/shopstic/iac-version-bumper:latest";

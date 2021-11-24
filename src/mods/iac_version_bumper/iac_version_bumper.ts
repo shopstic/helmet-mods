@@ -12,13 +12,10 @@ import type {
   VersionBumpParams,
   VersionBumpTargets,
 } from "../../apps/iac_version_bumper/libs/types.ts";
-import { imageName, version } from "../../apps/iac_version_bumper/meta.ts";
+import { image as iacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
 import { stableHash } from "../../libs/hash_utils.ts";
 
 export const defaultName = "iac-version-bumper";
-export const defaultImage = `shopstic/${imageName}${
-  version === "latest" ? ":latest" : `@${version}`
-}`;
 
 export interface IacVersionBumperResources {
   targetsConfigMap: K8sConfigMap;
@@ -29,7 +26,7 @@ export interface IacVersionBumperResources {
 
 export function createIacVersionBumperResources({
   name = defaultName,
-  image = defaultImage,
+  image = iacVersionBumperImage,
   gitBranch,
   gitRepoUri,
   checkIntervalSeconds,
