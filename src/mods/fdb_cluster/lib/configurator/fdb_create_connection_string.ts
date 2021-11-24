@@ -81,9 +81,9 @@ export function createFdbCreateConnectionStringResources(
         spec: {
           serviceAccountName: serviceAccount.metadata.name,
           securityContext: {
-            runAsUser: 5000,
-            runAsGroup: 5000,
-            fsGroup: 5000,
+            runAsUser: 1001,
+            runAsGroup: 1001,
+            fsGroup: 1001,
             fsGroupChangePolicy: "OnRootMismatch",
           },
           containers: [container],
