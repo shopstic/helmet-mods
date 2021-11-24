@@ -48,11 +48,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1637653213,
-        "narHash": "sha256-jMUFc1DLzrfBPe90q2e63dqj1eLbn78xYrwD5sNT/6g=",
+        "lastModified": 1637735110,
+        "narHash": "sha256-tCh2wHTK0E9m4ORW8SFr6DOcjPH2gm0FGGB+yCzZJPU=",
         "owner": "shopstic",
         "repo": "nix-hot-pot",
-        "rev": "ab6bbdcfa26df3ae5fb8b705c0c11d97ec9f2e78",
+        "rev": "aedd1fee6b8b3f079ffc967bb7dfe82f9f564cb3",
         "type": "github"
       },
       "original": {
