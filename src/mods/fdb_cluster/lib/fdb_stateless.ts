@@ -40,7 +40,7 @@ export function createFdbStatelessDeployment(
   };
 
   const volumeName = "data";
-  const volumeMountPath = "/app/data";
+  const volumeMountPath = "/home/app/data";
 
   const container = createFdbContainer({
     processClass,

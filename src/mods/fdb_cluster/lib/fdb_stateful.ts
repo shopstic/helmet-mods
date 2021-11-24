@@ -121,7 +121,7 @@ export function createFdbStatefulResources(
   statefulSets: K8sStatefulSet[];
 } {
   const volumeName = "data";
-  const volumeMountPath = "/app/data";
+  const volumeMountPath = "/home/app/data";
 
   const resources = Object.entries(configs).flatMap(
     (

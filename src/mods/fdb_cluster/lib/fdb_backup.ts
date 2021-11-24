@@ -31,7 +31,7 @@ export function createFdbBackupAgentContainer(
     env: [
       {
         name: "FDB_CLUSTER_FILE",
-        value: "/app/fdb.cluster",
+        value: "/home/app/fdb.cluster",
       },
       {
         name: "FDB_CONNECTION_STRING",

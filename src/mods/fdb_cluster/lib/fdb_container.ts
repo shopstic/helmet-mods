@@ -144,7 +144,7 @@ export function createFdbContainer(
     env: [
       {
         name: "FDB_CLUSTER_FILE",
-        value: "/app/fdb.cluster",
+        value: "/home/app/fdb.cluster",
       },
       {
         name: "FDB_PROCESS_CLASS",

@@ -117,7 +117,7 @@ export function createIacVersionBumperResources({
 
   const targetsConfigVolumeMount = createK8sVolumeMount({
     name: targetsConfigVolume.name,
-    mountPath: "/app/config",
+    mountPath: "/home/app/config",
   });
 
   const deployment = createK8sDeployment({
