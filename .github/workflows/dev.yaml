@@ -14,7 +14,7 @@ defaults:
 jobs:
   build-x86_64:
     name: Build x86_64
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, nix]
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
@@ -22,16 +22,13 @@ jobs:
       - uses: ./.github/actions/build
         id: build
         with:
-          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
           dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
           arch: x86_64
-      - run: sudo tailscale logout
 
   build-aarch64:
     name: Build aarch64
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, nix]
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
@@ -39,16 +36,13 @@ jobs:
       - uses: ./.github/actions/build
         id: build
         with:
-          tailscaleAuthKey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          nixBuildSshKey: ${{ secrets.NIX_BUILD_SSH_KEY }}
           dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
           arch: aarch64
-      - run: sudo tailscale logout
 
   push:
     name: Push
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, nix]
     needs: [build-x86_64, build-aarch64]
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
