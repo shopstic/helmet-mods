@@ -2,21 +2,10 @@
   description = "Helmet mods";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/29830319abf5a925921885974faae5509312b940";
-    flakeUtils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    fdbPkgs = {
-      url = "github:shopstic/nix-fdb";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flakeUtils.follows = "flakeUtils";
-    };
-    hotPot = {
-      url = "github:shopstic/nix-hot-pot";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flakeUtils.follows = "flakeUtils";
-    };
+    hotPot.url = "github:shopstic/nix-hot-pot";
+    nixpkgs.follows = "hotPot/nixpkgs";
+    flakeUtils.follows = "hotPot/flakeUtils";
+    fdbPkgs.url = "github:shopstic/nix-fdb";
   };
 
   outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot }:
@@ -53,21 +42,12 @@
               inherit deno;
               inherit (pkgs)
                 skopeo
+                gh
+                ;
+              inherit (hotPotPkgs)
+                manifest-tool
                 ;
             };
-        };
-        devShells = {
-          release = pkgs.mkShellNoCC {
-            buildInputs = builtins.attrValues
-              {
-                inherit (pkgs)
-                  gh
-                  ;
-                inherit (hotPotPkgs)
-                  manifest-tool
-                  ;
-              };
-          };
         };
         packages = {
           inherit deps fdbConfigurator iacVersionBumper;

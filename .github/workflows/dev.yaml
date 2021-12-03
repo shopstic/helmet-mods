@@ -22,8 +22,7 @@ jobs:
       - uses: ./.github/actions/build
         id: build
         with:
-          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
+          imageRepo: public.ecr.aws/g1b1f7a7
           arch: x86_64
 
   build-aarch64:
@@ -36,8 +35,7 @@ jobs:
       - uses: ./.github/actions/build
         id: build
         with:
-          dockerHubUsername: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerHubToken: ${{ secrets.DOCKERHUB_TOKEN }}
+          imageRepo: public.ecr.aws/g1b1f7a7
           arch: aarch64
 
   push:
@@ -45,32 +43,28 @@ jobs:
     runs-on: [self-hosted, nix]
     needs: [build-x86_64, build-aarch64]
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579   
 
-      - run: chmod +r ~/.docker/config.json
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Push multi-arch manifests
+        shell: nix develop -v -c bash {0}
         env:
-          AMD64_DIGESTS: ${{ needs.build-x86_64.outputs.digests }}
-          ARM64_DIGESTS: ${{ needs.build-aarch64.outputs.digests }}
-          IMAGE_TAG: dev-${{ github.sha }}
+          GITHUB_SHA: ${{ github.sha }}
+          IMAGE_REPOSITORY: public.ecr.aws/g1b1f7a7
         run: |-
-          ./release.sh push_multi_arch_manifest \
-            docker.io/shopstic/iac-version-bumper "${IMAGE_TAG}" \
-            "$(printenv AMD64_DIGESTS | jq -r '.iac_version_bumper')" \
-            "$(printenv ARM64_DIGESTS | jq -r '.iac_version_bumper')"
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/iac-version-bumper:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/iac-version-bumper:dev-"${GITHUB_SHA}"
 
-          ./release.sh push_multi_arch_manifest \
-            docker.io/shopstic/fdb-server "${IMAGE_TAG}" \
-            "$(printenv AMD64_DIGESTS | jq -r '.fdb_server')" \
-            "$(printenv ARM64_DIGESTS | jq -r '.fdb_server')"
-
-          ./release.sh push_multi_arch_manifest \
-            docker.io/shopstic/fdb-configurator "${IMAGE_TAG}" \
-            "$(printenv AMD64_DIGESTS | jq -r '.fdb_configurator')" \
-            "$(printenv ARM64_DIGESTS | jq -r '.fdb_configurator')"
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/fdb-server:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/fdb-server:dev-"${GITHUB_SHA}"
+          
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/fdb-configurator:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/fdb-configurator:dev-"${GITHUB_SHA}"
