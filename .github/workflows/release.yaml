@@ -26,11 +26,12 @@ jobs:
         env:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        shell: nix develop -v -c bash {0}
         run: |
           IMAGE_TAG=""
-
           if [[ "${REFERENCE_SHA}" != "" ]]; then
             IMAGE_TAG="dev-${REFERENCE_SHA}"
           fi
 
-          nix develop '.#release' -v -c ./release.sh release "${{ github.event.inputs.version }}" "${IMAGE_TAG}"
+          ./release.sh release "${RELEASE_VERSION}" "${IMAGE_TAG}"
