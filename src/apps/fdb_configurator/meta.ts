@@ -1,1 +1,1 @@
-export const image = "docker.io/shopstic/fdb-configurator:latest";
+export const image = "1.11.12/fdb-configurator@";
