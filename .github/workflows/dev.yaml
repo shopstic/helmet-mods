@@ -42,17 +42,20 @@ jobs:
     name: Push
     runs-on: [self-hosted, nix]
     needs: [build-x86_64, build-aarch64]
+    env:
+      IMAGE_REPOSITORY: public.ecr.aws/g1b1f7a7
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579   
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: ./.github/actions/login-to-public-ecr
+        with:
+          imageRepo: ${{ env.IMAGE_REPOSITORY }}
 
       - name: Push multi-arch manifests
         shell: nix develop -v -c bash {0}
         env:
           GITHUB_SHA: ${{ github.sha }}
-          IMAGE_REPOSITORY: public.ecr.aws/g1b1f7a7
         run: |-
           manifest-tool push from-args \
             --platforms linux/amd64,linux/arm64 \
