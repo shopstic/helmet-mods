@@ -43,6 +43,7 @@
               inherit (pkgs)
                 skopeo
                 gh
+                awscli2
                 ;
               inherit (hotPotPkgs)
                 manifest-tool
