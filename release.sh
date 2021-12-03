@@ -30,9 +30,9 @@ release() {
   local FDB_CONFIGURATOR_MANIFEST
   local IAC_VERSION_BUMPER_MANIFEST
 
-  FDB_SERVER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-server:"${IMAGE_TAG}" | jq -r '.digest')
-  FDB_CONFIGURATOR_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-configurator:"${IMAGE_TAG}" | jq -r '.digest')
-  IAC_VERSION_BUMPER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/iac-version-bumper:"${IMAGE_TAG}" | jq -r '.digest')
+  FDB_SERVER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-server:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
+  FDB_CONFIGURATOR_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-configurator:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
+  IAC_VERSION_BUMPER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/iac-version-bumper:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
 
   local RELEASE_BRANCH="releases/${RELEASE_VERSION}"
 

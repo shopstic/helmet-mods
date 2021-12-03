@@ -34,4 +34,4 @@ jobs:
             IMAGE_TAG="dev-${REFERENCE_SHA}"
           fi
 
-          ./release.sh release "${RELEASE_VERSION}" "${IMAGE_TAG}"
+          ./release.sh release public.ecr.aws/g1b1f7a7 "${RELEASE_VERSION}" "${IMAGE_TAG}"
