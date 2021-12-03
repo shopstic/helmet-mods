@@ -22,6 +22,12 @@ runs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Debugging
+      shell: bash
+      run: |-
+        ls -la ~/.docker/
+        cat ~/.docker/config.json
+
     - name: Push
       shell: nix develop -v -c bash {0}
       id: push
