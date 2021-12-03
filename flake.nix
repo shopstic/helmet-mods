@@ -44,6 +44,7 @@
                 skopeo
                 gh
                 awscli2
+                jq
                 ;
               inherit (hotPotPkgs)
                 manifest-tool
