@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.7.3/mod.ts";
+export * from "https://deno.land/x/helmet@1.7.6/mod.ts";
