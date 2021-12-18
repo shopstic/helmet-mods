@@ -35,7 +35,10 @@ import { image as fdbImage } from "../../apps/fdb/meta.ts";
 import {
   image as fdbConfiguratorImage,
 } from "../../apps/fdb_configurator/meta.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
+import {
+  IoK8sApiCoreV1PodSpec,
+  IoK8sApiCoreV1ResourceRequirements,
+} from "../../deps/k8s_utils.ts";
 import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
@@ -83,10 +86,12 @@ export function createFdbClusterResources(
       resolverCount: number;
       standbyCount: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+      resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
     } | {
       mode: "dev";
       count?: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+      resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
     };
     backup?: {
       podCount: number;
@@ -151,6 +156,7 @@ export function createFdbClusterResources(
       image,
       imagePullPolicy,
       nodeSelector: stateless.nodeSelector,
+      resourceRequirements: stateless.resourceRequirements,
       locality,
     })
     : undefined;
@@ -167,6 +173,7 @@ export function createFdbClusterResources(
     image,
     imagePullPolicy,
     nodeSelector: stateless.nodeSelector,
+    resourceRequirements: stateless.resourceRequirements,
     locality,
   });
 

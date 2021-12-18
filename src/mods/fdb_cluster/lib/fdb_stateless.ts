@@ -4,7 +4,10 @@ import {
   K8sDeployment,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
+import {
+  IoK8sApiCoreV1PodSpec,
+  IoK8sApiCoreV1ResourceRequirements,
+} from "../../../deps/k8s_utils.ts";
 import { createFdbContainer, FdbLocalityMode } from "./fdb_container.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
@@ -19,6 +22,7 @@ export function createFdbStatelessDeployment(
     image,
     imagePullPolicy,
     nodeSelector,
+    resourceRequirements,
     locality,
   }: {
     baseName: string;
@@ -30,6 +34,7 @@ export function createFdbStatelessDeployment(
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
     nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
     locality: FdbLocalityMode;
   },
 ): K8sDeployment {
@@ -53,6 +58,7 @@ export function createFdbStatelessDeployment(
       },
     ],
     connectionStringConfigMapRef,
+    resourceRequirements,
     port,
     locality,
   });
