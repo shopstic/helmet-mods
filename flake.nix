@@ -34,6 +34,31 @@
         };
         fdbConfigurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
         iacVersionBumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
+        vscodeSettings = pkgs.writeTextFile {
+          name = "vscode-settings.json";
+          text = builtins.toJSON {
+            "deno.enable" = true;
+            "deno.lint" = true;
+            "deno.unstable" = true;
+            "deno.path" = deno + "/bin/deno";
+            "deno.suggest.imports.hosts" = {
+              "https://deno.land" = false;
+            };
+            "editor.tabSize" = 2;
+            "[typescript]" = {
+              "editor.defaultFormatter" = "denoland.vscode-deno";
+              "editor.formatOnSave" = true;
+            };
+            "yaml.schemaStore.enable" = true;
+            "yaml.schemas" = {
+              "https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.yaml";
+              "https://json.schemastore.org/github-action.json" = "*/action.yaml";
+            };
+            "nix.enableLanguageServer" = true;
+            "nix.formatterPath" = pkgs.nixpkgs-fmt + "/bin/nixpkgs-fmt";
+            "nix.serverPath" = pkgs.rnix-lsp + "/bin/rnix-lsp";
+          };
+        };
       in
       rec {
         devShell = pkgs.mkShellNoCC {
@@ -50,6 +75,10 @@
                 manifest-tool
                 ;
             };
+          shellHook = ''
+            mkdir -p ./.vscode
+            cat ${vscodeSettings} > ./.vscode/settings.json
+          '';
         };
         packages = {
           inherit deps fdbConfigurator iacVersionBumper;

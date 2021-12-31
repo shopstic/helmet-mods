@@ -1,13 +1,7 @@
 import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
 import { validate } from "../../../deps/validation_utils.ts";
 import { memoizePromise } from "../../../deps/async_utils.ts";
-import {
-  Static,
-  TObject,
-  TProperties,
-  TSchema,
-  Type,
-} from "../../../deps/typebox.ts";
+import { Static, TSchema, Type } from "../../../deps/typebox.ts";
 import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
@@ -162,16 +156,10 @@ export async function readClusterConfig(
   return configValidation.value;
 }
 
-function RelaxedObject<T extends TProperties>(
-  properties: T,
-): TObject<T> {
-  return Type.Object<T>(properties, { additionalProperties: true });
-}
-
-export const ServiceSpecSchema = RelaxedObject({
+export const ServiceSpecSchema = Type.PartialObject({
   clusterIP: Type.String({ format: "ipv4" }),
   ports: Type.Array(
-    RelaxedObject({
+    Type.PartialObject({
       port: Type.Number(),
     }),
     { minItems: 1 },

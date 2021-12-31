@@ -1,11 +1,11 @@
-import { TObject, TProperties, Type } from "../../../deps/typebox.ts";
+import { Type } from "../../../deps/typebox.ts";
 import type { Static } from "../../../deps/typebox.ts";
 
 export function NonEmptyString() {
   return Type.String({ minLength: 1 });
 }
 
-export const FdbDatabaseConfigSchema = RelaxedObject({
+export const FdbDatabaseConfigSchema = Type.PartialObject({
   storageEngine: Type.Union([
     Type.Literal("memory"),
     Type.Literal("ssd-2"),
@@ -24,7 +24,7 @@ export const FdbDatabaseConfigSchema = RelaxedObject({
   proxyCount: Type.Number({ minimum: 1 }),
   resolverCount: Type.Number({ minimum: 1 }),
   coordinatorServiceNames: Type.Array(Type.String()),
-  excludedServiceEndpoints: Type.Array(RelaxedObject({
+  excludedServiceEndpoints: Type.Array(Type.PartialObject({
     name: Type.String(),
     port: Type.Number({ minimum: 1, maximum: 65535 }),
   })),
@@ -32,13 +32,7 @@ export const FdbDatabaseConfigSchema = RelaxedObject({
 
 export type FdbDatabaseConfig = Static<typeof FdbDatabaseConfigSchema>;
 
-function RelaxedObject<T extends TProperties>(
-  properties: T,
-): TObject<T> {
-  return Type.Object<T>(properties, { additionalProperties: true });
-}
-
-export const FdbStatusProcessSchema = RelaxedObject({
+export const FdbStatusProcessSchema = Type.PartialObject({
   address: Type.String(),
   excluded: Type.Optional(Type.Boolean()),
   machine_id: Type.Optional(Type.String()),
@@ -54,28 +48,30 @@ export const FdbStatusProcessSchema = RelaxedObject({
   ]),
 });
 
-export const FdbStatusSchema = RelaxedObject({
-  cluster: RelaxedObject({
-    configuration: Type.Optional(RelaxedObject({
+export const FdbStatusSchema = Type.PartialObject({
+  cluster: Type.PartialObject({
+    configuration: Type.Optional(Type.PartialObject({
       resolvers: Type.Number(),
       proxies: Type.Number(),
       logs: Type.Number(),
       redundancy_mode: FdbDatabaseConfigSchema.properties.redundancyMode,
       storage_engine: FdbDatabaseConfigSchema.properties.storageEngine,
     })),
-    recovery_state: Type.Optional(RelaxedObject({
+    recovery_state: Type.Optional(Type.PartialObject({
       name: Type.String(),
       description: Type.String(),
     })),
-    processes: Type.Optional(Type.Dict(FdbStatusProcessSchema)),
+    processes: Type.Optional(
+      Type.Record(Type.String(), FdbStatusProcessSchema),
+    ),
   }),
-  client: RelaxedObject({
-    database_status: RelaxedObject({
+  client: Type.PartialObject({
+    database_status: Type.PartialObject({
       available: Type.Boolean(),
     }),
-    coordinators: RelaxedObject({
+    coordinators: Type.PartialObject({
       quorum_reachable: Type.Boolean(),
-      coordinators: Type.Array(RelaxedObject({
+      coordinators: Type.Array(Type.PartialObject({
         address: Type.String(),
         reachable: Type.Boolean(),
       })),

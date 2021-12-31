@@ -40,7 +40,7 @@ export default createCliAction(
         `node/${nodeName}`,
         "-o=jsonpath={.metadata.annotations}",
       ],
-      schema: Type.Dict(Type.String()),
+      schema: Type.Record(Type.String(), Type.String()),
     });
 
     const deviceIdsString =
