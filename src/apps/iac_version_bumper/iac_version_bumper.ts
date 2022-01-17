@@ -37,7 +37,7 @@ async function updateDigests({ repoPath, targets }: {
 
       logger.info("Fetching digest for", image);
 
-      const digest: string = JSON
+      const digest = JSON
         .parse(
           await captureExec({
             run: {
@@ -51,6 +51,10 @@ async function updateDigests({ repoPath, targets }: {
           }),
         )
         .digest;
+
+      if (typeof digest !== "string" || digest.length === 0) {
+        throw new Error(`Got empty digest for ${image}`);
+      }
 
       /* const digest = (await captureExec({
         run: {
@@ -121,7 +125,7 @@ export async function autoBumpVersions(
       `Got ${changes.length} changes so far, going to check once more after ${groupingDelayMs}ms to group more changes`,
     );
     await delay(groupingDelayMs);
-    await updateDigests({ repoPath, targets });
+    changes.push.apply(changes, await updateDigests({ repoPath, targets }));
   }
 
   const gitStatus = await captureExec(
