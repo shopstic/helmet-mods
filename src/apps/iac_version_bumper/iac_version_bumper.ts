@@ -1,9 +1,8 @@
 import { captureExec, inheritExec } from "../../deps/exec_utils.ts";
-import { fsExists } from "../../deps/std_fs.ts";
 import { dirname, joinPath } from "../../deps/std_path.ts";
 import { CliProgram, createCliAction } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
-import { readAll } from "../../deps/std_io.ts";
+import { readAll } from "../../deps/std_stream.ts";
 import { loggerWithContext } from "../../libs/logger.ts";
 import {
   VersionBumpParamsSchema,
@@ -22,15 +21,15 @@ async function updateDigests({ repoPath, targets }: {
       const fullVersionFilePath = joinPath(repoPath, versionFilePath);
 
       const currentDigest = await (async () => {
-        if (await fsExists(fullVersionFilePath)) {
+        try {
           const currentDigestSource = await Deno.readTextFile(
-            joinPath(repoPath, versionFilePath),
+            fullVersionFilePath,
           );
 
           return JSON.parse(
             currentDigestSource.match(/^export default ([^;]+)/)![1],
           );
-        } else {
+        } catch {
           return "";
         }
       })();
@@ -92,9 +91,7 @@ async function updateDigests({ repoPath, targets }: {
         const { versionFilePath, digest } = change!;
         const toWritePath = joinPath(repoPath, versionFilePath);
 
-        if (!await fsExists(toWritePath)) {
-          await Deno.mkdir(dirname(toWritePath), { recursive: true });
-        }
+        await Deno.mkdir(dirname(toWritePath), { recursive: true });
 
         await Deno.writeTextFile(
           toWritePath,
