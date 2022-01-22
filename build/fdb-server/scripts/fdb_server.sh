@@ -54,7 +54,7 @@ ARGS=(--class "${FDB_PROCESS_CLASS}" \
   --logsize "2MiB" \
   --maxlogssize "10MiB" \
   --public_address "${FDB_PUBLIC_ADDRESS}" \
-  --trace-format "json")
+  --trace_format "json")
 
 if [[ -n "${FDB_ZONE_ID}" ]]; then
   ARGS+=(--locality_zoneid "${FDB_ZONE_ID}")
