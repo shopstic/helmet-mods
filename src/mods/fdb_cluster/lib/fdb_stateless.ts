@@ -44,8 +44,11 @@ export function createFdbStatelessDeployment(
     [FDB_COMPONENT_LABEL]: processClass,
   };
 
-  const volumeName = "data";
-  const volumeMountPath = "/home/app/data";
+  const dataVolumeName = "data";
+  const dataVolumeMountPath = "/home/app/data";
+
+  const logVolumeName = "log";
+  const logVolumeMountPath = "/home/app/log";
 
   const container = createFdbContainer({
     processClass,
@@ -53,8 +56,12 @@ export function createFdbStatelessDeployment(
     imagePullPolicy,
     volumeMounts: [
       {
-        name: volumeName,
-        mountPath: volumeMountPath,
+        name: dataVolumeName,
+        mountPath: dataVolumeMountPath,
+      },
+      {
+        name: logVolumeName,
+        mountPath: logVolumeMountPath,
       },
     ],
     connectionStringConfigMapRef,
@@ -95,7 +102,11 @@ export function createFdbStatelessDeployment(
           },
           volumes: [
             {
-              name: volumeName,
+              name: dataVolumeName,
+              emptyDir: {},
+            },
+            {
+              name: logVolumeName,
               emptyDir: {},
             },
           ],

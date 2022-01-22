@@ -13,7 +13,7 @@ export FDB_CLUSTER_FILE=${FDB_CLUSTER_FILE:-"/home/app/fdb.cluster"}
 echo "${FDB_CONNECTION_STRING}" > "${FDB_CLUSTER_FILE}"
 
 FDB_PROCESS_DATA_DIR=${FDB_PROCESS_DATA_DIR:-"/home/app/data/data/${FDB_PROCESS_PORT}"}
-export FDB_PROCESS_LOG_DIR=${FDB_PROCESS_LOG_DIR:-"/home/app/data/log"}
+export FDB_PROCESS_LOG_DIR=${FDB_PROCESS_LOG_DIR:-"/home/app/log"}
 
 mkdir -p "${FDB_PROCESS_DATA_DIR}" "${FDB_PROCESS_LOG_DIR}"
 
@@ -51,6 +51,8 @@ ARGS=(--class "${FDB_PROCESS_CLASS}" \
   --listen_address "0.0.0.0:${FDB_PROCESS_PORT}" \
   --locality_machineid "${FDB_MACHINE_ID}" \
   --logdir "${FDB_PROCESS_LOG_DIR}" \
+  --logsize "2MiB" \
+  --maxlogssize "10MiB" \
   --public_address "${FDB_PUBLIC_ADDRESS}" \
   --trace-format "json")
 
