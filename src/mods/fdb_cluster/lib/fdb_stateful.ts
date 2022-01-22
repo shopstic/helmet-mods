@@ -120,8 +120,11 @@ export function createFdbStatefulResources(
   services: K8sService[];
   statefulSets: K8sStatefulSet[];
 } {
-  const volumeName = "data";
-  const volumeMountPath = "/home/app/data";
+  const dataVolumeName = "data";
+  const dataVolumeMountPath = "/home/app/data";
+
+  const logVolumeName = "log";
+  const logVolumeMountPath = "/home/app/log";
 
   const resources = Object.entries(configs).flatMap(
     (
@@ -168,8 +171,12 @@ export function createFdbStatefulResources(
           imagePullPolicy,
           volumeMounts: [
             {
-              name: volumeName,
-              mountPath: volumeMountPath,
+              name: dataVolumeName,
+              mountPath: dataVolumeMountPath,
+            },
+            {
+              name: logVolumeName,
+              mountPath: logVolumeMountPath,
             },
           ],
           connectionStringConfigMapRef,
@@ -208,10 +215,14 @@ export function createFdbStatefulResources(
               nodeSelector,
               volumes: [
                 {
-                  name: volumeName,
+                  name: dataVolumeName,
                   persistentVolumeClaim: {
                     claimName: resourceName,
                   },
+                },
+                {
+                  name: logVolumeName,
+                  emptyDir: {},
                 },
               ],
             },

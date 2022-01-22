@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-FDB_PROCESS_LOG_DIR=${FDB_PROCESS_LOG_DIR:-"/home/app/data/log"}
+FDB_PROCESS_LOG_DIR=${FDB_PROCESS_LOG_DIR:-"/home/app/log"}
 
 tailing_pid=-1
 latest_file=""
