@@ -17,8 +17,8 @@ let
       };
       outputHash =
         if stdenv.isx86_64 then
-          "sha256-vZvBOFJ9ZFnMAgC6XWTGD5s6jcjTkIQgibrqP4/eb7E=" else
-          "sha256-EdObjwAOCNIxOZ9ZIoSY5xDCw2XWUbJhXxmLmGNI4fE=";
+          "sha256-dlG2nZaXCKkNaiKGf7CORLFiAg5Ko3H75XN4MgKq960=" else
+          "sha256-7JtahFfkp8Py2KfPZvo0sUMgtLX3/TDeGy2mIsw5iOU=";
     };
 
   scripts = ./scripts;
