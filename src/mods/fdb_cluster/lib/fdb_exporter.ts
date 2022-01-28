@@ -107,6 +107,7 @@ export function createFdbExporterResources(
             args: [
               `--port=${proxyPort}`,
               `--proxyTarget=http://localhost:${backendExporterPort}`,
+              `--targetRequestTimeoutMs=10000`,
             ],
           }],
         },
