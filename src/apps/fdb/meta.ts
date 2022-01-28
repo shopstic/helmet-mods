@@ -1,1 +1,1 @@
-export const image = "docker.io/shopstic/fdb-server:latest";
+export const image = "public.ecr.aws/shopstic/fdb-server:latest";

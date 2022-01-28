@@ -43,9 +43,10 @@ import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
 
-export const fdbExporterVersion = "1.3.0";
 export const fdbExporterImage =
-  `shopstic/fdb-prometheus-exporter:${fdbExporterVersion}`;
+  "public.ecr.aws/shopstic/fdb-prometheus-exporter:2.0.0";
+export const defaultDedupProxyImage =
+  "public.ecr.aws/shopstic/dedup-proxy:2.0.1";
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;
@@ -72,6 +73,7 @@ export function createFdbClusterResources(
     image = fdbImage,
     configuratorImage = fdbConfiguratorImage,
     exporterImage = fdbExporterImage,
+    dedupProxyImage = defaultDedupProxyImage,
     createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
     labels: extraLabels = {},
@@ -104,6 +106,7 @@ export function createFdbClusterResources(
     image?: string;
     configuratorImage?: string;
     exporterImage?: string;
+    dedupProxyImage?: string;
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
     labels?: Record<string, string>;
@@ -254,8 +257,7 @@ export function createFdbClusterResources(
     name: `${baseName}-exporter`,
     namespace,
     baseLabels: labels,
-    dedupProxyImage:
-      "shopstic/dedup-proxy:cde8f002fee7962e1da76e9243a19d3409e93299",
+    dedupProxyImage: dedupProxyImage,
     connectionStringConfigMapRef,
     image: exporterImage,
     imagePullPolicy,

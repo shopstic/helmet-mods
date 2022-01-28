@@ -5,7 +5,7 @@
     hotPot.url = "github:shopstic/nix-hot-pot";
     nixpkgs.follows = "hotPot/nixpkgs";
     flakeUtils.follows = "hotPot/flakeUtils";
-    fdbPkgs.url = "github:shopstic/nix-fdb";
+    fdbPkgs.url = "github:shopstic/nix-fdb/6.3.23";
   };
 
   outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot }:

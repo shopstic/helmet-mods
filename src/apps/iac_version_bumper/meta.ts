@@ -1,1 +1,1 @@
-export const image = "docker.io/shopstic/iac-version-bumper:latest";
+export const image = "public.ecr.aws/shopstic/iac-version-bumper:latest";
