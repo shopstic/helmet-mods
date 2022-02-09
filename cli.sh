@@ -17,6 +17,7 @@ update_cache() {
 }
 
 update_lock() {
+  deno cache --reload ./src/deps/*
   deno cache ./src/deps/* --lock ./lock.json --lock-write
 }
 
