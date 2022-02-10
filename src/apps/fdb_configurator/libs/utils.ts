@@ -1,4 +1,8 @@
-import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
+import {
+  captureExec,
+  inheritExec,
+  StdInputBehavior,
+} from "../../../deps/exec_utils.ts";
 import { validate } from "../../../deps/validation_utils.ts";
 import { memoizePromise } from "../../../deps/async_utils.ts";
 import { Static, TSchema, Type } from "../../../deps/typebox.ts";
@@ -37,16 +41,14 @@ export async function fdbcliCaptureExec(
   timeoutSeconds = 30,
 ): Promise<string> {
   try {
-    const captured = await captureExec(
+    const captured = (await captureExec(
       {
-        run: {
-          cmd: commandWithTimeout(
-            toFdbcliCommand(command),
-            timeoutSeconds,
-          ),
-        },
+        cmd: commandWithTimeout(
+          toFdbcliCommand(command),
+          timeoutSeconds,
+        ),
       },
-    );
+    )).out;
 
     return trimFdbCliOutput(captured);
   } catch (e) {
@@ -65,13 +67,9 @@ export async function fdbcliInheritExec(
   timeoutSeconds = 30,
 ): Promise<void> {
   try {
-    await inheritExec(
-      {
-        run: {
-          cmd: commandWithTimeout(toFdbcliCommand(command), timeoutSeconds),
-        },
-      },
-    );
+    await inheritExec({
+      cmd: commandWithTimeout(toFdbcliCommand(command), timeoutSeconds),
+    });
   } catch (e) {
     if (e.message.indexOf("Command return non-zero status of: 124") !== -1) {
       throw new Error(
@@ -174,16 +172,14 @@ export async function kubectlInherit({
   timeoutSeconds = 5,
 }: {
   args: string[];
-  stdin?: string | Deno.Reader;
+  stdin?: StdInputBehavior;
   timeoutSeconds?: number;
 }) {
   return await inheritExec({
-    run: {
-      cmd: commandWithTimeout([
-        "kubectl",
-        ...args,
-      ], timeoutSeconds),
-    },
+    cmd: commandWithTimeout([
+      "kubectl",
+      ...args,
+    ], timeoutSeconds),
     stdin,
   });
 }
@@ -194,18 +190,16 @@ export async function kubectlCapture({
   timeoutSeconds = 5,
 }: {
   args: string[];
-  stdin?: string | Deno.Reader;
+  stdin?: StdInputBehavior;
   timeoutSeconds?: number;
 }) {
-  return await captureExec({
-    run: {
-      cmd: commandWithTimeout([
-        "kubectl",
-        ...args,
-      ], timeoutSeconds),
-    },
+  return (await captureExec({
+    cmd: commandWithTimeout([
+      "kubectl",
+      ...args,
+    ], timeoutSeconds),
     stdin,
-  });
+  })).out;
 }
 
 export async function kubectlGetJson<T extends TSchema>({
@@ -287,6 +281,8 @@ export async function updateConnectionStringConfigMap(
 
   await kubectlInherit({
     args: ["apply", "-f", "-"],
-    stdin: JSON.stringify(configMap),
+    stdin: {
+      pipe: JSON.stringify(configMap),
+    },
   });
 }

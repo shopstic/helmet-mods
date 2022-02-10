@@ -38,16 +38,18 @@ async function updateDigests({ repoPath, targets }: {
 
       const digest = JSON
         .parse(
-          await captureExec({
-            run: {
-              cmd: [
-                "manifest-tool",
-                "inspect",
-                "--raw",
-                image,
-              ],
-            },
-          }),
+          (await captureExec({
+            cmd: [
+              "timeout",
+              "-k",
+              "0",
+              "5s",
+              "manifest-tool",
+              "inspect",
+              "--raw",
+              image,
+            ],
+          })).out,
         )
         .digest;
 
@@ -113,7 +115,7 @@ export async function autoBumpVersions(
 ) {
   const gitPullCmd = ["git", "pull", "--rebase", "origin", gitBranch];
 
-  await inheritExec({ run: { cmd: gitPullCmd, cwd: repoPath } });
+  await inheritExec({ cmd: gitPullCmd, cwd: repoPath });
 
   const changes = await updateDigests({ repoPath, targets });
 
@@ -125,38 +127,34 @@ export async function autoBumpVersions(
     changes.push.apply(changes, await updateDigests({ repoPath, targets }));
   }
 
-  const gitStatus = await captureExec(
-    { run: { cmd: ["git", "status"], cwd: repoPath } },
-  );
+  const gitStatus = (await captureExec(
+    { cmd: ["git", "status"], cwd: repoPath },
+  )).out;
 
   if (!gitStatus.includes("nothing to commit, working tree clean")) {
     logger.info("Needs to commit, git status:", gitStatus);
 
-    await inheritExec({ run: { cmd: ["git", "add", "*"], cwd: repoPath } });
+    await inheritExec({ cmd: ["git", "add", "*"], cwd: repoPath });
 
     const changedNames = changes.map((c) => c!.name);
 
     await inheritExec(
       {
-        run: {
-          cmd: [
-            "git",
-            "commit",
-            "-m",
-            `Bump version${changedNames.length > 1 ? "s" : ""} for ${
-              changedNames.join(", ")
-            }`,
-          ],
-          cwd: repoPath,
-        },
+        cmd: [
+          "git",
+          "commit",
+          "-m",
+          `Bump version${changedNames.length > 1 ? "s" : ""} for ${
+            changedNames.join(", ")
+          }`,
+        ],
+        cwd: repoPath,
       },
     );
     await inheritExec(
       {
-        run: {
-          cmd: ["git", "push", "origin", gitBranch],
-          cwd: repoPath,
-        },
+        cmd: ["git", "push", "origin", gitBranch],
+        cwd: repoPath,
       },
     );
   } else {
@@ -187,7 +185,7 @@ await new CliProgram()
         const repoPath = await Deno.makeTempDir();
         const gitCloneCmd = ["git", "clone", gitRepoUri, repoPath];
 
-        await inheritExec({ run: { cmd: gitCloneCmd } });
+        await inheritExec({ cmd: gitCloneCmd });
 
         while (true) {
           logger.info(

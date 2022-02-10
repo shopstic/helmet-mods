@@ -91,11 +91,9 @@ export default createCliAction(
           logger.info(`${deviceMountTargetPath} is not mounted`);
           logger.info(`Checking for existing file system inside ${devicePath}`);
 
-          const wipefsTest = await captureExec({
-            run: {
-              cmd: toRootElevatedCommand(["wipefs", "-a", "-n", devicePath]),
-            },
-          });
+          const wipefsTest = (await captureExec({
+            cmd: toRootElevatedCommand(["wipefs", "-a", "-n", devicePath]),
+          })).out;
 
           if (wipefsTest.trim().length > 0) {
             logger.error(
@@ -107,9 +105,9 @@ export default createCliAction(
           logger.info(
             `Making sure /etc/fstab does not already contain a reference to ${devicePath}`,
           );
-          const currentFstabContent = await captureExec({
-            run: { cmd: toRootElevatedCommand(["cat", "/etc/fstab"]) },
-          });
+          const currentFstabContent = (await captureExec({
+            cmd: toRootElevatedCommand(["cat", "/etc/fstab"]),
+          })).out;
 
           if (currentFstabContent.indexOf(devicePath) !== -1) {
             logger.error(
@@ -120,88 +118,78 @@ export default createCliAction(
 
           logger.info(`Formatting ${devicePath}`);
           await inheritExec({
-            run: { cmd: toRootElevatedCommand(["mkfs.ext4", devicePath]) },
+            cmd: toRootElevatedCommand(["mkfs.ext4", devicePath]),
           });
 
           logger.info(`Writing to /etc/fstab`);
           await inheritExec({
-            run: { cmd: toRootElevatedCommand(["tee", "/etc/fstab"]) },
-            stdin: currentFstabContent + "\n" +
-              `${devicePath}  ${deviceMountTargetPath}  ext4  defaults,noatime,discard,nofail  0 0
+            cmd: toRootElevatedCommand(["tee", "/etc/fstab"]),
+            stdin: {
+              pipe: currentFstabContent + "\n" +
+                `${devicePath}  ${deviceMountTargetPath}  ext4  defaults,noatime,discard,nofail  0 0
 ${storageMountSourcePath}  ${storageBindMountTargetPath}  none  bind  0 0
 ${logMountSourcePath}  ${logBindMountTargetPath}  none  bind  0 0
 `,
+            },
           });
 
           logger.info(`Creating mount paths`);
           await inheritExec({
-            run: {
-              cmd: toRootElevatedCommand([
-                "mkdir",
-                "-p",
-                deviceMountTargetPath,
-                storageBindMountTargetPath,
-                logBindMountTargetPath,
-              ]),
-            },
+            cmd: toRootElevatedCommand([
+              "mkdir",
+              "-p",
+              deviceMountTargetPath,
+              storageBindMountTargetPath,
+              logBindMountTargetPath,
+            ]),
           });
 
           logger.info(`Making mount target paths immutable`);
           await inheritExec({
-            run: {
-              cmd: toRootElevatedCommand([
-                "chattr",
-                "+i",
-                deviceMountTargetPath,
-                storageBindMountTargetPath,
-                logBindMountTargetPath,
-              ]),
-            },
+            cmd: toRootElevatedCommand([
+              "chattr",
+              "+i",
+              deviceMountTargetPath,
+              storageBindMountTargetPath,
+              logBindMountTargetPath,
+            ]),
           });
 
           logger.info(`Mounting ${devicePath} to ${deviceMountTargetPath}`);
           await inheritExec({
-            run: {
-              cmd: toRootElevatedCommand(["mount", `--source=${devicePath}`]),
-            },
+            cmd: toRootElevatedCommand(["mount", `--source=${devicePath}`]),
           });
 
           logger.info(
             `Creating bind-mount source paths: ${storageMountSourcePath} and ${logMountSourcePath}`,
           );
           await inheritExec({
-            run: {
-              cmd: toRootElevatedCommand([
-                "mkdir",
-                "-p",
-                storageMountSourcePath,
-                logMountSourcePath,
-              ]),
-            },
+            cmd: toRootElevatedCommand([
+              "mkdir",
+              "-p",
+              storageMountSourcePath,
+              logMountSourcePath,
+            ]),
           });
 
           logger.info(
             `Bind-mounting ${storageMountSourcePath} to ${storageBindMountTargetPath}`,
           );
           await inheritExec({
-            run: {
-              cmd: toRootElevatedCommand([
-                "mount",
-                `--source=${storageMountSourcePath}`,
-              ]),
-            },
+            cmd: toRootElevatedCommand([
+              "mount",
+              `--source=${storageMountSourcePath}`,
+            ]),
           });
 
           logger.info(
             `Bind-mounting ${logMountSourcePath} to ${logBindMountTargetPath}`,
           );
           await inheritExec({
-            run: {
-              cmd: toRootElevatedCommand([
-                "mount",
-                `--source=${logMountSourcePath}`,
-              ]),
-            },
+            cmd: toRootElevatedCommand([
+              "mount",
+              `--source=${logMountSourcePath}`,
+            ]),
           });
         } else {
           logger.info(
