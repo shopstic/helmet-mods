@@ -6,10 +6,7 @@ import {
   K8sImagePullPolicy,
   K8sService,
 } from "../../../deps/helmet.ts";
-import {
-  createServiceMonitorV1,
-  ServiceMonitorV1,
-} from "../../prometheus_operator/prometheus_operator.ts";
+import { createServiceMonitorV1, ServiceMonitorV1 } from "../../prometheus_operator/prometheus_operator.ts";
 
 export interface FdbExporterResources {
   service: K8sService;

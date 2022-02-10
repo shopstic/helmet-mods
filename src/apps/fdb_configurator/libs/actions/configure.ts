@@ -1,12 +1,7 @@
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { Type } from "../../../../deps/typebox.ts";
 import { loggerWithContext } from "../../../../libs/logger.ts";
-import {
-  FdbDatabaseConfig,
-  FdbStatus,
-  FdbStatusProcess,
-  NonEmptyString,
-} from "../types.ts";
+import { FdbDatabaseConfig, FdbStatus, FdbStatusProcess, NonEmptyString } from "../types.ts";
 
 import {
   fdbcliInheritExec,
@@ -28,10 +23,9 @@ async function configureCoordinators(
     .sort()
     .join(" ");
 
-  const coordinators =
-    (await fetchCoordinatorEndpointsFromServiceNames(coordinatorServiceNames))
-      .sort()
-      .join(" ");
+  const coordinators = (await fetchCoordinatorEndpointsFromServiceNames(coordinatorServiceNames))
+    .sort()
+    .join(" ");
 
   if (currentCoordinators !== coordinators) {
     logger.info(
@@ -73,14 +67,11 @@ async function configureDatabase(
         createNew ? " new" : ""
       } ${redundancyMode} ${storageEngine} resolvers=${resolverCount} proxies=${proxyCount} logs=${logCount}`;
 
-      logger.info(
-        `Configuration changed, going to execute: ${cmd}`,
-      );
+      logger.info(`Configuration changed, going to execute: ${cmd}`);
 
       await fdbcliInheritExec(cmd);
     } else {
-      const recoveryStateDescription =
-        status.cluster.recovery_state?.description || "Unknown";
+      const recoveryStateDescription = status.cluster.recovery_state?.description || "Unknown";
 
       logger.info("Failed configuring database!");
       logger.info(`Recovery state name: ${recoveryState}`);
@@ -138,9 +129,7 @@ async function excludeAndIncludeProcesses(
         excludedServiceEndpoints.map((e) => e.name),
       );
 
-      return serviceSpecs.map((s, i) =>
-        `${s.clusterIP}:${excludedServiceEndpoints[i].port}`
-      );
+      return serviceSpecs.map((s, i) => `${s.clusterIP}:${excludedServiceEndpoints[i].port}`);
     }
   })();
 
@@ -170,25 +159,17 @@ async function excludeAndIncludeProcesses(
       }]),
   );
 
-  const nonexistentExcludedAddresses = desiredExcludedAddresses.filter((a) =>
-    !currentAddressSet.has(a)
-  );
-  const alreadyExcludedAddresses = desiredExcludedAddresses.filter((a) =>
-    currentlyExcludedAddressSet.has(a)
-  );
+  const nonexistentExcludedAddresses = desiredExcludedAddresses.filter((a) => !currentAddressSet.has(a));
+  const alreadyExcludedAddresses = desiredExcludedAddresses.filter((a) => currentlyExcludedAddressSet.has(a));
   const toBeExcludedAddresses = desiredExcludedAddresses.filter((a) =>
     currentAddressSet.has(a) && !currentlyExcludedAddressSet.has(a)
   );
-  const toBeIncludedAddresses = currentlyExcludedAddresses.filter((a) =>
-    !desiredExcludedAddressSet.has(a)
-  );
+  const toBeIncludedAddresses = currentlyExcludedAddresses.filter((a) => !desiredExcludedAddressSet.has(a));
 
   if (nonexistentExcludedAddresses.length > 0) {
     logger.warn(
       `There are ${nonexistentExcludedAddresses.length} addresses to be excluded but they don't exist in FDB status:\n${
-        nonexistentExcludedAddresses.map((a) =>
-          prettyPrintProcessInfo(processByAddressMap[a])
-        ).join("\n")
+        nonexistentExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])).join("\n")
       }`,
     );
   }
@@ -196,9 +177,7 @@ async function excludeAndIncludeProcesses(
   if (alreadyExcludedAddresses.length > 0) {
     logger.info(
       `The following ${alreadyExcludedAddresses.length} addresses have already been previously excluded:\n${
-        alreadyExcludedAddresses.map((a) =>
-          prettyPrintProcessInfo(processByAddressMap[a])
-        ).join("\n")
+        alreadyExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])).join("\n")
       }`,
     );
   }
@@ -206,9 +185,7 @@ async function excludeAndIncludeProcesses(
   if (toBeIncludedAddresses.length > 0) {
     logger.info(
       `The following ${toBeIncludedAddresses.length} addresses will be included back:\n${
-        toBeIncludedAddresses.map((a) =>
-          prettyPrintProcessInfo(processByAddressMap[a])
-        ).join("\n")
+        toBeIncludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])).join("\n")
       }`,
     );
 
@@ -220,9 +197,7 @@ async function excludeAndIncludeProcesses(
   } else {
     logger.info(
       `Going to exclude:\n${
-        toBeExcludedAddresses.map((a) =>
-          prettyPrintProcessInfo(processByAddressMap[a])
-        ).join("\n")
+        toBeExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])).join("\n")
       }`,
     );
 

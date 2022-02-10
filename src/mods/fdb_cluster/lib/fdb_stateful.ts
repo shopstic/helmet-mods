@@ -13,11 +13,7 @@ import {
   IoK8sApiCoreV1PodSpec,
   IoK8sApiCoreV1ResourceRequirements,
 } from "../../../deps/k8s_utils.ts";
-import {
-  createFdbContainer,
-  FdbConfiguredProcessClass,
-  FdbLocalityMode,
-} from "./fdb_container.ts";
+import { createFdbContainer, FdbConfiguredProcessClass, FdbLocalityMode } from "./fdb_container.ts";
 
 export interface FdbStatefulServer {
   port: number;

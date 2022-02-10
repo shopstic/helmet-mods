@@ -16,8 +16,7 @@ enum BuildImageOutput {
 }
 
 const outputArgumentType = Type.Enum(BuildImageOutput, {
-  description:
-    "Output to either /dev/null (for testing) or push to remote registry",
+  description: "Output to either /dev/null (for testing) or push to remote registry",
 });
 
 async function buildImage(
@@ -79,8 +78,7 @@ async function deepHash(path: string): Promise<string> {
       cmd: ["bash", "-euo", "pipefail"],
       cwd: path,
     },
-    stdin:
-      `find . -type f -print0 | xargs -0 xargs stat --printf "%n %A\\n" | sort | sha1sum | awk '{print $1}'`,
+    stdin: `find . -type f -print0 | xargs -0 xargs stat --printf "%n %A\\n" | sort | sha1sum | awk '{print $1}'`,
   });
 
   const contentHashPromise = captureExec({
@@ -88,8 +86,7 @@ async function deepHash(path: string): Promise<string> {
       cmd: ["bash", "-euo", "pipefail"],
       cwd: path,
     },
-    stdin:
-      `find . -type f -print0 | xargs -0 sha1sum | awk '{print $1}' | sort | sha1sum | awk '{print $1}'`,
+    stdin: `find . -type f -print0 | xargs -0 sha1sum | awk '{print $1}' | sort | sha1sum | awk '{print $1}'`,
   });
 
   const hashes = (await Promise.all([permHashPromise, contentHashPromise]));
@@ -132,9 +129,7 @@ const buildApps = createCliAction(
             run: {
               cmd: ["bash", "-euo", "pipefail"],
             },
-            stdin: `deno bundle ${JSON.stringify(appEntrypoint)} > ${
-              joinPath(appBuildPath, `${appName}.js`)
-            }`,
+            stdin: `deno bundle ${JSON.stringify(appEntrypoint)} > ${joinPath(appBuildPath, `${appName}.js`)}`,
             stderrTag: gray(`[$ deno bundle ${appName}.ts]`),
             stdoutTag: gray(`[$ deno bundle ${appName}.ts]`),
           });
@@ -211,9 +206,9 @@ const buildImages = createCliAction(
 
           await Deno.writeTextFile(
             metaPath,
-            `export const version = ${
-              JSON.stringify(appBuildHash)
-            };\nexport const imageName = ${JSON.stringify(imageName)};\n`,
+            `export const version = ${JSON.stringify(appBuildHash)};\nexport const imageName = ${
+              JSON.stringify(imageName)
+            };\n`,
           );
         } else {
           await buildImage({

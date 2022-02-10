@@ -4,10 +4,7 @@ import {
   K8sDeployment,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
-import {
-  IoK8sApiCoreV1PodSpec,
-  IoK8sApiCoreV1ResourceRequirements,
-} from "../../../deps/k8s_utils.ts";
+import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1ResourceRequirements } from "../../../deps/k8s_utils.ts";
 import { createFdbContainer, FdbLocalityMode } from "./fdb_container.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 

@@ -33,9 +33,7 @@ export default createCliAction(
       serviceNames,
     },
   ) => {
-    const serviceNameArray = typeof serviceNames === "string"
-      ? [serviceNames]
-      : serviceNames;
+    const serviceNameArray = typeof serviceNames === "string" ? [serviceNames] : serviceNames;
 
     const namespace = await readCurrentNamespace();
 
@@ -73,13 +71,10 @@ export default createCliAction(
       return ExitCode.Zero;
     }
 
-    const coordinatorEndpoints =
-      await fetchCoordinatorEndpointsFromServiceNames(serviceNameArray);
+    const coordinatorEndpoints = await fetchCoordinatorEndpointsFromServiceNames(serviceNameArray);
     const clusterDescription = generateString(32);
     const clusterId = generateString(8);
-    const connectionString = `${clusterDescription}:${clusterId}@${
-      coordinatorEndpoints.join(",")
-    }`;
+    const connectionString = `${clusterDescription}:${clusterId}@${coordinatorEndpoints.join(",")}`;
 
     logger.info(
       `Going to create ConfigMap '${configMapName}' with data key '${configMapKey}' and value '${connectionString}'`,

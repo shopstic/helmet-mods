@@ -62,9 +62,7 @@ Deno.test("fdb_cluster should work", () => {
 
   assertEquals(
     cluster.statefulSets.find((s) => s.metadata.name.includes("storage")!)?.spec
-      ?.template.spec?.containers.filter((c) =>
-        c.resources?.requests !== undefined
-      ).length,
+      ?.template.spec?.containers.filter((c) => c.resources?.requests !== undefined).length,
     1,
   );
 

@@ -1,8 +1,4 @@
-import {
-  captureExec,
-  inheritExec,
-  StdInputBehavior,
-} from "../../../deps/exec_utils.ts";
+import { captureExec, inheritExec, StdInputBehavior } from "../../../deps/exec_utils.ts";
 import { validate } from "../../../deps/validation_utils.ts";
 import { memoizePromise } from "../../../deps/async_utils.ts";
 import { Static, TSchema, Type } from "../../../deps/typebox.ts";
@@ -100,9 +96,7 @@ export async function fetchStatus(
   if (!statusValidation.isSuccess) {
     logger.error(json);
     throw new Error(
-      `FDB status JSON payload failed schema validation: ${
-        JSON.stringify(statusValidation.errors, null, 2)
-      }`,
+      `FDB status JSON payload failed schema validation: ${JSON.stringify(statusValidation.errors, null, 2)}`,
     );
   }
 
@@ -223,9 +217,7 @@ export async function kubectlGetJson<T extends TSchema>({
   if (!validation.isSuccess) {
     logger.error(output);
     throw new Error(
-      `'kubectl ${
-        fullArgs.join(" ")
-      }' output failed schema validation. Errors: ${
+      `'kubectl ${fullArgs.join(" ")}' output failed schema validation. Errors: ${
         JSON.stringify(validation.errors, null, 2)
       }`,
     );

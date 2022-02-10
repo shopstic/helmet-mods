@@ -8,10 +8,7 @@ import {
   K8sDeployment,
   K8sSecret,
 } from "../../deps/helmet.ts";
-import type {
-  VersionBumpParams,
-  VersionBumpTargets,
-} from "../../apps/iac_version_bumper/libs/types.ts";
+import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
 import { image as iacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
 import { stableHash } from "../../libs/hash_utils.ts";
 

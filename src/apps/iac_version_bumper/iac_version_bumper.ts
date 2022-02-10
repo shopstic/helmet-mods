@@ -4,11 +4,7 @@ import { CliProgram, createCliAction } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import { readAll } from "../../deps/std_stream.ts";
 import { loggerWithContext } from "../../libs/logger.ts";
-import {
-  VersionBumpParamsSchema,
-  VersionBumpTargets,
-  VersionBumpTargetsSchema,
-} from "./libs/types.ts";
+import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
 
 const logger = loggerWithContext("main");
 
@@ -26,9 +22,7 @@ async function updateDigests({ repoPath, targets }: {
             fullVersionFilePath,
           );
 
-          return JSON.parse(
-            currentDigestSource.match(/^export default ([^;]+)/)![1],
-          );
+          return JSON.parse(currentDigestSource.match(/^export default ([^;]+)/)![1]);
         } catch {
           return "";
         }
@@ -39,16 +33,7 @@ async function updateDigests({ repoPath, targets }: {
       const digest = JSON
         .parse(
           (await captureExec({
-            cmd: [
-              "timeout",
-              "-k",
-              "0",
-              "5s",
-              "manifest-tool",
-              "inspect",
-              "--raw",
-              image,
-            ],
+            cmd: ["timeout", "-k", "0", "5s", "manifest-tool", "inspect", "--raw", image],
           })).out,
         )
         .digest;
@@ -69,9 +54,7 @@ async function updateDigests({ repoPath, targets }: {
         },
       })).trim(); */
 
-      logger.info(
-        `Got digest for ${image}: ${digest} vs. ${currentDigest || "unknown"}`,
-      );
+      logger.info(`Got digest for ${image}: ${digest} vs. ${currentDigest || "unknown"}`);
 
       if (digest !== currentDigest) {
         return {
@@ -95,10 +78,7 @@ async function updateDigests({ repoPath, targets }: {
 
         await Deno.mkdir(dirname(toWritePath), { recursive: true });
 
-        await Deno.writeTextFile(
-          toWritePath,
-          `export default ${JSON.stringify(digest)};\n`,
-        );
+        await Deno.writeTextFile(toWritePath, `export default ${JSON.stringify(digest)};\n`);
       }),
   );
 
@@ -144,9 +124,7 @@ export async function autoBumpVersions(
           "git",
           "commit",
           "-m",
-          `Bump version${changedNames.length > 1 ? "s" : ""} for ${
-            changedNames.join(", ")
-          }`,
+          `Bump version${changedNames.length > 1 ? "s" : ""} for ${changedNames.join(", ")}`,
         ],
         cwd: repoPath,
       },
@@ -189,17 +167,13 @@ await new CliProgram()
 
         while (true) {
           logger.info(
-            `Reading targets config from: ${
-              targetsConfigFile === "-" ? "stdin" : targetsConfigFile
-            }`,
+            `Reading targets config from: ${targetsConfigFile === "-" ? "stdin" : targetsConfigFile}`,
           );
 
-          const targetsConfigHandle = targetsConfigFile === "-"
-            ? Deno.stdin
-            : await Deno.open(
-              targetsConfigFile,
-              { read: true, write: false },
-            );
+          const targetsConfigHandle = targetsConfigFile === "-" ? Deno.stdin : await Deno.open(
+            targetsConfigFile,
+            { read: true, write: false },
+          );
 
           const targetsConfigRaw = JSON.parse(new TextDecoder().decode(
             await readAll(targetsConfigHandle),
@@ -212,9 +186,9 @@ await new CliProgram()
 
           if (!targetsConfigResult.isSuccess) {
             throw new Error(
-              `Failed validating targets config. Payload:\n${
-                JSON.stringify(targetsConfigRaw, null, 2)
-              }\nErrors:\n${JSON.stringify(targetsConfigResult, null, 2)}`,
+              `Failed validating targets config. Payload:\n${JSON.stringify(targetsConfigRaw, null, 2)}\nErrors:\n${
+                JSON.stringify(targetsConfigResult, null, 2)
+              }`,
             );
           }
 

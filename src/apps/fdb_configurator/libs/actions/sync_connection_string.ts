@@ -3,15 +3,11 @@ import { createCliAction } from "../../../../deps/cli_utils.ts";
 import { Type } from "../../../../deps/typebox.ts";
 import { loggerWithContext } from "../../../../libs/logger.ts";
 import { NonEmptyString } from "../types.ts";
-import {
-  fdbcliCaptureExec,
-  updateConnectionStringConfigMap,
-} from "../utils.ts";
+import { fdbcliCaptureExec, updateConnectionStringConfigMap } from "../utils.ts";
 
 const logger = loggerWithContext("main");
 const FDB_CLUSTER_FILE = "FDB_CLUSTER_FILE";
-const connectionStringResultRegex =
-  /`\\xff\\xff\/connection_string' is `([^']+)'/;
+const connectionStringResultRegex = /`\\xff\\xff\/connection_string' is `([^']+)'/;
 
 export default createCliAction(
   Type.Object({
@@ -34,10 +30,7 @@ export default createCliAction(
 
     let lastConnectionString = (await Deno.readTextFile(clusterFile)).trim();
 
-    logger.info(
-      "Connection string sync loop started with last value",
-      lastConnectionString,
-    );
+    logger.info("Connection string sync loop started with last value", lastConnectionString);
 
     while (true) {
       try {
@@ -63,9 +56,7 @@ export default createCliAction(
         if (connectionString === lastConnectionString) {
           logger.debug(`Connection string hasn't changed`, connectionString);
         } else {
-          logger.info(
-            `Connection string changed from '${lastConnectionString}' to ${connectionString}`,
-          );
+          logger.info(`Connection string changed from '${lastConnectionString}' to ${connectionString}`);
           logger.info(
             `Going to update ConfigMap '${configMapName}' with data key '${configMapKey}' and value '${connectionString}'`,
           );

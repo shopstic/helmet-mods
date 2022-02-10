@@ -6,10 +6,7 @@ import {
   K8sStatefulSet,
 } from "../../deps/helmet.ts";
 import { IoK8sApiCoreV1ConfigMapKeySelector } from "../../deps/helmet.ts";
-import {
-  createFdbConfigureResources,
-  FdbConfigureResources,
-} from "./lib/configurator/fdb_configure.ts";
+import { createFdbConfigureResources, FdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
 import {
   createFdbCreateConnectionStringResources,
   FdbCreateConnectionStringResources,
@@ -18,35 +15,22 @@ import {
   createFdbSyncConnectionStringResources,
   FdbSyncConnectionStringResources,
 } from "./lib/configurator/fdb_sync_connection_string.ts";
-import {
-  createFdbStatefulResources,
-  FdbStatefulConfig,
-} from "./lib/fdb_stateful.ts";
+import { createFdbStatefulResources, FdbStatefulConfig } from "./lib/fdb_stateful.ts";
 import { createFdbStatelessDeployment } from "./lib/fdb_stateless.ts";
 import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
-import {
-  createFdbExporterResources,
-  FdbExporterResources,
-} from "./lib/fdb_exporter.ts";
+import { createFdbExporterResources, FdbExporterResources } from "./lib/fdb_exporter.ts";
 import { createFdbBackupDeployment } from "./lib/fdb_backup.ts";
 
 import { K8sImagePullPolicy } from "../../deps/helmet.ts";
 import { image as fdbImage } from "../../apps/fdb/meta.ts";
-import {
-  image as fdbConfiguratorImage,
-} from "../../apps/fdb_configurator/meta.ts";
-import {
-  IoK8sApiCoreV1PodSpec,
-  IoK8sApiCoreV1ResourceRequirements,
-} from "../../deps/k8s_utils.ts";
+import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
+import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1ResourceRequirements } from "../../deps/k8s_utils.ts";
 import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
 
-export const fdbExporterImage =
-  "public.ecr.aws/shopstic/fdb-prometheus-exporter:2.0.0";
-export const defaultDedupProxyImage =
-  "public.ecr.aws/shopstic/dedup-proxy:2.0.1";
+export const fdbExporterImage = "public.ecr.aws/shopstic/fdb-prometheus-exporter:2.0.0";
+export const defaultDedupProxyImage = "public.ecr.aws/shopstic/dedup-proxy:2.0.1";
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;
@@ -137,16 +121,15 @@ export function createFdbClusterResources(
     })
     : undefined;
 
-  const { services: statefulServices, statefulSets } =
-    createFdbStatefulResources({
-      baseName,
-      baseLabels: labels,
-      configs: stateful,
-      connectionStringConfigMapRef,
-      image,
-      imagePullPolicy,
-      locality,
-    });
+  const { services: statefulServices, statefulSets } = createFdbStatefulResources({
+    baseName,
+    baseLabels: labels,
+    configs: stateful,
+    connectionStringConfigMapRef,
+    image,
+    imagePullPolicy,
+    locality,
+  });
 
   const proxyDeployment = (stateless.mode === "prod")
     ? createFdbStatelessDeployment({
@@ -167,9 +150,7 @@ export function createFdbClusterResources(
   const statelessDeployment = createFdbStatelessDeployment({
     baseName,
     processClass: "stateless",
-    replicas: (stateless.mode === "prod")
-      ? stateless.resolverCount + stateless.standbyCount + 4
-      : stateless.count ?? 1,
+    replicas: (stateless.mode === "prod") ? stateless.resolverCount + stateless.standbyCount + 4 : stateless.count ?? 1,
     baseLabels: labels,
     connectionStringConfigMapRef,
     port: 4500,
@@ -188,25 +169,22 @@ export function createFdbClusterResources(
     )
     .map(([id, _]) => `${baseName}-${id}`);
 
-  const excludedServiceEndpoints:
-    FdbDatabaseConfig["excludedServiceEndpoints"] = Object
-      .entries(stateful)
-      .filter(([_, cfg]) => cfg.processClass !== "coordinator")
-      .flatMap(([id, cfg]) =>
-        cfg
-          .servers
-          .filter((s) => s.excluded)
-          .map((s) => ({
-            name: `${baseName}-${id}`,
-            port: s.port,
-          }))
-      );
+  const excludedServiceEndpoints: FdbDatabaseConfig["excludedServiceEndpoints"] = Object
+    .entries(stateful)
+    .filter(([_, cfg]) => cfg.processClass !== "coordinator")
+    .flatMap(([id, cfg]) =>
+      cfg
+        .servers
+        .filter((s) => s.excluded)
+        .map((s) => ({
+          name: `${baseName}-${id}`,
+          port: s.port,
+        }))
+    );
 
   const logCount = Object
     .entries(stateful)
-    .map(([_, r]) =>
-      r.processClass === "log" ? r.servers.filter((s) => !s.excluded).length : 0
-    )
+    .map(([_, r]) => r.processClass === "log" ? r.servers.filter((s) => !s.excluded).length : 0)
     .reduce((s, c) => s + c, 0);
 
   const createConnectionString = createFdbCreateConnectionStringResources({
@@ -219,9 +197,7 @@ export function createFdbClusterResources(
     imagePullPolicy,
   });
 
-  const proxyCount = stateless.mode === "prod"
-    ? stateless.proxyCount
-    : stateless.count ?? 1;
+  const proxyCount = stateless.mode === "prod" ? stateless.proxyCount : stateless.count ?? 1;
   const resolverCount = stateless.mode === "prod" ? stateless.resolverCount : 1;
 
   const databaseConfig: FdbDatabaseConfig = {

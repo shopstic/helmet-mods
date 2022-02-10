@@ -52,9 +52,7 @@ export function createFdbContainer(
     resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
   },
 ): K8sContainer {
-  const serviceNameUpperSnakeCased = serviceName
-    ? toSnakeCase(serviceName).toUpperCase()
-    : "";
+  const serviceNameUpperSnakeCased = serviceName ? toSnakeCase(serviceName).toUpperCase() : "";
 
   const serviceEnv = serviceNameUpperSnakeCased
     ? [
