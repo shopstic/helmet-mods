@@ -6,6 +6,7 @@ import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
 import { loggerWithContext } from "../../../libs/logger.ts";
+import { commandWithTimeout } from "../../../libs/utils.ts";
 
 const logger = loggerWithContext("utils");
 
@@ -26,10 +27,6 @@ function trimFdbCliOutput(output: string): string {
   }
 
   throw new Error(`Invalid fdbcli output: ${output}`);
-}
-
-export function commandWithTimeout(command: string[], timeoutSeconds: number) {
-  return ["timeout", "-k", "0", `${timeoutSeconds}s`, ...command];
 }
 
 export async function fdbcliCaptureExec(

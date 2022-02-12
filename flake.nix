@@ -73,6 +73,7 @@
                 ;
               inherit (hotPotPkgs)
                 manifest-tool
+                regclient
                 ;
             };
           shellHook = ''

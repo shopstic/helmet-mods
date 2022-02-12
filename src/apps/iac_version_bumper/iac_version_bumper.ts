@@ -5,6 +5,7 @@ import { validate } from "../../deps/validation_utils.ts";
 import { readAll } from "../../deps/std_stream.ts";
 import { loggerWithContext } from "../../libs/logger.ts";
 import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
+import { commandWithTimeout } from "../../libs/utils.ts";
 
 const logger = loggerWithContext("main");
 
@@ -33,7 +34,7 @@ async function updateDigests({ repoPath, targets }: {
       const digest = JSON
         .parse(
           (await captureExec({
-            cmd: ["timeout", "-k", "0", "5s", "manifest-tool", "inspect", "--raw", image],
+            cmd: commandWithTimeout(["manifest-tool", "inspect", "--raw", image], 5),
           })).out,
         )
         .digest;
@@ -118,23 +119,19 @@ export async function autoBumpVersions(
 
     const changedNames = changes.map((c) => c!.name);
 
-    await inheritExec(
-      {
-        cmd: [
-          "git",
-          "commit",
-          "-m",
-          `Bump version${changedNames.length > 1 ? "s" : ""} for ${changedNames.join(", ")}`,
-        ],
-        cwd: repoPath,
-      },
-    );
-    await inheritExec(
-      {
-        cmd: ["git", "push", "origin", gitBranch],
-        cwd: repoPath,
-      },
-    );
+    await inheritExec({
+      cmd: [
+        "git",
+        "commit",
+        "-m",
+        `Bump version${changedNames.length > 1 ? "s" : ""} for ${changedNames.join(", ")}`,
+      ],
+      cwd: repoPath,
+    });
+    await inheritExec({
+      cmd: ["timeout", "-k", "0", "10s", "git", "push", "origin", gitBranch],
+      cwd: repoPath,
+    });
   } else {
     logger.info("Nothing to commit");
   }
@@ -166,11 +163,9 @@ await new CliProgram()
         await inheritExec({ cmd: gitCloneCmd });
 
         while (true) {
-          logger.info(
-            `Reading targets config from: ${targetsConfigFile === "-" ? "stdin" : targetsConfigFile}`,
-          );
+          logger.info(`Reading targets config from: ${targetsConfigFile}`);
 
-          const targetsConfigHandle = targetsConfigFile === "-" ? Deno.stdin : await Deno.open(
+          const targetsConfigHandle = await Deno.open(
             targetsConfigFile,
             { read: true, write: false },
           );

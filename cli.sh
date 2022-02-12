@@ -29,6 +29,8 @@ smoke_test() {
   code_quality
   test_app ./src/apps/fdb_configurator/fdb_configurator.ts
   test_app ./src/apps/iac_version_bumper/iac_version_bumper.ts
+  test_app ./src/apps/registry_syncer/registry_syncer.ts
+  test_app ./src/apps/registry_authenticator/registry_authenticator.ts
   test
 }
 

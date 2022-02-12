@@ -1,13 +1,13 @@
 import { Type } from "../../../../deps/typebox.ts";
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import {
-  commandWithTimeout,
   fetchCoordinatorEndpointsFromServiceNames,
   readCurrentNamespace,
   updateConnectionStringConfigMap,
 } from "../utils.ts";
 import { loggerWithContext } from "../../../../libs/logger.ts";
 import { NonEmptyString } from "../types.ts";
+import { commandWithTimeout } from "../../../../libs/utils.ts";
 
 const logger = loggerWithContext("main");
 
