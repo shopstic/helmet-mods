@@ -122,7 +122,7 @@ await new CliProgram()
     "run",
     createCliAction(
       RegistrySyncParamsSchema,
-      async (
+      (
         {
           configFile,
           digestCheckIntervalSeconds,
@@ -178,16 +178,14 @@ await new CliProgram()
             catchError((e) => {
               if (e instanceof NonZeroExitError) {
                 logger.error(`Command failed: ${e.command.join(" ")}`);
-                logger.error(`stdout: ${e.output?.out}`);
-                logger.error(`stderr: ${e.output?.err}`);
+                logger.error(`stdout: ${e.output?.out.trim()}`);
+                logger.error(`stderr: ${e.output?.err.trim()}`);
               }
               return throwError(() => e);
             }),
           );
 
-        await lastValueFrom(stream);
-
-        return ExitCode.Zero;
+        return lastValueFrom(stream).then(() => ExitCode.One);
       },
     ),
   )

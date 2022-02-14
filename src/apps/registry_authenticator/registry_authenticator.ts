@@ -1,6 +1,6 @@
 import { captureExec, ExecAbortedError, NonZeroExitError } from "../../deps/exec_utils.ts";
 import { loggerWithContext } from "../../libs/logger.ts";
-import { commandWithTimeout, NonEmptyString, withAbortSignal } from "../../libs/utils.ts";
+import { commandWithTimeout, exhaustiveMatchingGuard, NonEmptyString, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { readAll } from "../../deps/std_stream.ts";
 import { validate } from "../../deps/validation_utils.ts";
@@ -24,10 +24,7 @@ import {
   throwError,
 } from "../../deps/rxjs.ts";
 import { equal } from "../../deps/std_testing.ts";
-
-function exhaustiveMatchingGuard(_: never): never {
-  throw new Error("Non exhaustive matching");
-}
+import { dirname, resolvePath } from "../../deps/helmet.ts";
 
 interface AuthResult {
   auth: string;
@@ -100,10 +97,18 @@ await new CliProgram()
         outputFile: NonEmptyString,
         configLoadIntervalSeconds: Type.Number({ minimum: 1 }),
       }),
-      ({ configFile, outputFile, configLoadIntervalSeconds }) => {
+      async ({ configFile, outputFile, configLoadIntervalSeconds }) => {
         const logger = loggerWithContext("main");
 
         const seedConfig: RegistryAuthConfig | null = null;
+
+        const resolvedOutputFile = resolvePath(outputFile);
+
+        try {
+          await Deno.mkdir(dirname(resolvedOutputFile), { recursive: true });
+        } catch {
+          // Ignore
+        }
 
         const stream = interval(configLoadIntervalSeconds * 1000)
           .pipe(
@@ -137,15 +142,17 @@ await new CliProgram()
             catchError((e) => {
               if (e instanceof NonZeroExitError) {
                 logger.error(`Command failed: ${e.command.join(" ")}`);
-                logger.error(`stdout: ${e.output?.out}`);
-                logger.error(`stderr: ${e.output?.err}`);
+                logger.error(`stdout: ${e.output?.out.trim()}`);
+                logger.error(`stderr: ${e.output?.err.trim()}`);
               }
               return throwError(() => e);
             }),
             tap(() => logger.info(`Updated ${outputFile}`)),
           );
 
-        return lastValueFrom(stream).then(() => ExitCode.Zero);
+        await lastValueFrom(stream);
+
+        return ExitCode.One;
       },
     ),
   )

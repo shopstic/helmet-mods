@@ -9,21 +9,22 @@ import {
   K8sSecret,
 } from "../../deps/helmet.ts";
 import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
-import { image as iacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
-import { stableHash } from "../../libs/hash_utils.ts";
+import { image as defaultIacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
+import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";
 
 export const defaultName = "iac-version-bumper";
 
 export interface IacVersionBumperResources {
   targetsConfigMap: K8sConfigMap;
-  dockerConfigSecret: K8sSecret;
+  registryAuthConfigSecret: K8sSecret;
   sshPrivateKeySecret: K8sSecret;
   deployment: K8sDeployment;
 }
 
 export function createIacVersionBumperResources({
   name = defaultName,
-  image = iacVersionBumperImage,
+  image = defaultIacVersionBumperImage,
+  registryAuthResources,
   gitBranch,
   gitRepoUri,
   checkIntervalSeconds,
@@ -32,20 +33,14 @@ export function createIacVersionBumperResources({
   committerEmail,
   sshPrivateKey,
   targets,
-  dockerConfig = {
-    auths: {},
-  },
 }: {
   name?: string;
   image?: string;
+  registryAuthResources: RegistryAuthenticatorResources;
   committerName: string;
   committerEmail: string;
   sshPrivateKey: string;
   targets: VersionBumpTargets;
-  dockerConfig?: {
-    auths: Record<string, unknown>;
-    [k: string]: unknown;
-  };
 } & Omit<VersionBumpParams, "targetsConfigFile">): IacVersionBumperResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,
@@ -59,15 +54,6 @@ export function createIacVersionBumperResources({
     },
     data: {
       [targetsConfigFileName]: JSON.stringify(targets, null, 2),
-    },
-  });
-
-  const dockerConfigSecret = createK8sSecret({
-    metadata: {
-      name: `${name}-docker-config`,
-    },
-    data: {
-      "config.json": btoa(JSON.stringify(dockerConfig, null, 2)),
     },
   });
 
@@ -93,20 +79,8 @@ export function createIacVersionBumperResources({
     },
   });
 
-  const dockerConfigVolume = createK8sVolume({
-    name: `docker-config-${stableHash(targetsConfigMap)}`,
-    secret: {
-      secretName: dockerConfigSecret.metadata.name,
-    },
-  });
-
-  const dockerConfigVolumeMount = createK8sVolumeMount({
-    name: dockerConfigVolume.name,
-    mountPath: "/home/app/.docker",
-  });
-
   const targetsConfigVolume = createK8sVolume({
-    name: `targets-config-${stableHash(targetsConfigMap)}`,
+    name: "targets-config",
     configMap: {
       name: targetsConfigMap.metadata.name,
     },
@@ -116,6 +90,14 @@ export function createIacVersionBumperResources({
     name: targetsConfigVolume.name,
     mountPath: "/home/app/config",
   });
+
+  const {
+    registryAuthContainer,
+    registryAuthConfigVolume,
+    registryAuthConfigSecret,
+    dockerConfigVolume,
+    dockerConfigVolumeMount,
+  } = registryAuthResources;
 
   const deployment = createK8sDeployment({
     metadata: {
@@ -139,35 +121,39 @@ export function createIacVersionBumperResources({
             fsGroup: 1001,
             fsGroupChangePolicy: "OnRootMismatch",
           },
-          containers: [{
-            name,
-            image,
-            args: [
-              `--gitRepoUri=${gitRepoUri}`,
-              `--gitBranch=${gitBranch}`,
-              `--checkIntervalSeconds=${checkIntervalSeconds}`,
-              `--groupingDelaySeconds=${groupingDelaySeconds}`,
-              `--targetsConfigFile=${targetsConfigVolumeMount.mountPath}/${targetsConfigFileName}`,
-            ],
-            volumeMounts: [
-              targetsConfigVolumeMount,
-              dockerConfigVolumeMount,
-              {
-                name: sshPrivateKeyVolume.name,
-                mountPath: "/home/app/.ssh/id_rsa",
-                subPath: sshPrivateKeyVolume.secret!.items![0].path,
-              },
-            ],
-            env: [{
-              name: "COMMITTER_NAME",
-              value: committerName,
-            }, {
-              name: "COMMITTER_EMAIL",
-              value: committerEmail,
-            }],
-          }],
+          containers: [
+            registryAuthContainer,
+            {
+              name,
+              image,
+              args: [
+                `--gitRepoUri=${gitRepoUri}`,
+                `--gitBranch=${gitBranch}`,
+                `--checkIntervalSeconds=${checkIntervalSeconds}`,
+                `--groupingDelaySeconds=${groupingDelaySeconds}`,
+                `--targetsConfigFile=${targetsConfigVolumeMount.mountPath}/${targetsConfigFileName}`,
+              ],
+              volumeMounts: [
+                targetsConfigVolumeMount,
+                dockerConfigVolumeMount,
+                {
+                  name: sshPrivateKeyVolume.name,
+                  mountPath: "/home/app/.ssh/id_rsa",
+                  subPath: sshPrivateKeyVolume.secret!.items![0].path,
+                },
+              ],
+              env: [{
+                name: "COMMITTER_NAME",
+                value: committerName,
+              }, {
+                name: "COMMITTER_EMAIL",
+                value: committerEmail,
+              }],
+            },
+          ],
           volumes: [
             targetsConfigVolume,
+            registryAuthConfigVolume,
             dockerConfigVolume,
             sshPrivateKeyVolume,
           ],
@@ -178,7 +164,7 @@ export function createIacVersionBumperResources({
 
   return {
     targetsConfigMap,
-    dockerConfigSecret,
+    registryAuthConfigSecret,
     sshPrivateKeySecret,
     deployment,
   };

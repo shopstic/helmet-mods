@@ -26,4 +26,4 @@ export const RegistrySyncParamsSchema = Type.Object({
   configFile: NonEmptyString,
 });
 
-export type SyncerParams = Static<typeof RegistrySyncParamsSchema>;
+export type RegistrySyncParams = Static<typeof RegistrySyncParamsSchema>;

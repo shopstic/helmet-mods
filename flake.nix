@@ -11,9 +11,16 @@
   outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot }:
     flakeUtils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ] (system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        fdb = fdbPkgs.defaultPackage.${system};
         hotPotPkgs = hotPot.packages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            (final: prev: {
+              regclient = hotPotPkgs.regclient;
+            })
+          ];
+        };
+        fdb = fdbPkgs.defaultPackage.${system};
         src = builtins.path
           {
             path = ./.;
@@ -34,6 +41,8 @@
         };
         fdbConfigurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
         iacVersionBumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
+        registryAuthenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
+        registrySyncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
         vscodeSettings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -95,6 +104,12 @@
             inherit (hotPotPkgs)
               manifest-tool
               ;
+          };
+          registryAuthenticatorImage = pkgs.callPackage ./build/registry-authenticator {
+            inherit registryAuthenticator buildahBuild deno;
+          };
+          registrySyncerImage = pkgs.callPackage ./build/registry-syncer {
+            inherit registrySyncer buildahBuild deno;
           };
         };
         defaultPackage = pkgs.linkFarmFromDrvs "helmet-mods-all" (pkgs.lib.attrValues packages);

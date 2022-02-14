@@ -1,1 +1,1 @@
-export const image = "public.ecr.aws/shopstic/registry-auth:latest";
+export const image = "public.ecr.aws/shopstic/registry-authenticator:latest";

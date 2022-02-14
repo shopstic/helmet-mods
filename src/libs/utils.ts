@@ -19,3 +19,7 @@ export function withAbortSignal<T>(fn: (signal: AbortSignal) => Observable<T>): 
     };
   });
 }
+
+export function exhaustiveMatchingGuard(_: never): never {
+  throw new Error("Non exhaustive matching");
+}
