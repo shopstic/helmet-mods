@@ -29,10 +29,14 @@ release() {
   local FDB_SERVER_MANIFEST
   local FDB_CONFIGURATOR_MANIFEST
   local IAC_VERSION_BUMPER_MANIFEST
+  local REGISTRY_AUTHENTICATOR_MANIFEST
+  local REGISTRY_SYNCER_MANIFEST
 
   FDB_SERVER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-server:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
   FDB_CONFIGURATOR_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-configurator:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
   IAC_VERSION_BUMPER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/iac-version-bumper:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
+  REGISTRY_AUTHENTICATOR_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/registry-authenticator:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
+  REGISTRY_SYNCER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/registry-syncer:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
 
   local RELEASE_BRANCH="releases/${RELEASE_VERSION}"
 
@@ -43,6 +47,8 @@ release() {
   echo "export const image = \"${IMAGE_REPOSITORY}/fdb-server@${FDB_SERVER_MANIFEST}\";" > ./src/apps/fdb/meta.ts
   echo "export const image = \"${IMAGE_REPOSITORY}/fdb-configurator@${FDB_CONFIGURATOR_MANIFEST}\";" > ./src/apps/fdb_configurator/meta.ts
   echo "export const image = \"${IMAGE_REPOSITORY}/iac-version-bumper@${IAC_VERSION_BUMPER_MANIFEST}\";" > ./src/apps/iac_version_bumper/meta.ts
+  echo "export const image = \"${IMAGE_REPOSITORY}/registry-authenticator@${REGISTRY_AUTHENTICATOR_MANIFEST}\";" > ./src/apps/registry_authenticator/meta.ts
+  echo "export const image = \"${IMAGE_REPOSITORY}/registry-syncer@${REGISTRY_SYNCER_MANIFEST}\";" > ./src/apps/registry_syncer/meta.ts
   echo "export default \"${RELEASE_VERSION}\";" > ./src/version.ts
 
   git add ./src/apps/*/meta.ts ./src/version.ts

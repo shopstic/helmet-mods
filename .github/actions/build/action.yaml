@@ -39,12 +39,14 @@ runs:
 
         IMAGE_TAG="dev-${IMAGE_ARCH}-${GITHUB_SHA}"
 
-        declare iac_version_bumper_digest fdb_server_digest fdb_configurator_digest
+        declare iac_version_bumper_digest registry_authenticator_digest registry_syncer_digest fdb_server_digest fdb_configurator_digest
 
         iac_version_bumper_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" iac-version-bumper "${IMAGE_TAG}") || exit $?
+        registry_authenticator_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" registry-authenticator "${IMAGE_TAG}") || exit $?
+        registry_syncer_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" registry-syncer "${IMAGE_TAG}") || exit $?
         fdb_server_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" fdb-server "${IMAGE_TAG}") || exit $?
         fdb_configurator_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" fdb-configurator "${IMAGE_TAG}") || exit $?
 
-        output='{"iac_version_bumper":"'${iac_version_bumper_digest}'","fdb_server":"'${fdb_server_digest}'","fdb_configurator":"'${fdb_configurator_digest}'"}'
+        output='{"iac_version_bumper":"'${iac_version_bumper_digest}'","registry_authenticator":"'${registry_authenticator_digest}'","registry_syncer":"'${registry_syncer_digest}'","fdb_server":"'${fdb_server_digest}'","fdb_configurator":"'${fdb_configurator_digest}'"}'
 
         echo ::set-output name=digests::"${output}"

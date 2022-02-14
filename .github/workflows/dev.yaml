@@ -64,6 +64,16 @@ jobs:
 
           manifest-tool push from-args \
             --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/registry-authenticator:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/registry-authenticator:dev-"${GITHUB_SHA}"
+
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/registry-syncer:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/registry-syncer:dev-"${GITHUB_SHA}"
+
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
             --template "${IMAGE_REPOSITORY}"/fdb-server:dev-ARCH-"${GITHUB_SHA}" \
             --target "${IMAGE_REPOSITORY}"/fdb-server:dev-"${GITHUB_SHA}"
           
