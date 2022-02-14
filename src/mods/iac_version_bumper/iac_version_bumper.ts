@@ -17,6 +17,7 @@ export const defaultName = "iac-version-bumper";
 export interface IacVersionBumperResources {
   targetsConfigMap: K8sConfigMap;
   registryAuthConfigSecret: K8sSecret;
+  registryAuthSecret: K8sSecret;
   sshPrivateKeySecret: K8sSecret;
   deployment: K8sDeployment;
 }
@@ -24,6 +25,7 @@ export interface IacVersionBumperResources {
 export function createIacVersionBumperResources({
   name = defaultName,
   image = defaultIacVersionBumperImage,
+  serviceAccountName,
   registryAuthResources,
   gitBranch,
   gitRepoUri,
@@ -36,6 +38,7 @@ export function createIacVersionBumperResources({
 }: {
   name?: string;
   image?: string;
+  serviceAccountName?: string;
   registryAuthResources: RegistryAuthenticatorResources;
   committerName: string;
   committerEmail: string;
@@ -97,6 +100,8 @@ export function createIacVersionBumperResources({
     registryAuthConfigSecret,
     dockerConfigVolume,
     dockerConfigVolumeMount,
+    registryAuthSecret,
+    registryAuthSecretVolume,
   } = registryAuthResources;
 
   const deployment = createK8sDeployment({
@@ -115,6 +120,7 @@ export function createIacVersionBumperResources({
           labels,
         },
         spec: {
+          serviceAccountName,
           securityContext: {
             runAsUser: 1001,
             runAsGroup: 1001,
@@ -156,6 +162,7 @@ export function createIacVersionBumperResources({
             registryAuthConfigVolume,
             dockerConfigVolume,
             sshPrivateKeyVolume,
+            registryAuthSecretVolume,
           ],
         },
       },
@@ -165,6 +172,7 @@ export function createIacVersionBumperResources({
   return {
     targetsConfigMap,
     registryAuthConfigSecret,
+    registryAuthSecret,
     sshPrivateKeySecret,
     deployment,
   };

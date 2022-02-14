@@ -16,12 +16,14 @@ export const defaultName = "iac-version-bumper";
 export interface RegistrySyncerResources {
   jobsConfigMap: K8sConfigMap;
   registryAuthConfigSecret: K8sSecret;
+  registryAuthSecret: K8sSecret;
   deployment: K8sDeployment;
 }
 
 export function createRegistrySyncerResources({
   name = defaultName,
   image = defaultRegistrySyncImage,
+  serviceAccountName,
   registryAuthResources,
   digestCheckIntervalSeconds,
   configCheckIntervalSeconds,
@@ -29,6 +31,7 @@ export function createRegistrySyncerResources({
 }: {
   name?: string;
   image?: string;
+  serviceAccountName?: string;
   registryAuthResources: RegistryAuthenticatorResources;
   jobs: RegistrySyncJobs;
 } & Omit<RegistrySyncParams, "jobsConfigFile">): RegistrySyncerResources {
@@ -65,6 +68,8 @@ export function createRegistrySyncerResources({
     registryAuthConfigSecret,
     dockerConfigVolume,
     dockerConfigVolumeMount,
+    registryAuthSecret,
+    registryAuthSecretVolume,
   } = registryAuthResources;
 
   const deployment = createK8sDeployment({
@@ -83,6 +88,7 @@ export function createRegistrySyncerResources({
           labels,
         },
         spec: {
+          serviceAccountName,
           securityContext: {
             runAsUser: 1001,
             runAsGroup: 1001,
@@ -109,6 +115,7 @@ export function createRegistrySyncerResources({
             jobsConfigVolume,
             registryAuthConfigVolume,
             dockerConfigVolume,
+            registryAuthSecretVolume,
           ],
         },
       },
@@ -118,6 +125,7 @@ export function createRegistrySyncerResources({
   return {
     jobsConfigMap,
     registryAuthConfigSecret,
+    registryAuthSecret,
     deployment,
   };
 }

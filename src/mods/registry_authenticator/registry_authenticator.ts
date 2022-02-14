@@ -17,6 +17,8 @@ export interface RegistryAuthenticatorResources {
   registryAuthConfigSecret: K8sSecret;
   dockerConfigVolume: IoK8sApiCoreV1Volume;
   dockerConfigVolumeMount: IoK8sApiCoreV1VolumeMount;
+  registryAuthSecret: K8sSecret;
+  registryAuthSecretVolume: IoK8sApiCoreV1Volume;
 }
 
 export function createRegistryAuthenticatorResources({
@@ -24,16 +26,18 @@ export function createRegistryAuthenticatorResources({
   image = defaultRegistryAuthImage,
   config,
   configLoadIntervalSeconds = 5,
+  secretMounts,
 }: {
   name: string;
   image?: string;
   config: RegistryAuthConfig;
   configLoadIntervalSeconds?: number;
+  secretMounts?: Record<string, string>;
 }): RegistryAuthenticatorResources {
   const registryAuthConfigFileName = "registry-auth.json";
   const registryAuthConfigSecret = createK8sSecret({
     metadata: {
-      name: `${name}-registry-auth-config`,
+      name: `${name}-config`,
     },
     data: {
       [registryAuthConfigFileName]: btoa(JSON.stringify(config, null, 2)),
@@ -62,8 +66,31 @@ export function createRegistryAuthenticatorResources({
     mountPath: "/home/app/config",
   });
 
+  const registryAuthSecret = createK8sSecret({
+    metadata: {
+      name,
+    },
+    data: Object.fromEntries(Object.entries(secretMounts ?? {}).map(([key, value]) => [key, btoa(value)])),
+  });
+
+  const registryAuthSecretVolume = createK8sVolume({
+    name: `${name}-secrets`,
+    secret: {
+      secretName: registryAuthSecret.metadata.name,
+      items: Object.entries(secretMounts ?? {}).map(([key]) => ({
+        key,
+        path: key,
+      })),
+    },
+  });
+
+  const registryAuthSecretVolumeMount = createK8sVolumeMount({
+    name: registryAuthSecretVolume.name,
+    mountPath: "/home/app",
+  });
+
   const registryAuthContainer = createK8sContainer({
-    name: `${name}-registry-authenticator`,
+    name,
     image,
     args: [
       `--configFile=${registryAuthConfigVolumeMount.mountPath}/${registryAuthConfigFileName}`,
@@ -73,6 +100,7 @@ export function createRegistryAuthenticatorResources({
     volumeMounts: [
       registryAuthConfigVolumeMount,
       dockerConfigVolumeMount,
+      registryAuthSecretVolumeMount,
     ],
   });
 
@@ -80,6 +108,8 @@ export function createRegistryAuthenticatorResources({
     registryAuthContainer,
     registryAuthConfigVolume,
     registryAuthConfigSecret,
+    registryAuthSecret,
+    registryAuthSecretVolume,
     dockerConfigVolume,
     dockerConfigVolumeMount: {
       ...dockerConfigVolumeMount,
