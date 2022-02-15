@@ -34,7 +34,7 @@ export function createRegistrySyncerResources({
   serviceAccountName?: string;
   registryAuthResources: RegistryAuthenticatorResources;
   jobs: RegistrySyncJobs;
-} & Omit<RegistrySyncParams, "jobsConfigFile">): RegistrySyncerResources {
+} & Omit<RegistrySyncParams, "configFile">): RegistrySyncerResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,
     "app.kubernetes.io/instance": name,
