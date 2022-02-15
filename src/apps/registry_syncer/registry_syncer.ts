@@ -49,17 +49,36 @@ export async function sync(
   const fromRef = `${fromImage}:${tag}`;
   const toRef = `${toImage}:${tag}`;
 
-  logger.info(`Fetching manifest digest for '${fromRef}' for platform '${platform}'`);
-  const digest = (await captureExec({
-    cmd: commandWithTimeout(
-      ["regctl", "manifest", "digest", ...getManifestDigestCmdArgs, `${fromRef}`],
-      5,
-    ),
-    abortSignal,
-  })).out.trim();
+  logger.info(`Fetching manifest digest for '${fromRef}' with platform '${platform}'`);
+  const digest = await (async () => {
+    try {
+      const ret = (await captureExec({
+        cmd: commandWithTimeout(
+          ["regctl", "manifest", "digest", ...getManifestDigestCmdArgs, `${fromRef}`],
+          5,
+        ),
+        abortSignal,
+      })).out.trim();
 
-  if (digest.length === 0) {
-    throw new Error(`Got empty digest for '${fromRef}'`);
+      if (!ret.startsWith("sha256:")) {
+        throw new Error(`Invalid digest for '${fromRef}'. Got: ${ret}`);
+      }
+
+      return ret;
+    } catch (e) {
+      if (e instanceof NonZeroExitError) {
+        logger.error(`Command failed: ${e.command.join(" ")}`);
+        logger.error(`stdout: ${e.output?.out.trim()}`);
+        logger.error(`stderr: ${e.output?.err.trim()}`);
+        return null;
+      }
+
+      throw e;
+    }
+  })();
+
+  if (!digest) {
+    return lastDigest;
   }
 
   if (digest !== lastDigest) {

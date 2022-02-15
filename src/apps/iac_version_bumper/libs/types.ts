@@ -5,6 +5,11 @@ export const VersionBumpTargetsSchema = Type.Array(Type.Object({
   versionFilePath: Type.String(),
   name: Type.String(),
   image: Type.String(),
+  platform: Type.Union([
+    Type.Literal("all"),
+    Type.Literal("linux/amd64"),
+    Type.Literal("linux/arm64"),
+  ]),
 }));
 
 export type VersionBumpTargets = Static<typeof VersionBumpTargetsSchema>;

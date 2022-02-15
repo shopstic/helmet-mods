@@ -1,4 +1,4 @@
-import { captureExec, inheritExec } from "../../deps/exec_utils.ts";
+import { captureExec, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
 import { dirname, joinPath } from "../../deps/std_path.ts";
 import { CliProgram, createCliAction } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
@@ -7,15 +7,15 @@ import { loggerWithContext } from "../../libs/logger.ts";
 import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
 import { commandWithTimeout } from "../../libs/utils.ts";
 
-const logger = loggerWithContext("main");
-
 async function updateDigests({ repoPath, targets }: {
   repoPath: string;
   targets: VersionBumpTargets;
 }) {
   const promises = targets
-    .map(async ({ name, versionFilePath, image }) => {
+    .map(async ({ name, versionFilePath, image, platform }) => {
+      const logger = loggerWithContext(name);
       const fullVersionFilePath = joinPath(repoPath, versionFilePath);
+      const getManifestDigestCmdArgs = (platform === "all") ? ["--list", "--require-list"] : ["--platform", platform];
 
       const currentDigest = await (async () => {
         try {
@@ -29,31 +29,37 @@ async function updateDigests({ repoPath, targets }: {
         }
       })();
 
-      logger.info("Fetching digest for", image);
+      logger.info(`Fetching manifest digest for '${image}' with platform '${platform}'`);
 
-      const digest = JSON
-        .parse(
-          (await captureExec({
-            cmd: commandWithTimeout(["manifest-tool", "inspect", "--raw", image], 5),
-          })).out,
-        )
-        .digest;
+      const digest = await (async () => {
+        try {
+          const ret = (await captureExec({
+            cmd: commandWithTimeout(
+              ["regctl", "manifest", "digest", ...getManifestDigestCmdArgs, `${image}`],
+              5,
+            ),
+          })).out.trim();
 
-      if (typeof digest !== "string" || digest.length === 0) {
-        throw new Error(`Got empty digest for ${image}`);
+          if (!ret.startsWith("sha256:")) {
+            throw new Error(`Invalid digest for '${image}'. Got: ${ret}`);
+          }
+
+          return ret;
+        } catch (e) {
+          if (e instanceof NonZeroExitError) {
+            logger.error(`Command failed: ${e.command.join(" ")}`);
+            logger.error(`stdout: ${e.output?.out.trim()}`);
+            logger.error(`stderr: ${e.output?.err.trim()}`);
+            return null;
+          }
+
+          throw e;
+        }
+      })();
+
+      if (!digest) {
+        return null;
       }
-
-      /* const digest = (await captureExec({
-        run: {
-          cmd: [
-            "skopeo",
-            "inspect",
-            "--format",
-            "{{.Digest}}",
-            `docker://${image}`,
-          ],
-        },
-      })).trim(); */
 
       logger.info(`Got digest for ${image}: ${digest} vs. ${currentDigest || "unknown"}`);
 
@@ -94,6 +100,8 @@ export async function autoBumpVersions(
     groupingDelayMs: number;
   },
 ) {
+  const logger = loggerWithContext("bump");
+
   const gitPullCmd = ["git", "pull", "--rebase", "origin", gitBranch];
 
   await inheritExec({ cmd: gitPullCmd, cwd: repoPath });
@@ -157,6 +165,8 @@ await new CliProgram()
           groupingDelaySeconds,
         },
       ) => {
+        const logger = loggerWithContext("main");
+
         const repoPath = await Deno.makeTempDir();
         const gitCloneCmd = ["git", "clone", gitRepoUri, repoPath];
 

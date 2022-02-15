@@ -4,8 +4,7 @@
 , dumb-init
 , cacert
 , gitMinimal
-# , skopeo
-, manifest-tool
+, regclient
 , runCommand
 , writeTextFile
 , buildahBuild
@@ -50,7 +49,7 @@ let
     fromImage = baseImage;
     config = {
       Env = [
-        "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal manifest-tool ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal regclient.regctl ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         "SSL_CERT_FILE=${cacert.out}/etc/ssl/certs/ca-bundle.crt"
       ];
     };
