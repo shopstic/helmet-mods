@@ -81,7 +81,6 @@
                 jq
                 ;
               inherit (hotPotPkgs)
-                manifest-tool
                 regclient
                 ;
             };
@@ -101,9 +100,6 @@
           };
           iacVersionBumperImage = pkgs.callPackage ./build/iac-version-bumper {
             inherit iacVersionBumper buildahBuild deno;
-            inherit (hotPotPkgs)
-              manifest-tool
-              ;
           };
           registryAuthenticatorImage = pkgs.callPackage ./build/registry-authenticator {
             inherit registryAuthenticator buildahBuild deno;
