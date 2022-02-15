@@ -32,7 +32,10 @@ export function createRegistryAuthenticatorResources({
   image?: string;
   config: RegistryAuthConfig;
   configLoadIntervalSeconds?: number;
-  secretMounts?: Record<string, string>;
+  secretMounts?: Record<string, {
+    path: string;
+    content: string;
+  }>;
 }): RegistryAuthenticatorResources {
   const registryAuthConfigFileName = "registry-auth.json";
   const registryAuthConfigSecret = createK8sSecret({
@@ -70,16 +73,16 @@ export function createRegistryAuthenticatorResources({
     metadata: {
       name,
     },
-    data: Object.fromEntries(Object.entries(secretMounts ?? {}).map(([key, value]) => [btoa(key), btoa(value)])),
+    data: Object.fromEntries(Object.entries(secretMounts ?? {}).map(([key, { content }]) => [key, btoa(content)])),
   });
 
   const registryAuthSecretVolume = createK8sVolume({
     name: `${name}-secrets`,
     secret: {
       secretName: registryAuthSecret.metadata.name,
-      items: Object.entries(secretMounts ?? {}).map(([key]) => ({
-        key: btoa(key),
-        path: key,
+      items: Object.entries(secretMounts ?? {}).map(([key, { path }]) => ({
+        key,
+        path,
       })),
     },
   });
