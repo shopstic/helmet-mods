@@ -81,6 +81,7 @@
                 jq
                 ;
               inherit (hotPotPkgs)
+                manifest-tool
                 regclient
                 ;
             };
