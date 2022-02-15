@@ -70,7 +70,7 @@ export function createRegistryAuthenticatorResources({
     metadata: {
       name,
     },
-    data: Object.fromEntries(Object.entries(secretMounts ?? {}).map(([key, value]) => [key, btoa(value)])),
+    data: Object.fromEntries(Object.entries(secretMounts ?? {}).map(([key, value]) => [btoa(key), btoa(value)])),
   });
 
   const registryAuthSecretVolume = createK8sVolume({
@@ -78,7 +78,7 @@ export function createRegistryAuthenticatorResources({
     secret: {
       secretName: registryAuthSecret.metadata.name,
       items: Object.entries(secretMounts ?? {}).map(([key]) => ({
-        key,
+        key: btoa(key),
         path: key,
       })),
     },
