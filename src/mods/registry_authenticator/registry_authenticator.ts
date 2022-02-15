@@ -87,11 +87,6 @@ export function createRegistryAuthenticatorResources({
     },
   });
 
-  const registryAuthSecretVolumeMount = createK8sVolumeMount({
-    name: registryAuthSecretVolume.name,
-    mountPath: "/home/app",
-  });
-
   const registryAuthContainer = createK8sContainer({
     name,
     image,
@@ -103,7 +98,13 @@ export function createRegistryAuthenticatorResources({
     volumeMounts: [
       registryAuthConfigVolumeMount,
       dockerConfigVolumeMount,
-      registryAuthSecretVolumeMount,
+      ...Object.values(secretMounts ?? {}).map(({ path }) =>
+        createK8sVolumeMount({
+          name: registryAuthSecretVolume.name,
+          mountPath: `/home/app/${path}`,
+          subPath: path,
+        })
+      ),
     ],
   });
 
