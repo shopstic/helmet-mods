@@ -4,6 +4,4 @@ FROM docker.io/ubuntu@$fromDigest
 RUN \
   groupadd --gid 1001 app && \
   useradd --home-dir /home/app --create-home --uid 1001 \
-      --gid 1001 --shell /bin/bash --skel /dev/null app && \
-  mkdir /home/app/.aws && \
-  chown app:app /home/app/.aws
+      --gid 1001 --shell /bin/bash --skel /dev/null app
