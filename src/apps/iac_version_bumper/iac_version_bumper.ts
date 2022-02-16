@@ -117,27 +117,27 @@ export async function autoBumpVersions(
   }
 
   const gitStatus = (await captureExec(
-    { cmd: ["git", "status"], cwd: repoPath },
+    { cmd: commandWithTimeout(["git", "status"], 5), cwd: repoPath },
   )).out;
 
   if (!gitStatus.includes("nothing to commit, working tree clean")) {
     logger.info("Needs to commit, git status:", gitStatus);
 
-    await inheritExec({ cmd: ["git", "add", "*"], cwd: repoPath });
+    await inheritExec({ cmd: commandWithTimeout(["git", "add", "*"], 5), cwd: repoPath });
 
     const changedNames = changes.map((c) => c!.name);
 
     await inheritExec({
-      cmd: [
+      cmd: commandWithTimeout([
         "git",
         "commit",
         "-m",
         `Bump version${changedNames.length > 1 ? "s" : ""} for ${changedNames.join(", ")}`,
-      ],
+      ], 5),
       cwd: repoPath,
     });
     await inheritExec({
-      cmd: ["timeout", "-k", "0", "10s", "git", "push", "origin", gitBranch],
+      cmd: commandWithTimeout(["git", "push", "origin", gitBranch], 10),
       cwd: repoPath,
     });
   } else {
@@ -168,9 +168,8 @@ await new CliProgram()
         const logger = loggerWithContext("main");
 
         const repoPath = await Deno.makeTempDir();
-        const gitCloneCmd = ["git", "clone", gitRepoUri, repoPath];
 
-        await inheritExec({ cmd: gitCloneCmd });
+        await inheritExec({ cmd: commandWithTimeout(["git", "clone", gitRepoUri, repoPath], 5) });
 
         while (true) {
           logger.info(`Reading targets config from: ${targetsConfigFile}`);
