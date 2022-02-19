@@ -29,7 +29,7 @@ let
     text = ''
       #!/usr/bin/env bash
       set -euo pipefail
-      exec dumb-init -- deno run --cached-only --unstable -A ${registryAuthenticator} run "$@"
+      exec dumb-init -- deno run --cached-only -A ${registryAuthenticator} run "$@"
     '';
   };
   baseImageWithDeps = dockerTools.buildImage {

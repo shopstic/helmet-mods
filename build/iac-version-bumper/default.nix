@@ -41,7 +41,7 @@ let
           email = ''${COMMITTER_EMAIL}
       EOF
 
-      exec dumb-init -- deno run --cached-only --unstable -A ${iacVersionBumper} auto-bump-versions "$@"
+      exec dumb-init -- deno run --cached-only -A ${iacVersionBumper} auto-bump-versions "$@"
     '';
   };
   baseImageWithDeps = dockerTools.buildImage {

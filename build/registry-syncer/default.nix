@@ -30,7 +30,7 @@ let
     text = ''
       #!/usr/bin/env bash
       set -euo pipefail
-      exec dumb-init -- deno run --cached-only --unstable -A ${registrySyncer} run "$@"
+      exec dumb-init -- deno run --cached-only -A ${registrySyncer} run "$@"
     '';
   };
   baseImageWithDeps = dockerTools.buildImage {

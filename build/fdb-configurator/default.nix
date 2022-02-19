@@ -44,7 +44,7 @@ let
       export PATH="${lib.makeBinPath [ dumb-init deno kubectl fdb ]}:$PATH"
   
       exec dumb-init -- \
-        deno run --no-remote --cached-only --unstable -A "${fdbConfigurator}" "$@"
+        deno run --no-remote --cached-only -A "${fdbConfigurator}" "$@"
     '';
   };
 in

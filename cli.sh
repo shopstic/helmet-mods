@@ -3,9 +3,9 @@ set -euo pipefail
 
 code_quality() {
   echo "Checking formatting..."
-  deno fmt --unstable --check ./src
+  deno fmt --check ./src
   echo "Linting..."
-  deno lint --unstable ./src
+  deno lint ./src
 }
 
 test() {
@@ -44,7 +44,7 @@ test_app() {
 
 test_run_app() {
   local OUT
-  if ! OUT=$(deno run -A --unstable "$@" 2>&1); then
+  if ! OUT=$(deno run -A "$@" 2>&1); then
     if ! echo "$OUT" | grep -q "No command provided"; then
       echo "App run failed, output:"
       echo "${OUT}"
