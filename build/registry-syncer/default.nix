@@ -21,8 +21,8 @@ let
       };
       outputHash =
         if stdenv.isx86_64 then
-          "sha256-N8ZIyRPej1pmB7GOLl48pK31djDLxOskdZAuFWi0XhI=" else
-          "sha256-FtwmGOQ/KwcdgsxBPdBBU3IHgi2F379JyllTtVdBDZ8=";
+          "sha256-eotnI9mFn2JUByoNv0ZJKnMJP7wIU4ntV+T9+LQEdhU=" else
+          "sha256-tNrNIb+89bwW4eJL5tr4Gj3gayMqQrklq2chMKUn16E=";
     };
   entrypoint = writeTextFile {
     name = "entrypoint";
