@@ -21,7 +21,7 @@ let
       outputHash =
         if stdenv.isx86_64 then
           "sha256-GHdUi5KsMTGv58XvVkEPKCoFcEbLrr7BQgOR7vXp4PY=" else
-          "sha256-RFy4UdgwxRa9V+3pSt3fjXCJ6iWhdGl9CfNNUDz0O+Y=";
+          "sha256-CP3K2Tw2N+Bmv61K2RMLt9tAam3zZ8hTxrgtf6ol9rc=";
     };
   entrypoint = writeTextFile {
     name = "entrypoint";
