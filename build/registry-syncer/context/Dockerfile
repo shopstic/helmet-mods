@@ -11,3 +11,5 @@ RUN \
   echo "app:100000:65536" >> /etc/subgid && \
   mkdir -p /home/app/.aws && \
   chown -R app:app /home/app
+
+USER app:app
