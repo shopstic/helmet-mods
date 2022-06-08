@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.10.0/deps/std_fs.ts";
+export * from "https://deno.land/x/helmet@1.10.2/deps/std_fs.ts";
