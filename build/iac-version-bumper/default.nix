@@ -5,6 +5,7 @@
 , cacert
 , gitMinimal
 , regclient
+, openssh
 , runCommand
 , writeTextFile
 , buildahBuild
@@ -49,7 +50,7 @@ let
     fromImage = baseImage;
     config = {
       Env = [
-        "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal regclient.regctl ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        "PATH=${lib.makeBinPath [ dumb-init deno gitMinimal regclient.regctl openssh ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         "SSL_CERT_FILE=${cacert.out}/etc/ssl/certs/ca-bundle.crt"
       ];
     };
