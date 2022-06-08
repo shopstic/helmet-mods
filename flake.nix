@@ -19,6 +19,9 @@
               regclient = hotPotPkgs.regclient;
             })
           ];
+          config = {
+            allowBroken = true;
+          };
         };
         fdb = fdbPkgs.defaultPackage.${system};
         src = builtins.path
