@@ -1,5 +1,5 @@
 ARG fromDigest
-FROM public.ecr.aws/docker/library/ubuntu@$fromDigest
+FROM public.ecr.aws/lts/ubuntu@$fromDigest
 
 RUN \
   echo "app:x:1001:1001::/home/app:/bin/bash" >> /etc/passwd && \

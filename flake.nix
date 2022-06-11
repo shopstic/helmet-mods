@@ -5,7 +5,7 @@
     hotPot.url = "github:shopstic/nix-hot-pot";
     nixpkgs.follows = "hotPot/nixpkgs";
     flakeUtils.follows = "hotPot/flakeUtils";
-    fdbPkgs.url = "github:shopstic/nix-fdb/6.3.23";
+    fdbPkgs.url = "github:shopstic/nix-fdb/7.1.9";
   };
 
   outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot }:
@@ -23,7 +23,7 @@
             allowBroken = true;
           };
         };
-        fdb = fdbPkgs.defaultPackage.${system};
+        fdb = fdbPkgs.packages.${system}.fdb_7;
         src = builtins.path
           {
             path = ./.;

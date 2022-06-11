@@ -17,12 +17,12 @@ let
       name = "${name}-base";
       context = ./context;
       buildArgs = {
-        fromDigest = "sha256:626ffe58f6e7566e00254b638eb7e0f3b11d4da9675088f4781a50ae288f3322";
+        fromDigest = "sha256:62b8f60c5c8e1717f460bb7af05e558b74feb8ac460ff2abbdd3a98becdc15ce";
       };
       outputHash =
         if stdenv.isx86_64 then
-          "sha256-+mJxSKECD1rY5NQZOaNC12HPeV3n4Cbg4VNMFqBHlns=" else
-          "sha256-6yiInlmnJknX1+Fsjip8RLXUiQ9Q6w7Ivgxty1dsHWE=";
+          "sha256-NKAxcX9A1OF27iQGtBk8DWkbu7uF1zo1CwLvdPKjfm4=" else
+          "sha256-D2glKVuZLyTJJorA+pQn8VqhBZiI6RzW+EZUs3jZw58=";
     };
   entrypoint = writeTextFile {
     name = "entrypoint";
