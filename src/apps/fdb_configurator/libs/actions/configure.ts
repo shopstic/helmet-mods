@@ -46,6 +46,8 @@ async function configureDatabase(
   const {
     logCount,
     proxyCount,
+    grvProxyCount,
+    commitProxyCount,
     resolverCount,
     redundancyMode,
     storageEngine,
@@ -55,6 +57,8 @@ async function configureDatabase(
     !currentClusterConfig ||
     currentClusterConfig.logs !== logCount ||
     currentClusterConfig.proxies !== proxyCount ||
+    currentClusterConfig.grv_proxies !== grvProxyCount ||
+    currentClusterConfig.commit_proxies !== commitProxyCount ||
     currentClusterConfig.resolvers !== resolverCount ||
     currentClusterConfig.redundancy_mode !== redundancyMode ||
     currentClusterConfig.storage_engine !== storageEngine
@@ -65,7 +69,13 @@ async function configureDatabase(
     if (status.client.database_status.available || createNew) {
       const cmd = `configure${
         createNew ? " new" : ""
-      } ${redundancyMode} ${storageEngine} resolvers=${resolverCount} proxies=${proxyCount} logs=${logCount}`;
+      } ${redundancyMode} ${storageEngine} resolvers=${resolverCount} logs=${logCount} ${
+        [
+          typeof proxyCount === "number" ? `proxies=${proxyCount}` : "",
+          typeof grvProxyCount === "number" ? `grv_proxies=${grvProxyCount}` : "",
+          typeof commitProxyCount === "number" ? `commit_proxies=${commitProxyCount}` : "",
+        ].filter((c) => c.length > 0).join(" ")
+      }`;
 
       logger.info(`Configuration changed, going to execute: ${cmd}`);
 

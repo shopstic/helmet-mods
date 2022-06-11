@@ -7,9 +7,13 @@ export function NonEmptyString() {
 
 export const FdbDatabaseConfigSchema = Type.PartialObject({
   storageEngine: Type.Union([
-    Type.Literal("memory"),
+    Type.Literal("memory-1"),
+    Type.Literal("memory-2"),
+    Type.Literal("memory-radixtree-beta"),
+    Type.Literal("ssd-1"),
     Type.Literal("ssd-2"),
-    Type.Literal("ssd-redwood-experimental"),
+    Type.Literal("ssd-redwood-1-experimental"),
+    Type.Literal("ssd-rocksdb-v1"),
   ]),
   redundancyMode: Type.Union([
     Type.Literal("single"),
@@ -21,7 +25,9 @@ export const FdbDatabaseConfigSchema = Type.PartialObject({
     Type.Literal("three_data_hall_fallback"),
   ]),
   logCount: Type.Number({ minimum: 1 }),
-  proxyCount: Type.Number({ minimum: 1 }),
+  proxyCount: Type.Optional(Type.Number({ minimum: 1 })),
+  grvProxyCount: Type.Optional(Type.Number({ minimum: 1 })),
+  commitProxyCount: Type.Optional(Type.Number({ minimum: 1 })),
   resolverCount: Type.Number({ minimum: 1 }),
   coordinatorServiceNames: Type.Array(Type.String()),
   excludedServiceEndpoints: Type.Array(Type.PartialObject({
@@ -52,7 +58,9 @@ export const FdbStatusSchema = Type.PartialObject({
   cluster: Type.PartialObject({
     configuration: Type.Optional(Type.PartialObject({
       resolvers: Type.Number(),
-      proxies: Type.Number(),
+      proxies: Type.Optional(Type.Number()),
+      grv_proxies: Type.Optional(Type.Number()),
+      commit_proxies: Type.Optional(Type.Number()),
       logs: Type.Number(),
       redundancy_mode: FdbDatabaseConfigSchema.properties.redundancyMode,
       storage_engine: FdbDatabaseConfigSchema.properties.storageEngine,
