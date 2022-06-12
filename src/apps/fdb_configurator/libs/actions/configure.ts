@@ -51,6 +51,10 @@ async function configureDatabase(
     resolverCount,
     redundancyMode,
     storageEngine,
+    perpetualStorageWiggle,
+    perpetualStorageWiggleLocality,
+    storageMigrationType,
+    tenantMode,
   } = config;
 
   if (
@@ -61,21 +65,30 @@ async function configureDatabase(
     currentClusterConfig.commit_proxies !== commitProxyCount ||
     currentClusterConfig.resolvers !== resolverCount ||
     currentClusterConfig.redundancy_mode !== redundancyMode ||
-    currentClusterConfig.storage_engine !== storageEngine
+    currentClusterConfig.storage_engine !== storageEngine ||
+    currentClusterConfig.perpetual_storage_wiggle !== perpetualStorageWiggle ||
+    currentClusterConfig.perpetual_storage_wiggle_locality !== perpetualStorageWiggleLocality ||
+    currentClusterConfig.storage_migration_type !== storageMigrationType ||
+    currentClusterConfig.tenant_mode !== tenantMode
   ) {
     const recoveryState = status.cluster.recovery_state?.name || "unknown";
     const createNew = recoveryState === "configuration_never_created";
 
     if (status.client.database_status.available || createNew) {
-      const cmd = `configure${
-        createNew ? " new" : ""
-      } ${redundancyMode} ${storageEngine} resolvers=${resolverCount} logs=${logCount} ${
-        [
-          typeof proxyCount === "number" ? `proxies=${proxyCount}` : "",
-          typeof grvProxyCount === "number" ? `grv_proxies=${grvProxyCount}` : "",
-          typeof commitProxyCount === "number" ? `commit_proxies=${commitProxyCount}` : "",
-        ].filter((c) => c.length > 0).join(" ")
-      }`;
+      const cmd = [
+        `configure${createNew ? " new" : ""}`,
+        redundancyMode,
+        storageEngine,
+        `resolvers=${resolverCount}`,
+        `logs=${logCount}`,
+        `perpetual_storage_wiggle=${perpetualStorageWiggle}`,
+        `perpetual_storage_wiggle_locality=${perpetualStorageWiggleLocality}`,
+        `storage_migration_type=${storageMigrationType}`,
+        `tenant_mode=${tenantMode}`,
+        typeof proxyCount === "number" ? `proxies=${proxyCount}` : "",
+        typeof grvProxyCount === "number" ? `grv_proxies=${grvProxyCount}` : "",
+        typeof commitProxyCount === "number" ? `commit_proxies=${commitProxyCount}` : "",
+      ].filter((c) => c.length > 0).join(" ");
 
       logger.info(`Configuration changed, going to execute: ${cmd}`);
 

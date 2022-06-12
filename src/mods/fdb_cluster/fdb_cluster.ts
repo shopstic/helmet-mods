@@ -54,6 +54,10 @@ export function createFdbClusterResources(
     backup,
     baseName,
     namespace,
+    perpetualStorageWiggle = 0,
+    perpetualStorageWiggleLocality = "0",
+    tenantMode = "disabled",
+    storageMigrationType = "disabled",
     locality = "none",
     image = fdbImage,
     configuratorImage = fdbConfiguratorImage,
@@ -67,6 +71,10 @@ export function createFdbClusterResources(
     namespace: string;
     storageEngine: FdbDatabaseConfig["storageEngine"];
     redundancyMode: FdbDatabaseConfig["redundancyMode"];
+    perpetualStorageWiggle?: FdbDatabaseConfig["perpetualStorageWiggle"];
+    perpetualStorageWiggleLocality?: FdbDatabaseConfig["perpetualStorageWiggleLocality"];
+    tenantMode?: FdbDatabaseConfig["tenantMode"];
+    storageMigrationType?: FdbDatabaseConfig["storageMigrationType"];
     stateless: {
       mode: "prod";
       grvProxyCount: number;
@@ -222,6 +230,10 @@ export function createFdbClusterResources(
   const databaseConfig: FdbDatabaseConfig = {
     storageEngine,
     redundancyMode,
+    perpetualStorageWiggle,
+    perpetualStorageWiggleLocality,
+    storageMigrationType,
+    tenantMode,
     logCount,
     grvProxyCount,
     commitProxyCount,

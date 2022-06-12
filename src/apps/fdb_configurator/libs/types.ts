@@ -34,6 +34,18 @@ export const FdbDatabaseConfigSchema = Type.PartialObject({
     name: Type.String(),
     port: Type.Number({ minimum: 1, maximum: 65535 }),
   })),
+  perpetualStorageWiggle: Type.Number(),
+  perpetualStorageWiggleLocality: Type.String(),
+  storageMigrationType: Type.Union([
+    Type.Literal("disabled"),
+    Type.Literal("gradual"),
+    Type.Literal("aggressive"),
+  ]),
+  tenantMode: Type.Optional(Type.Union([
+    Type.Literal("disabled"),
+    Type.Literal("optional_experimental"),
+    Type.Literal("required_experimental"),
+  ])),
 });
 
 export type FdbDatabaseConfig = Static<typeof FdbDatabaseConfigSchema>;
@@ -62,6 +74,10 @@ export const FdbStatusSchema = Type.PartialObject({
       grv_proxies: Type.Optional(Type.Number()),
       commit_proxies: Type.Optional(Type.Number()),
       logs: Type.Number(),
+      perpetual_storage_wiggle: Type.Number(),
+      perpetual_storage_wiggle_locality: Type.String(),
+      storage_migration_type: Type.String(),
+      tenant_mode: Type.String(),
       redundancy_mode: FdbDatabaseConfigSchema.properties.redundancyMode,
       storage_engine: FdbDatabaseConfigSchema.properties.storageEngine,
     })),
