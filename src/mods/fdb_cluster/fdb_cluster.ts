@@ -34,7 +34,8 @@ export const defaultDedupProxyImage = "public.ecr.aws/shopstic/dedup-proxy:2.0.1
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;
-  proxyDeployment?: K8sDeployment;
+  grvProxyDeployment?: K8sDeployment;
+  commitProxyDeployment?: K8sDeployment;
   statefulServices: K8sService[];
   statefulSets: K8sStatefulSet[];
   statelessDeployment: K8sDeployment;
@@ -68,7 +69,8 @@ export function createFdbClusterResources(
     redundancyMode: FdbDatabaseConfig["redundancyMode"];
     stateless: {
       mode: "prod";
-      proxyCount: number;
+      grvProxyCount: number;
+      commitProxyCount: number;
       resolverCount: number;
       standbyCount: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
@@ -131,11 +133,27 @@ export function createFdbClusterResources(
     locality,
   });
 
-  const proxyDeployment = (stateless.mode === "prod")
+  const grvProxyDeployment = (stateless.mode === "prod")
     ? createFdbStatelessDeployment({
       baseName,
-      processClass: "proxy",
-      replicas: stateless.proxyCount,
+      processClass: "grv_proxy",
+      replicas: stateless.grvProxyCount,
+      baseLabels: labels,
+      connectionStringConfigMapRef,
+      port: 4500,
+      image,
+      imagePullPolicy,
+      nodeSelector: stateless.nodeSelector,
+      resourceRequirements: stateless.resourceRequirements,
+      locality,
+    })
+    : undefined;
+
+  const commitProxyDeployment = (stateless.mode === "prod")
+    ? createFdbStatelessDeployment({
+      baseName,
+      processClass: "commit_proxy",
+      replicas: stateless.commitProxyCount,
       baseLabels: labels,
       connectionStringConfigMapRef,
       port: 4500,
@@ -197,14 +215,16 @@ export function createFdbClusterResources(
     imagePullPolicy,
   });
 
-  const proxyCount = stateless.mode === "prod" ? stateless.proxyCount : stateless.count ?? 1;
+  const grvProxyCount = stateless.mode === "prod" ? stateless.grvProxyCount : stateless.count ?? 1;
+  const commitProxyCount = stateless.mode === "prod" ? stateless.commitProxyCount : stateless.count ?? 1;
   const resolverCount = stateless.mode === "prod" ? stateless.resolverCount : 1;
 
   const databaseConfig: FdbDatabaseConfig = {
     storageEngine,
     redundancyMode,
     logCount,
-    proxyCount,
+    grvProxyCount,
+    commitProxyCount,
     resolverCount,
     coordinatorServiceNames,
     excludedServiceEndpoints,
@@ -244,7 +264,8 @@ export function createFdbClusterResources(
     backupDeployment,
     statefulServices,
     statefulSets,
-    proxyDeployment,
+    grvProxyDeployment,
+    commitProxyDeployment,
     statelessDeployment,
     createConnectionString,
     configure,

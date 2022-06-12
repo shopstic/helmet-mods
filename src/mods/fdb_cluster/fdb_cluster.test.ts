@@ -43,7 +43,8 @@ Deno.test("fdb_cluster should work", () => {
     redundancyMode: "single",
     stateless: {
       mode: "prod",
-      proxyCount: 1,
+      grvProxyCount: 1,
+      commitProxyCount: 1,
       resolverCount: 1,
       standbyCount: 0,
     },
@@ -56,7 +57,8 @@ Deno.test("fdb_cluster should work", () => {
 
   assertEquals(cluster.statefulSets.length, 3);
   assertEquals(cluster.backupDeployment, undefined);
-  assertNotEquals(cluster.proxyDeployment, undefined);
+  assertNotEquals(cluster.grvProxyDeployment, undefined);
+  assertNotEquals(cluster.commitProxyDeployment, undefined);
   assertEquals(cluster.statelessDeployment.spec?.replicas, 5);
   assertEquals(cluster.statelessDeployment.metadata.labels?.foo, "bar");
 
@@ -68,7 +70,8 @@ Deno.test("fdb_cluster should work", () => {
 
   const allContainers = [
     ...(cluster.statelessDeployment.spec!.template.spec!.containers),
-    ...(cluster.proxyDeployment!.spec!.template.spec!.containers),
+    ...(cluster.grvProxyDeployment!.spec!.template.spec!.containers),
+    ...(cluster.commitProxyDeployment!.spec!.template.spec!.containers),
     ...(cluster.statefulSets.flatMap((s) => s.spec!.template.spec!.containers)),
   ];
 

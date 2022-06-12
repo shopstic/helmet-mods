@@ -10,7 +10,8 @@ import { IoK8sApiCoreV1ResourceRequirements } from "../../../deps/k8s_utils.ts";
 
 export type FdbConfiguredProcessClass =
   | "coordinator"
-  | "proxy"
+  | "grv_proxy"
+  | "commit_proxy"
   | "storage"
   | "log"
   | "stateless";

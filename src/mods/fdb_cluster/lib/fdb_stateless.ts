@@ -23,7 +23,7 @@ export function createFdbStatelessDeployment(
     locality,
   }: {
     baseName: string;
-    processClass: "proxy" | "stateless";
+    processClass: "grv_proxy" | "commit_proxy" | "stateless";
     replicas: number;
     baseLabels: Record<string, string>;
     connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
