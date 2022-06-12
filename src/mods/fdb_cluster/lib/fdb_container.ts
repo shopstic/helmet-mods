@@ -116,7 +116,7 @@ export function createFdbContainer(
   })();
 
   return {
-    name: `${processClass.replaceAll("_", "")}-${port}`,
+    name: `${processClass.replaceAll("_", "-")}-${port}`,
     image,
     imagePullPolicy,
     ports: [
