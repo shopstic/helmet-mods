@@ -29,7 +29,7 @@ import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
 
-export const fdbExporterImage = "public.ecr.aws/shopstic/fdb-prometheus-exporter:2.0.0";
+export const fdbExporterImage = "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.9";
 export const defaultDedupProxyImage = "public.ecr.aws/shopstic/dedup-proxy:2.0.1";
 
 export interface FdbClusterResources {
