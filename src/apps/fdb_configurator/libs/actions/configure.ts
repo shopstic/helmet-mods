@@ -45,7 +45,6 @@ async function configureDatabase(
 
   const {
     logCount,
-    proxyCount,
     grvProxyCount,
     commitProxyCount,
     resolverCount,
@@ -63,7 +62,6 @@ async function configureDatabase(
   if (
     !currentClusterConfig ||
     currentClusterConfig.logs !== logCount ||
-    currentClusterConfig.proxies !== proxyCount ||
     currentClusterConfig.grv_proxies !== grvProxyCount ||
     currentClusterConfig.commit_proxies !== commitProxyCount ||
     currentClusterConfig.resolvers !== resolverCount ||
@@ -88,10 +86,9 @@ async function configureDatabase(
         `perpetual_storage_wiggle_locality=${perpetualStorageWiggleLocality}`,
         `storage_migration_type=${storageMigrationType}`,
         `tenant_mode=${tenantMode}`,
-        typeof proxyCount === "number" ? `proxies=${proxyCount}` : "",
-        typeof grvProxyCount === "number" ? `grv_proxies=${grvProxyCount}` : "",
-        typeof commitProxyCount === "number" ? `commit_proxies=${commitProxyCount}` : "",
-      ].filter((c) => c.length > 0).join(" ");
+        `grv_proxies=${grvProxyCount}`,
+        `commit_proxies=${commitProxyCount}`,
+      ].join(" ");
 
       logger.info(`Configuration changed, going to execute: ${cmd}`);
 

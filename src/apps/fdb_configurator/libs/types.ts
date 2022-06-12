@@ -25,9 +25,8 @@ export const FdbDatabaseConfigSchema = Type.PartialObject({
     Type.Literal("three_data_hall_fallback"),
   ]),
   logCount: Type.Number({ minimum: 1 }),
-  proxyCount: Type.Optional(Type.Number({ minimum: 1 })),
-  grvProxyCount: Type.Optional(Type.Number({ minimum: 1 })),
-  commitProxyCount: Type.Optional(Type.Number({ minimum: 1 })),
+  grvProxyCount: Type.Number({ minimum: 1 }),
+  commitProxyCount: Type.Number({ minimum: 1 }),
   resolverCount: Type.Number({ minimum: 1 }),
   coordinatorServiceNames: Type.Array(Type.String()),
   excludedServiceEndpoints: Type.Array(Type.PartialObject({
