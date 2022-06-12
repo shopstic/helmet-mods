@@ -69,7 +69,7 @@ export function createFdbStatelessDeployment(
 
   const deployment = createK8sDeployment({
     metadata: {
-      name: `${baseName}-${processClass}`,
+      name: `${baseName}-${processClass.replaceAll("_", "-")}`,
       labels: statelessLabels,
     },
     spec: {
