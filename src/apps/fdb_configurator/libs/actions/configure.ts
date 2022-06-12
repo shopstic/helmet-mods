@@ -57,6 +57,9 @@ async function configureDatabase(
     tenantMode,
   } = config;
 
+  logger.info(`Current cluster config: ${JSON.stringify(currentClusterConfig)}`);
+  logger.info(`Desired cluster config: ${JSON.stringify(config)}`);
+
   if (
     !currentClusterConfig ||
     currentClusterConfig.logs !== logCount ||
