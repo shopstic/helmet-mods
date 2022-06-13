@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.10.3/deps/cli_utils.ts";
+export * from "https://deno.land/x/utils@2.7.2/cli_utils.ts";
