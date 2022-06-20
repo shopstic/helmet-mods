@@ -21,6 +21,7 @@ export function createFdbStatelessDeployment(
     nodeSelector,
     resourceRequirements,
     locality,
+    args,
   }: {
     baseName: string;
     processClass: "grv_proxy" | "commit_proxy" | "stateless";
@@ -33,6 +34,7 @@ export function createFdbStatelessDeployment(
     nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
     resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
     locality: FdbLocalityMode;
+    args?: string[];
   },
 ): K8sDeployment {
   const statelessLabels = {
@@ -65,6 +67,7 @@ export function createFdbStatelessDeployment(
     resourceRequirements,
     port,
     locality,
+    args,
   });
 
   const deployment = createK8sDeployment({

@@ -83,11 +83,13 @@ export function createFdbClusterResources(
       standbyCount: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
       resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+      args?: string[];
     } | {
       mode: "dev";
       count?: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
       resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+      args?: string[];
     };
     backup?: {
       podCount: number;
@@ -154,6 +156,7 @@ export function createFdbClusterResources(
       nodeSelector: stateless.nodeSelector,
       resourceRequirements: stateless.resourceRequirements,
       locality,
+      args: stateless.args,
     })
     : undefined;
 
@@ -170,6 +173,7 @@ export function createFdbClusterResources(
       nodeSelector: stateless.nodeSelector,
       resourceRequirements: stateless.resourceRequirements,
       locality,
+      args: stateless.args,
     })
     : undefined;
 
@@ -185,6 +189,7 @@ export function createFdbClusterResources(
     nodeSelector: stateless.nodeSelector,
     resourceRequirements: stateless.resourceRequirements,
     locality,
+    args: stateless.args,
   });
 
   const coordinatorServiceNames = Object
