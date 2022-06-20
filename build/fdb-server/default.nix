@@ -40,8 +40,7 @@ dockerTools.buildLayeredImage {
   name = name;
   fromImage = baseImage;
   config = {
-    Entrypoint = [ entrypoint ];
+    Entrypoint = [ entrypoint "fdb_server.sh" ];
     Env = [ "PATH=${lib.makeBinPath [ dumb-init fdb ]}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" ];
-    Cmd = [ "fdb_server.sh" ];
   };
 }
