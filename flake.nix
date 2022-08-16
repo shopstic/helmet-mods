@@ -46,6 +46,7 @@
         iacVersionBumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
         registryAuthenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
         registrySyncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
+        k8sJobAutoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
         vscodeSettings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -94,7 +95,7 @@
           '';
         };
         packages = {
-          inherit deps fdbConfigurator iacVersionBumper;
+          inherit deps fdbConfigurator iacVersionBumper registryAuthenticator registrySyncer k8sJobAutoscaler;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
           fdbServerImage = pkgs.callPackage ./build/fdb-server {
             inherit buildahBuild fdb;
@@ -110,6 +111,9 @@
           };
           registrySyncerImage = pkgs.callPackage ./build/registry-syncer {
             inherit registrySyncer buildahBuild deno;
+          };
+          k8sJobAutoscalerImage = pkgs.callPackage ./build/k8s-job-autoscaler {
+            inherit k8sJobAutoscaler deno;
           };
         };
         defaultPackage = pkgs.linkFarmFromDrvs "helmet-mods-all" (pkgs.lib.attrValues packages);

@@ -6,6 +6,7 @@ import { readAll } from "../../deps/std_stream.ts";
 import { loggerWithContext } from "../../libs/logger.ts";
 import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
 import { commandWithTimeout } from "../../libs/utils.ts";
+import { delay } from "../../deps/async_utils.ts";
 
 async function updateDigests({ repoPath, targets }: {
   repoPath: string;
@@ -143,12 +144,6 @@ export async function autoBumpVersions(
   } else {
     logger.info("Nothing to commit");
   }
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }
 
 await new CliProgram()
