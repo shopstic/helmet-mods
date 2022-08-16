@@ -81,3 +81,8 @@ jobs:
             --platforms linux/amd64,linux/arm64 \
             --template "${IMAGE_REPOSITORY}"/fdb-configurator:dev-ARCH-"${GITHUB_SHA}" \
             --target "${IMAGE_REPOSITORY}"/fdb-configurator:dev-"${GITHUB_SHA}"
+          
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:dev-"${GITHUB_SHA}"
