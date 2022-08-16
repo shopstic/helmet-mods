@@ -5,7 +5,7 @@
 , kubectl
 , writeTextDir
 , runCommand
-, runtimeShell
+, bash
 , dockerTools
 , k8sJobAutoscaler
 }:
@@ -17,7 +17,7 @@ let
 in
 dockerTools.buildLayeredImage {
   name = name;
-  contents = [ dumb-init deno kubectl ];
+  contents = [ dumb-init deno kubectl bash ];
   config = {
     Entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" k8sJobAutoscaler "run" ];
     User = "app:app";
@@ -28,7 +28,7 @@ dockerTools.buildLayeredImage {
     echo "root:!x:::::::" > ./etc/shadow
     echo "${user}:!:::::::" >> ./etc/shadow
 
-    echo "root:x:0:0::/root:${runtimeShell}" > ./etc/passwd
+    echo "root:x:0:0::/root:${bash}/bin/bash" > ./etc/passwd
     echo "${user}:x:${toString uid}:${toString gid}::/home/${user}:" >> ./etc/passwd
 
     echo "root:x:0:" > ./etc/group
