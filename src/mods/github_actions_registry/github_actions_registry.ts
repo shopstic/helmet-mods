@@ -10,7 +10,7 @@ import { image as defaultGithubActionsRegistryImage } from "../../apps/github_ac
 import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 
-export const defaultName = "github_actions_registry";
+export const defaultName = "github-actions-registry";
 
 export interface GithubActionsRegistryResources {
   service: K8sService;

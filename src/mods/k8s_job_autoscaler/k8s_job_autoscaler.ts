@@ -12,7 +12,7 @@ import {
 import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autoscaler/meta.ts";
 import crd from "./crd.json" assert { type: "json" };
 
-export const defaultName = "k8s_job_autoscaler";
+export const defaultName = "k8s-job-autoscaler";
 
 export interface K8sJobAutoscalerResources {
   crd: K8sCrd;
