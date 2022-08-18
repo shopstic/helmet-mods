@@ -202,7 +202,7 @@ const program = new CliProgram()
 
               if (
                 typeof payload === "object" && "action" in payload && "workflow_job" in payload &&
-                (payload.action === "queued" || payload.action === "completed")
+                (payload.action === "queued" || payload.action === "completed" || payload.action === "in_progress")
               ) {
                 const event: WorkflowJobEvent = payload;
 
