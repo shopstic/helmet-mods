@@ -8,12 +8,14 @@ import {
 } from "../../deps/helmet.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
 import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
+import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 
 export const defaultName = "github_actions_registry";
 
 export interface GithubActionsRegistryResources {
   service: K8sService;
   ingress?: K8sIngress;
+  serviceMonitor?: ServiceMonitorV1;
   deployment: K8sDeployment;
 }
 
@@ -31,6 +33,7 @@ export function createGithubActionsRegistryResources({
     privateKey,
     webhookSigningKey,
   },
+  createServiceMonitor,
 }:
   & {
     name?: string;
@@ -51,6 +54,7 @@ export function createGithubActionsRegistryResources({
         name: string;
       };
     };
+    createServiceMonitor: boolean;
   }
   & Pick<
     GithubActionsRegistryParams,
@@ -200,9 +204,36 @@ export function createGithubActionsRegistryResources({
     },
   });
 
+  const serviceMonitor = createServiceMonitor
+    ? createServiceMonitorV1({
+      metadata: {
+        name,
+      },
+      spec: {
+        endpoints: [
+          {
+            honorLabels: true,
+            interval: "1s",
+            path: "/metrics",
+            port: "registry",
+            scheme: "http",
+            scrapeTimeout: "1s",
+          },
+        ],
+        namespaceSelector: {
+          matchNames: [namespace],
+        },
+        selector: {
+          matchLabels: service.metadata.labels,
+        },
+      },
+    })
+    : undefined;
+
   return {
     service,
     ingress,
     deployment,
+    serviceMonitor,
   };
 }
