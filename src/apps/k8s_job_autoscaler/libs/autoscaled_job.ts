@@ -46,9 +46,9 @@ export async function* watchMetric(
         await delay(toDelayMs);
       }
       last = performance.now();
-    } catch (e) {
-      if (!(e instanceof DOMException) || e.name !== "AbortError") {
-        throw e;
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== "AbortError") {
+        logger.error({ message: "Metric query failed", error });
       }
     }
   }
