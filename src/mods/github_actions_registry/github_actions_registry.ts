@@ -130,6 +130,9 @@ export function createGithubActionsRegistryResources({
   const privateKeyFileName = "private-key.pem";
   const webhookSigningKeyFileName = "webhook-signing.key";
 
+  const privateKeyMountPath = `${secretsMountPath}/${privateKeyFileName}`;
+  const webhookSigningKeyMountPath = `${secretsMountPath}/${webhookSigningKeyFileName}`;
+
   const args: GithubActionsRegistryParams = {
     appId,
     installationId,
@@ -138,8 +141,8 @@ export function createGithubActionsRegistryResources({
     perRepoMinRefreshIntervalMs,
     webhookServerPort,
     registryServerPort,
-    privateKeyPath: `${secretsMountPath}/${privateKeyFileName}`,
-    webhookSigningKeyPath: `${secretsMountPath}/${webhookSigningKeyFileName}`,
+    privateKeyPath: privateKeyMountPath,
+    webhookSigningKeyPath: webhookSigningKeyMountPath,
   };
 
   const deployment = createK8sDeployment({
@@ -171,11 +174,11 @@ export function createGithubActionsRegistryResources({
               args: Object.entries(args).map(([k, v]) => `--${k}=${v}`),
               volumeMounts: [{
                 name: "private-key",
-                mountPath: secretsMountPath,
+                mountPath: privateKeyMountPath,
                 subPath: privateKeyFileName,
               }, {
                 name: "webhook-signing-key",
-                mountPath: secretsMountPath,
+                mountPath: webhookSigningKeyMountPath,
                 subPath: webhookSigningKeyFileName,
               }],
             },
