@@ -11,6 +11,7 @@ import {
 } from "../../deps/helmet.ts";
 import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autoscaler/meta.ts";
 import crd from "./crd.json" assert { type: "json" };
+import { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/types.ts";
 
 export const defaultName = "k8s-job-autoscaler";
 
@@ -83,6 +84,11 @@ export function createK8sJobAutoscalerResources({
     },
   });
 
+  const args: K8sJobAutoscalerParams = {
+    minReconcileIntervalMs,
+    apiServerBaseUrl: "http://localhost:8001",
+  };
+
   const deployment = createK8sDeployment({
     metadata: {
       name,
@@ -115,10 +121,7 @@ export function createK8sJobAutoscalerResources({
             {
               name,
               image,
-              args: [
-                `--minReconcileIntervalMs=${minReconcileIntervalMs}`,
-                `--apiServerBaseUrl=http://localhost:8001`,
-              ],
+              args: Object.entries(args).map(([k, v]) => `--${k}=${v}`),
             },
           ],
         },
