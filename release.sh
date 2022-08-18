@@ -39,6 +39,7 @@ release() {
   REGISTRY_AUTHENTICATOR_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/registry-authenticator:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
   REGISTRY_SYNCER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/registry-syncer:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
   K8S_JOB_AUTOSCALER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
+  GITHUB_ACTIONS_REGISTRY_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/github-actions-registry:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
 
   local RELEASE_BRANCH="releases/${RELEASE_VERSION}"
 
@@ -52,6 +53,7 @@ release() {
   echo "export const image = \"${IMAGE_REPOSITORY}/registry-authenticator@${REGISTRY_AUTHENTICATOR_MANIFEST}\";" > ./src/apps/registry_authenticator/meta.ts
   echo "export const image = \"${IMAGE_REPOSITORY}/registry-syncer@${REGISTRY_SYNCER_MANIFEST}\";" > ./src/apps/registry_syncer/meta.ts
   echo "export const image = \"${IMAGE_REPOSITORY}/k8s-job-autoscaler@${K8S_JOB_AUTOSCALER_MANIFEST}\";" > ./src/apps/k8s_job_autoscaler/meta.ts
+  echo "export const image = \"${IMAGE_REPOSITORY}/github-actions-registry@${GITHUB_ACTIONS_REGISTRY_MANIFEST}\";" > ./src/apps/github_actions_registry/meta.ts
   echo "export default \"${RELEASE_VERSION}\";" > ./src/version.ts
 
   git add ./src/apps/*/meta.ts ./src/version.ts

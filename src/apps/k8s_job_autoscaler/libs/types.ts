@@ -1,7 +1,7 @@
-import { K8s, K8sApiPaths, K8sApiPathsWithCrd } from "../../../deps/k8s_fetch.ts";
+import { K8s, K8sApiPaths, K8sApiPathsWithCrd } from "../../../deps/k8s_openapi.ts";
 import { Type } from "../../../deps/typebox.ts";
 
-export const K8sJobAutoscalerSchema = Type.Object({
+export const K8sJobAutoscalerParamsSchema = Type.Object({
   minReconcileIntervalMs: Type.Number({ minimum: 1 }),
   namespace: Type.Optional(Type.String({ minLength: 1 })),
   apiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),

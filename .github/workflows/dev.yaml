@@ -86,3 +86,8 @@ jobs:
             --platforms linux/amd64,linux/arm64 \
             --template "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:dev-ARCH-"${GITHUB_SHA}" \
             --target "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:dev-"${GITHUB_SHA}"
+          
+          manifest-tool push from-args \
+            --platforms linux/amd64,linux/arm64 \
+            --template "${IMAGE_REPOSITORY}"/github-actions-registry:dev-ARCH-"${GITHUB_SHA}" \
+            --target "${IMAGE_REPOSITORY}"/github-actions-registry:dev-"${GITHUB_SHA}"

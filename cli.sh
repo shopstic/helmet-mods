@@ -32,6 +32,7 @@ smoke_test() {
   test_app ./src/apps/registry_syncer/registry_syncer.ts
   test_app ./src/apps/registry_authenticator/registry_authenticator.ts
   test_app ./src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts
+  test_app ./src/apps/github_actions_registry/github_actions_registry.ts
   test
 }
 

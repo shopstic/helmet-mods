@@ -47,7 +47,8 @@ runs:
         fdb_server_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" fdb-server "${IMAGE_TAG}") || exit $?
         fdb_configurator_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" fdb-configurator "${IMAGE_TAG}") || exit $?
         k8s_job_autoscaler_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" k8s-job-autoscaler "${IMAGE_TAG}") || exit $?
+        github_actions_registry_digest=$(./release.sh push_image "${IMAGE_REPOSITORY}" github-actions-registry "${IMAGE_TAG}") || exit $?
 
-        output='{"iac_version_bumper":"'${iac_version_bumper_digest}'","registry_authenticator":"'${registry_authenticator_digest}'","registry_syncer":"'${registry_syncer_digest}'","fdb_server":"'${fdb_server_digest}'","fdb_configurator":"'${fdb_configurator_digest}'""k8s_job_autoscaler":"'${k8s_job_autoscaler_digest}'"}'
+        output='{"iac_version_bumper":"'${iac_version_bumper_digest}'","registry_authenticator":"'${registry_authenticator_digest}'","registry_syncer":"'${registry_syncer_digest}'","fdb_server":"'${fdb_server_digest}'","fdb_configurator":"'${fdb_configurator_digest}'","k8s_job_autoscaler":"'${k8s_job_autoscaler_digest}'","github_actions_registry":"'${github_actions_registry_digest}'"}'
 
         echo ::set-output name=digests::"${output}"

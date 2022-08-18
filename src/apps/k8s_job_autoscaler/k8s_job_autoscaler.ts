@@ -1,37 +1,19 @@
 import { equal } from "../../deps/std_testing.ts";
-import { Fetcher, K8s } from "../../deps/k8s_fetch.ts";
 import { immerProduce } from "../../deps/immer.ts";
 import { getJobs, jobReplicaIndexLabel, watchJobGroups, watchJobs, watchMetric } from "./libs/autoscaled_job.ts";
-import { deferred, delay } from "../../deps/async_utils.ts";
+import { delay } from "../../deps/async_utils.ts";
 import { ulid } from "../../deps/ulid.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { AutoscaledJob, AutoscaledJobAutoscaling, K8sJobAutoscalerSchema, Paths } from "./libs/types.ts";
+import { AutoscaledJob, AutoscaledJobAutoscaling, K8sJobAutoscalerParamsSchema, Paths } from "./libs/types.ts";
 import { Logger2 } from "../../libs/logger.ts";
-
-function createReconcileQueue() {
-  let promise = deferred<void>();
-
-  async function* generator() {
-    while (true) {
-      await promise;
-      promise = deferred<void>();
-      yield;
-    }
-  }
-
-  return {
-    trigger() {
-      promise.resolve();
-    },
-    loop: generator(),
-  };
-}
+import { createOpenapiClient, K8s } from "../../deps/k8s_openapi.ts";
+import { createReconciliationLoop } from "../../libs/utils.ts";
 
 await new CliProgram()
   .addAction(
     "run",
     createCliAction(
-      K8sJobAutoscalerSchema,
+      K8sJobAutoscalerParamsSchema,
       async (
         {
           apiServerBaseUrl,
@@ -44,7 +26,7 @@ await new CliProgram()
         const namespace = maybeNamespace ??
           (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
 
-        const fetcher = Fetcher.for<Paths>().configure({
+        const client = createOpenapiClient<Paths>({
           baseUrl: apiServerBaseUrl,
         });
         let jobGroupMap: Map<string, AutoscaledJob> = new Map();
@@ -55,12 +37,12 @@ await new CliProgram()
         }> = new Map();
         const logger = new Logger2();
         const autoscalingValues: Map<string, number> = new Map();
-        const reconcileQueue = createReconcileQueue();
+        const reconcileLoop = createReconciliationLoop();
 
         async function reconcile() {
           logger.info({ message: "Reconcile" });
 
-          const jobs = await getJobs({ fetcher, namespace });
+          const jobs = await getJobs({ client, namespace });
           const activeJobsByGroupUid: Map<string, Array<K8s["io.k8s.api.batch.v1.Job"]>> = new Map();
 
           for (const job of jobs) {
@@ -151,7 +133,7 @@ await new CliProgram()
                 });
 
                 try {
-                  const created = await fetcher.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("post")({
+                  const created = await client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("post")({
                     path: {
                       namespace,
                     },
@@ -218,7 +200,7 @@ await new CliProgram()
                 ) {
                   if (autoscalingValues.get(uid) !== autoscalingValue) {
                     autoscalingValues.set(uid, autoscalingValue);
-                    reconcileQueue.trigger();
+                    reconcileLoop.request();
                   }
                 }
               })();
@@ -235,14 +217,14 @@ await new CliProgram()
           logger.info({ message: "Watching autoscaled jobs" });
           for await (
             jobGroupMap of watchJobGroups({
-              fetcher,
+              client,
               namespace,
               signal,
             })
           ) {
             logger.info({ message: "Autoscaled job watch changed" });
             await reconcileMetricWatches();
-            reconcileQueue.trigger();
+            reconcileLoop.request();
           }
         })();
 
@@ -250,20 +232,20 @@ await new CliProgram()
           logger.info({ message: "Watching jobs" });
           for await (
             const event of watchJobs({
-              fetcher,
+              client,
               namespace,
               signal,
             })
           ) {
             logger.info({ message: "Job changed", change: event.type, name: event.object.metadata?.name });
-            reconcileQueue.trigger();
+            reconcileLoop.request();
           }
         })();
 
         const mainPromise = (async () => {
           logger.info({ message: "Running reconcile loop" });
           let last = performance.now();
-          for await (const _ of reconcileQueue.loop) {
+          for await (const _ of reconcileLoop.loop) {
             const now = performance.now();
             const elapseMs = now - last;
             const delayMs = Math.max(minReconcileIntervalMs - elapseMs, 0);

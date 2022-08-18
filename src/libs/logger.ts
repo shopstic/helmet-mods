@@ -36,7 +36,7 @@ export class Logger2 {
     Object.assign(this.context, context);
     return this;
   }
-  log(record: Record<string, unknown>, level: "info" | "warn" | "error" = "info") {
+  log(record: Record<string, unknown>, level: "debug" | "info" | "warn" | "error" = "info") {
     const out = serializeLog({
       time: new Date(),
       level,
@@ -44,6 +44,9 @@ export class Logger2 {
     });
 
     switch (level) {
+      case "debug":
+        console.debug(out);
+        break;
       case "info":
         console.log(out);
         break;
@@ -58,6 +61,9 @@ export class Logger2 {
     }
 
     return this;
+  }
+  debug(record: Record<string, unknown>) {
+    return this.log(record, "debug");
   }
   info(record: Record<string, unknown>) {
     return this.log(record, "info");

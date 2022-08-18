@@ -1,5 +1,5 @@
 import { delay } from "../../../deps/async_utils.ts";
-import { FetcherApi, K8s, k8sApiWatch } from "../../../deps/k8s_fetch.ts";
+import { K8s, k8sApiWatch, OpenapiClient } from "../../../deps/k8s_openapi.ts";
 import { Logger2 } from "../../../libs/logger.ts";
 import { createPromApiClient } from "../../../libs/prom_api_client.ts";
 import { exhaustiveMatchingGuard } from "../../../libs/utils.ts";
@@ -55,12 +55,12 @@ export async function* watchMetric(
 }
 
 export async function getJobs(
-  { fetcher, namespace }: {
-    fetcher: FetcherApi<Paths>;
+  { client, namespace }: {
+    client: OpenapiClient<Paths>;
     namespace: string;
   },
 ): Promise<Array<K8s["io.k8s.api.batch.v1.Job"]>> {
-  const jobList = (await fetcher.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get")({
+  const jobList = (await client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get")({
     path: {
       namespace,
     },
@@ -73,15 +73,15 @@ export async function getJobs(
 }
 
 export async function* watchJobs(
-  { fetcher, signal, namespace }: {
-    fetcher: FetcherApi<Paths>;
+  { client, signal, namespace }: {
+    client: OpenapiClient<Paths>;
     signal: AbortSignal;
     namespace: string;
   },
 ) {
   try {
     const events = k8sApiWatch(
-      fetcher.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get"),
+      client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get"),
     )({
       path: {
         namespace,
@@ -119,13 +119,13 @@ export async function* watchJobs(
 }
 
 export async function* watchJobGroups(
-  { fetcher, signal, namespace }: { fetcher: FetcherApi<Paths>; signal: AbortSignal; namespace: string },
+  { client, signal, namespace }: { client: OpenapiClient<Paths>; signal: AbortSignal; namespace: string },
 ): AsyncGenerator<Map<string, AutoscaledJob>> {
   try {
     const map: Map<string, AutoscaledJob> = new Map();
 
     const events = k8sApiWatch(
-      fetcher.endpoint("/apis/shopstic.com/v1/namespaces/{namespace}/autoscaledjobs").method("get"),
+      client.endpoint("/apis/shopstic.com/v1/namespaces/{namespace}/autoscaledjobs").method("get"),
     )({
       path: {
         namespace,

@@ -47,6 +47,7 @@
         registryAuthenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
         registrySyncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
         k8sJobAutoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
+        githubActionsRegistry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
         vscodeSettings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -114,6 +115,9 @@
           };
           k8sJobAutoscalerImage = pkgs.callPackage ./build/k8s-job-autoscaler {
             inherit k8sJobAutoscaler deno;
+          };
+          githubActionsRegistryImage = pkgs.callPackage ./build/github-actions-registry {
+            inherit githubActionsRegistry deno;
           };
         };
         defaultPackage = pkgs.linkFarmFromDrvs "helmet-mods-all" (pkgs.lib.attrValues packages);
