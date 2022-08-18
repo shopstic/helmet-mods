@@ -32,6 +32,7 @@ release() {
   local REGISTRY_AUTHENTICATOR_MANIFEST
   local REGISTRY_SYNCER_MANIFEST
   local K8S_JOB_AUTOSCALER_MANIFEST
+  local GITHUB_ACTIONS_REGISTRY_MANIFEST
 
   FDB_SERVER_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-server:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
   FDB_CONFIGURATOR_MANIFEST=$(manifest-tool inspect --raw "${IMAGE_REPOSITORY}"/fdb-configurator:"${IMAGE_TAG}" | jq -r '.digest') || exit $?
