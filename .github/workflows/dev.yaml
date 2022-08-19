@@ -18,7 +18,7 @@ jobs:
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/build
         id: build
         with:
@@ -31,7 +31,7 @@ jobs:
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579    
+      - uses: actions/checkout@v3    
       - uses: ./.github/actions/build
         id: build
         with:
@@ -45,7 +45,7 @@ jobs:
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579   
+      - uses: actions/checkout@v3
 
       - name: Login to Amazon ECR
         uses: ./.github/actions/login-to-public-ecr
