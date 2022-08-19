@@ -17,8 +17,6 @@ runs:
     - name: Build
       shell: bash
       run: |-
-        whoami
-        ls -la /nix/var/nix/db/big-lock
         nix build -L -v '.#defaultPackage.${{ inputs.arch }}-linux'
         
     - name: Login to Amazon ECR
