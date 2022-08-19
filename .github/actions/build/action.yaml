@@ -14,13 +14,16 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Fix permissions
+      shell: bash
+      run: |-
+        chmod -R 0755 "${GITHUB_WORKSPACE}"
+
     - name: Build
       shell: bash
       run: |-
-        ls -la .
-        sleep 100001
         nix build -L -v '.#defaultPackage.${{ inputs.arch }}-linux'
-        
+
     - name: Login to Amazon ECR
       uses: ./.github/actions/login-to-public-ecr
       with:
