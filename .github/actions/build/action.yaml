@@ -14,11 +14,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Fix permissions
-      shell: bash
-      run: |-
-        chmod -R 0755 "${GITHUB_WORKSPACE}"
-
     - name: Build
       shell: bash
       run: |-
