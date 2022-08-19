@@ -18,6 +18,7 @@ runs:
       shell: bash
       run: |-
         ls -la .
+        sleep 100000
         nix build -L -v '.#defaultPackage.${{ inputs.arch }}-linux'
         
     - name: Login to Amazon ECR
