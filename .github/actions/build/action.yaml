@@ -17,6 +17,7 @@ runs:
     - name: Build
       shell: bash
       run: |-
+        env
         nix build -L -v '.#defaultPackage.${{ inputs.arch }}-linux'
         
     - name: Login to Amazon ECR
