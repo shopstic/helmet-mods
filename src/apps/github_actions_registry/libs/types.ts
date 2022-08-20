@@ -7,6 +7,7 @@ export const GithubActionsRegistryParamsSchema = Type.Object({
   privateKeyPath: Type.String({ minLength: 1 }),
   clientRefreshIntervalSeconds: Type.Number({ minimum: 1 }),
   perRepoMinRefreshIntervalMs: Type.Number({ minimum: 1 }),
+  allReposRefreshIntervalSeconds: Type.Number({ minimum: 1 }),
   webhookSigningKeyPath: Type.String({ minLength: 1 }),
   webhookServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
   registryServerPort: Type.Number({ minimum: 0, maximum: 65535 }),

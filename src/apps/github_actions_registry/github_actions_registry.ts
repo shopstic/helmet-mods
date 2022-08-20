@@ -98,6 +98,7 @@ const program = new CliProgram()
           privateKeyPath,
           clientRefreshIntervalSeconds,
           perRepoMinRefreshIntervalMs,
+          allReposRefreshIntervalSeconds,
           webhookSigningKeyPath,
           webhookServerPort,
           registryServerPort,
@@ -148,13 +149,17 @@ const program = new CliProgram()
         })();
 
         (async () => {
-          const activeRepos = await getLastActiveRepoNames({ client: await accessClientPromise, org });
+          for await (const _ of agInterval(allReposRefreshIntervalSeconds)) {
+            logger.info({ message: "Polling from all active repos" });
 
-          logger.info({ message: `Got ${activeRepos.length} active repos`, activeRepos });
+            const activeRepos = await getLastActiveRepoNames({ client: await accessClientPromise, org });
 
-          activeRepos.forEach((repo) => {
-            requestReconciliation({ org, repo, id: `${org}/${repo}` });
-          });
+            logger.info({ message: `Got ${activeRepos.length} active repos`, activeRepos });
+
+            activeRepos.forEach((repo) => {
+              requestReconciliation({ org, repo, id: `${org}/${repo}` });
+            });
+          }
         })();
 
         function requestReconciliation(request: ReconciliationRequest) {

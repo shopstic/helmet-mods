@@ -29,6 +29,7 @@ export function createGithubActionsRegistryResources({
   org,
   clientRefreshIntervalSeconds,
   perRepoMinRefreshIntervalMs,
+  allReposRefreshIntervalSeconds,
   secrets: {
     privateKey,
     webhookSigningKey,
@@ -58,7 +59,12 @@ export function createGithubActionsRegistryResources({
   }
   & Pick<
     GithubActionsRegistryParams,
-    "appId" | "installationId" | "org" | "clientRefreshIntervalSeconds" | "perRepoMinRefreshIntervalMs"
+    | "appId"
+    | "installationId"
+    | "org"
+    | "clientRefreshIntervalSeconds"
+    | "perRepoMinRefreshIntervalMs"
+    | "allReposRefreshIntervalSeconds"
   >): GithubActionsRegistryResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,
@@ -139,6 +145,7 @@ export function createGithubActionsRegistryResources({
     org,
     clientRefreshIntervalSeconds,
     perRepoMinRefreshIntervalMs,
+    allReposRefreshIntervalSeconds,
     webhookServerPort,
     registryServerPort,
     privateKeyPath: privateKeyMountPath,

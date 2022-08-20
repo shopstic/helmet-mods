@@ -68,17 +68,15 @@ export async function* agInterval(intervalMs: number): AsyncGenerator<void> {
 export async function* agThrottle<T>(items: AsyncGenerator<T>, minDelayMs: number): AsyncGenerator<T> {
   let last = performance.now();
 
-  while (true) {
-    for await (const item of items) {
-      yield item;
-      const now = performance.now();
-      const elapseMs = now - last;
+  for await (const item of items) {
+    yield item;
+    const now = performance.now();
+    const elapseMs = now - last;
 
-      const toDelayMs = Math.max(minDelayMs - elapseMs, 0);
-      if (toDelayMs > 0) {
-        await delay(toDelayMs);
-      }
-      last = performance.now();
+    const toDelayMs = Math.max(minDelayMs - elapseMs, 0);
+    if (toDelayMs > 0) {
+      await delay(toDelayMs);
     }
+    last = performance.now();
   }
 }
