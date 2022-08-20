@@ -32,7 +32,7 @@ export async function* watchMetric(
         logger.error({ error: "Query resulted in more than 1 metrics", metrics });
       } else {
         const metric = metrics[0];
-        logger.info({ metric });
+        logger.info({ metric, query });
 
         const value = Number(metric.value[1]);
         yield value;

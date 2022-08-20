@@ -30,7 +30,7 @@ export async function createOrgRunnerRegistrationToken(
   })).data.token;
 }
 
-export async function getRepoQueuedJobs(
+export async function getRepoPendingJobs(
   { client, owner, repo }: { owner: string; repo: string; client: OpenapiClient<GhPaths> },
 ) {
   const statusFilter: GhComponents["parameters"]["workflow-run-status"][] = ["queued", "in_progress"];
@@ -68,7 +68,7 @@ export async function getRepoQueuedJobs(
       })).data.jobs;
   }))).flat();
 
-  return jobs.filter((j) => j.status === "queued").map((j) => ({
+  return jobs.filter((j) => j.status !== "completed").map((j) => ({
     name: j.name,
     labels: j.labels,
   }));

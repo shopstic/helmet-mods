@@ -8,7 +8,7 @@ import {
   createOrgRunnerRegistrationToken,
   generateAccessClient,
   getLastActiveRepoNames,
-  getRepoQueuedJobs,
+  getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
 import { GithubActionsRegistryParamsSchema } from "./libs/types.ts";
 import { deferred } from "../../deps/async_utils.ts";
@@ -63,24 +63,24 @@ function renderQueueJobsMetrics() {
 
     return Array
       .from(countMap.values()).map(({ item: { name, labels }, count }) => {
-        return `github_actions_queued_jobs{owner=${JSON.stringify(owner)},repo=${JSON.stringify(repo)},name=${
+        return `github_actions_pending_jobs{owner=${JSON.stringify(owner)},repo=${JSON.stringify(repo)},name=${
           JSON.stringify(name)
         },labels=${JSON.stringify(`,${labels.join(",")},`)}} ${count}`;
       });
   });
 
   return [
-    "# HELP github_actions_queued_jobs The current number of queued jobs.",
-    "# TYPE github_actions_queued_jobs gauge",
+    "# HELP github_actions_pending_jobs The current number of pending jobs.",
+    "# TYPE github_actions_pending_jobs gauge",
   ].concat(lines).join("\n");
 }
 
 async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequest>) {
   for await (const { org: owner, repo } of requests) {
     const client = await accessClientPromise;
-    logger.info({ message: "Getting repo queued jobs", owner, repo });
-    const jobs = await getRepoQueuedJobs({ client, owner, repo });
-    logger.info({ message: `Got ${jobs.length} queued jobs`, jobs, owner, repo });
+    logger.info({ message: "Getting repo pending jobs", owner, repo });
+    const jobs = await getRepoPendingJobs({ client, owner, repo });
+    logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
     jobsByRepoMap.set(`${owner}/repo`, { owner, repo, jobs });
   }
 }
@@ -202,7 +202,7 @@ const program = new CliProgram()
 
               if (
                 typeof payload === "object" && "action" in payload && "workflow_job" in payload &&
-                (payload.action === "queued" || payload.action === "completed" || payload.action === "in_progress")
+                (payload.action === "queued" || payload.action === "completed")
               ) {
                 const event: WorkflowJobEvent = payload;
 
