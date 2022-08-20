@@ -23,7 +23,8 @@
                     "required": [
                       "query",
                       "intervalSeconds",
-                      "metricServerUrl"
+                      "metricServerUrl",
+                      "maxReplicas"
                     ],
                     "properties": {
                       "query": {
@@ -34,6 +35,9 @@
                       },
                       "metricServerUrl": {
                         "type": "string"
+                      },
+                      "maxReplicas": {
+                        "type": "number"
                       }
                     }
                   },

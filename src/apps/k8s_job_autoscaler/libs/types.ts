@@ -13,6 +13,7 @@ export type AutoscaledJobAutoscaling = {
   query: string;
   intervalSeconds: number;
   metricServerUrl: string;
+  maxReplicas: number;
 };
 
 export type AutoscaledJob = {

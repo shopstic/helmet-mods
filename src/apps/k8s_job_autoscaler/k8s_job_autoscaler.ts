@@ -73,20 +73,32 @@ await new CliProgram()
           }
 
           for (const [uid, autoscaledJob] of jobGroupMap) {
+            const maxReplicas = autoscaledJob.spec.autoscaling.maxReplicas;
             const desiredJobCount = autoscalingValues.get(uid) || 0;
             const currentJobs = (activeJobsByGroupUid.get(uid) || []);
             const currentJobCount = currentJobs.length;
 
-            if (desiredJobCount > currentJobCount) {
+            if (desiredJobCount > maxReplicas) {
+              logger.warn({
+                message: `Desired count (${desiredJobCount}) is greater than max allowed ${maxReplicas}`,
+                name: autoscaledJob.metadata.name,
+                desired: desiredJobCount,
+                maxAllowed: maxReplicas,
+              });
+            }
+
+            const targetJobCount = Math.min(desiredJobCount, maxReplicas);
+
+            if (targetJobCount > currentJobCount) {
               const currentIndexes = currentJobs.map((j) => Number(j.metadata!.labels![jobReplicaIndexLabel]));
-              const toCreateCount = desiredJobCount - currentJobCount;
-              const toCreateIndexes = Array.from({ length: desiredJobCount }).map((_, i) => i).filter((i) =>
+              const toCreateCount = targetJobCount - currentJobCount;
+              const toCreateIndexes = Array.from({ length: targetJobCount }).map((_, i) => i).filter((i) =>
                 !currentIndexes.includes(i)
               );
 
               logger.info({
-                message: `Creating ${toCreateCount} jobs`,
-                desiredJobCount,
+                message: `Creating ${toCreateCount} extra jobs`,
+                targetJobCount,
                 currentJobCount,
                 uid,
                 name: autoscaledJob.metadata.name,
@@ -151,7 +163,7 @@ await new CliProgram()
             } else {
               logger.info({
                 message: `Nothing to do`,
-                desiredJobCount,
+                targetJobCount,
                 currentJobCount,
                 name: autoscaledJob.metadata.name,
                 uid,

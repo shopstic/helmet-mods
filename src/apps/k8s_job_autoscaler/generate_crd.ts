@@ -80,7 +80,7 @@ const crd = {
                 properties: {
                   autoscaling: {
                     type: "object",
-                    required: ["query", "intervalSeconds", "metricServerUrl"],
+                    required: ["query", "intervalSeconds", "metricServerUrl", "maxReplicas"],
                     properties: {
                       query: {
                         type: "string",
@@ -90,6 +90,9 @@ const crd = {
                       },
                       metricServerUrl: {
                         type: "string",
+                      },
+                      maxReplicas: {
+                        type: "number",
                       },
                     },
                   },
