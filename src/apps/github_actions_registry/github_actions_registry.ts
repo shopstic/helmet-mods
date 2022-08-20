@@ -149,7 +149,7 @@ const program = new CliProgram()
         })();
 
         (async () => {
-          for await (const _ of agInterval(allReposRefreshIntervalSeconds)) {
+          for await (const _ of agInterval(allReposRefreshIntervalSeconds * 1000)) {
             logger.info({ message: "Polling from all active repos" });
 
             const activeRepos = await getLastActiveRepoNames({ client: await accessClientPromise, org });
