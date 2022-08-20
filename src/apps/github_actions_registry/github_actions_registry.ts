@@ -99,6 +99,7 @@ const program = new CliProgram()
           clientRefreshIntervalSeconds,
           perRepoMinRefreshIntervalMs,
           allReposRefreshIntervalSeconds,
+          activeReposLastPushedWithinHours = 1,
           webhookSigningKeyPath,
           webhookServerPort,
           registryServerPort,
@@ -152,7 +153,11 @@ const program = new CliProgram()
           for await (const _ of agInterval(allReposRefreshIntervalSeconds * 1000)) {
             logger.info({ message: "Polling from all active repos" });
 
-            const activeRepos = await getLastActiveRepoNames({ client: await accessClientPromise, org });
+            const activeRepos = await getLastActiveRepoNames({
+              client: await accessClientPromise,
+              org,
+              lastPushedWithinHours: activeReposLastPushedWithinHours,
+            });
 
             logger.info({ message: `Got ${activeRepos.length} active repos`, activeRepos });
 

@@ -4,7 +4,13 @@ import { GhComponents, GhPaths } from "../../../deps/github_api.ts";
 import { base64Decode } from "../../../deps/std_encoding.ts";
 import { createJwt } from "../../../deps/djwt.ts";
 
-export async function getLastActiveRepoNames({ client, org }: { org: string; client: OpenapiClient<GhPaths> }) {
+export async function getLastActiveRepoNames(
+  { client, org, lastPushedWithinHours }: {
+    org: string;
+    client: OpenapiClient<GhPaths>;
+    lastPushedWithinHours: number;
+  },
+) {
   const repos = (await client.endpoint("/orgs/{org}/repos").method("get")({
     path: {
       org,
@@ -16,7 +22,7 @@ export async function getLastActiveRepoNames({ client, org }: { org: string; cli
   })).data;
 
   return repos
-    .filter((r) => r.pushed_at && new Date(r.pushed_at).getTime() > Date.now() - 24 * 60 * 60 * 1000)
+    .filter((r) => r.pushed_at && new Date(r.pushed_at).getTime() > Date.now() - lastPushedWithinHours * 60 * 60 * 1000)
     .map((r) => r.name);
 }
 
