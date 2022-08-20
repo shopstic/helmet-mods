@@ -164,6 +164,7 @@ const program = new CliProgram()
 
         function requestReconciliation(request: ReconciliationRequest) {
           if (!reconciliationLoopByIdMap.has(request.id)) {
+            logger.info({ message: "Create reconciliation loop", id: request.id, perRepoMinRefreshIntervalMs });
             const rl = createReconciliationLoop<ReconciliationRequest>();
             reconciliationLoopByIdMap.set(request.id, rl);
             runReconciliationLoop(agThrottle(rl.loop, perRepoMinRefreshIntervalMs));

@@ -69,7 +69,6 @@ export async function* agThrottle<T>(items: AsyncGenerator<T>, minDelayMs: numbe
   let last = performance.now();
 
   for await (const item of items) {
-    yield item;
     const now = performance.now();
     const elapseMs = now - last;
 
@@ -77,6 +76,8 @@ export async function* agThrottle<T>(items: AsyncGenerator<T>, minDelayMs: numbe
     if (toDelayMs > 0) {
       await delay(toDelayMs);
     }
+
+    yield item;
     last = performance.now();
   }
 }
