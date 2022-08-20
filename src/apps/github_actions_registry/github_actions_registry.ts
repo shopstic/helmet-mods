@@ -81,7 +81,7 @@ async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequ
     logger.info({ message: "Getting repo pending jobs", owner, repo });
     const jobs = await getRepoPendingJobs({ client, owner, repo });
     logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
-    jobsByRepoMap.set(`${owner}/repo`, { owner, repo, jobs });
+    jobsByRepoMap.set(`${owner}/${repo}`, { owner, repo, jobs });
   }
 }
 
