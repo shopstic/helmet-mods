@@ -15,6 +15,7 @@ jobs:
   build-x86_64:
     name: Build x86_64
     runs-on: [self-hosted, nix, amd64-linux, small]
+    timeout-minutes: 20
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
@@ -28,6 +29,7 @@ jobs:
   build-aarch64:
     name: Build aarch64
     runs-on: [self-hosted, nix, arm64-linux, small]
+    timeout-minutes: 20
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
@@ -41,6 +43,7 @@ jobs:
   push:
     name: Push
     runs-on: [self-hosted, nix, arm64-linux, small]
+    timeout-minutes: 20
     needs: [build-x86_64, build-aarch64]
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
