@@ -7,6 +7,7 @@ import {
   K8sDeployment,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
+import { IoK8sApiCoreV1TopologySpreadConstraint } from "../../../deps/k8s_utils.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
 export function createFdbBackupAgentContainer(
@@ -56,6 +57,7 @@ export function createFdbBackupDeployment(
     connectionStringConfigMapRef,
     volumeMounts,
     volumes,
+    topologySpreadConstraints,
   }: {
     replicas: number;
     baseName: string;
@@ -66,6 +68,7 @@ export function createFdbBackupDeployment(
     volumeMounts: IoK8sApiCoreV1VolumeMount[];
     volumes: IoK8sApiCoreV1Volume[];
     baseLabels: Record<string, string>;
+    topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
   },
 ): K8sDeployment {
   const labels = {
@@ -114,7 +117,7 @@ export function createFdbBackupDeployment(
             fsGroupChangePolicy: "OnRootMismatch",
           },
           volumes,
-          topologySpreadConstraints: [
+          topologySpreadConstraints: topologySpreadConstraints ? (topologySpreadConstraints(labels)) : [
             {
               maxSkew: 1,
               topologyKey: "kubernetes.io/hostname",

@@ -4,7 +4,11 @@ import {
   K8sDeployment,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1ResourceRequirements } from "../../../deps/k8s_utils.ts";
+import {
+  IoK8sApiCoreV1PodSpec,
+  IoK8sApiCoreV1ResourceRequirements,
+  IoK8sApiCoreV1TopologySpreadConstraint,
+} from "../../../deps/k8s_utils.ts";
 import { createFdbContainer, FdbLocalityMode } from "./fdb_container.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
@@ -22,6 +26,7 @@ export function createFdbStatelessDeployment(
     resourceRequirements,
     locality,
     args,
+    topologySpreadConstraints,
   }: {
     baseName: string;
     processClass: "grv_proxy" | "commit_proxy" | "stateless";
@@ -35,6 +40,7 @@ export function createFdbStatelessDeployment(
     resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
     locality: FdbLocalityMode;
     args?: string[];
+    topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
   },
 ): K8sDeployment {
   const statelessLabels = {
@@ -110,7 +116,7 @@ export function createFdbStatelessDeployment(
               emptyDir: {},
             },
           ],
-          topologySpreadConstraints: [
+          topologySpreadConstraints: topologySpreadConstraints ? topologySpreadConstraints(statelessLabels) : [
             {
               maxSkew: 1,
               topologyKey: "kubernetes.io/hostname",

@@ -12,6 +12,7 @@ import {
   IoK8sApiCoreV1Affinity,
   IoK8sApiCoreV1PodSpec,
   IoK8sApiCoreV1ResourceRequirements,
+  IoK8sApiCoreV1TopologySpreadConstraint,
 } from "../../../deps/k8s_utils.ts";
 import { createFdbContainer, FdbConfiguredProcessClass, FdbLocalityMode } from "./fdb_container.ts";
 
@@ -28,6 +29,7 @@ export interface FdbStatefulConfig {
   nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
   args?: string[];
   affinity?: IoK8sApiCoreV1Affinity;
+  topologySpreadConstraints?: Array<IoK8sApiCoreV1TopologySpreadConstraint>;
   resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
 }
 
@@ -131,6 +133,7 @@ export function createFdbStatefulResources(
           servers,
           nodeSelector,
           affinity,
+          topologySpreadConstraints,
           args,
           resourceRequirements,
         },
@@ -202,6 +205,7 @@ export function createFdbStatefulResources(
             spec: {
               containers,
               affinity,
+              topologySpreadConstraints,
               securityContext: {
                 runAsUser: 1001,
                 runAsGroup: 1001,

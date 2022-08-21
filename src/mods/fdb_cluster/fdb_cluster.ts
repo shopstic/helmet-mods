@@ -24,12 +24,16 @@ import { createFdbBackupDeployment } from "./lib/fdb_backup.ts";
 import { K8sImagePullPolicy } from "../../deps/helmet.ts";
 import { image as fdbImage } from "../../apps/fdb/meta.ts";
 import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
-import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1ResourceRequirements } from "../../deps/k8s_utils.ts";
+import {
+  IoK8sApiCoreV1PodSpec,
+  IoK8sApiCoreV1ResourceRequirements,
+  IoK8sApiCoreV1TopologySpreadConstraint,
+} from "../../deps/k8s_utils.ts";
 import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
 
-export const fdbExporterImage = "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.9";
+export const fdbExporterImage = "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.11";
 export const defaultDedupProxyImage = "public.ecr.aws/shopstic/dedup-proxy:2.0.1";
 
 export interface FdbClusterResources {
@@ -83,12 +87,14 @@ export function createFdbClusterResources(
       standbyCount: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
       resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+      topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
       args?: string[];
     } | {
       mode: "dev";
       count?: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
       resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+      topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
       args?: string[];
     };
     backup?: {
@@ -130,6 +136,7 @@ export function createFdbClusterResources(
       volumes: backup.volumes,
       image,
       imagePullPolicy,
+      topologySpreadConstraints: stateless.topologySpreadConstraints,
     })
     : undefined;
 
@@ -157,6 +164,7 @@ export function createFdbClusterResources(
       resourceRequirements: stateless.resourceRequirements,
       locality,
       args: stateless.args,
+      topologySpreadConstraints: stateless.topologySpreadConstraints,
     })
     : undefined;
 
@@ -174,6 +182,7 @@ export function createFdbClusterResources(
       resourceRequirements: stateless.resourceRequirements,
       locality,
       args: stateless.args,
+      topologySpreadConstraints: stateless.topologySpreadConstraints,
     })
     : undefined;
 
@@ -190,6 +199,7 @@ export function createFdbClusterResources(
     resourceRequirements: stateless.resourceRequirements,
     locality,
     args: stateless.args,
+    topologySpreadConstraints: stateless.topologySpreadConstraints,
   });
 
   const coordinatorServiceNames = Object

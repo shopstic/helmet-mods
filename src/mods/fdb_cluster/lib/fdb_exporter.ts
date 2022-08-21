@@ -148,6 +148,13 @@ export function createFdbExporterResources(
                 sourceLabels: ["machine_id"],
                 targetLabel: "node",
               },
+              {
+                action: "replace",
+                sourceLabels: ["machine_id"],
+                regex: "([^\\.]+).*",
+                replacement: "$1",
+                targetLabel: "short_node",
+              },
             ],
             path: "/metrics",
             port: "metrics",
