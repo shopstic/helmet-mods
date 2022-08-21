@@ -58,6 +58,7 @@ export function createFdbBackupDeployment(
     volumeMounts,
     volumes,
     topologySpreadConstraints,
+    nodeSelector,
   }: {
     replicas: number;
     baseName: string;
@@ -69,6 +70,7 @@ export function createFdbBackupDeployment(
     volumes: IoK8sApiCoreV1Volume[];
     baseLabels: Record<string, string>;
     topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
+    nodeSelector?: Record<string, string>;
   },
 ): K8sDeployment {
   const labels = {
@@ -109,6 +111,7 @@ export function createFdbBackupDeployment(
           labels,
         },
         spec: {
+          nodeSelector,
           containers,
           securityContext: {
             runAsUser: 1001,

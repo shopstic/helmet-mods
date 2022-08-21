@@ -70,6 +70,7 @@ export function createFdbClusterResources(
     createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
     labels: extraLabels = {},
+    helpersNodeSelector = {},
   }: {
     baseName: string;
     namespace: string;
@@ -112,6 +113,7 @@ export function createFdbClusterResources(
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
     labels?: Record<string, string>;
+    helpersNodeSelector?: Record<string, string>;
   },
 ): FdbClusterResources {
   const labels = {
@@ -137,6 +139,7 @@ export function createFdbClusterResources(
       image,
       imagePullPolicy,
       topologySpreadConstraints: stateless.topologySpreadConstraints,
+      nodeSelector: helpersNodeSelector,
     })
     : undefined;
 
@@ -265,6 +268,7 @@ export function createFdbClusterResources(
     databaseConfig,
     image: configuratorImage,
     imagePullPolicy,
+    nodeSelector: helpersNodeSelector,
   });
 
   const syncConnectionString = createFdbSyncConnectionStringResources({
@@ -274,6 +278,7 @@ export function createFdbClusterResources(
     connectionStringConfigMapRef,
     image: configuratorImage,
     imagePullPolicy,
+    nodeSelector: helpersNodeSelector,
   });
 
   const exporter = createFdbExporterResources({
@@ -285,6 +290,7 @@ export function createFdbClusterResources(
     image: exporterImage,
     imagePullPolicy,
     createServiceMonitor,
+    nodeSelector: helpersNodeSelector,
   });
 
   return {

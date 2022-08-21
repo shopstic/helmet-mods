@@ -26,6 +26,7 @@ export function createFdbSyncConnectionStringResources({
   connectionStringConfigMapRef,
   image,
   imagePullPolicy,
+  nodeSelector,
 }: {
   releaseName: string;
   namespace: string;
@@ -33,6 +34,7 @@ export function createFdbSyncConnectionStringResources({
   connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
   image: string;
   imagePullPolicy: K8sImagePullPolicy;
+  nodeSelector?: Record<string, string>;
 }): FdbSyncConnectionStringResources {
   const resourceName = `${releaseName}-sync-connection-string`;
 
@@ -89,6 +91,7 @@ export function createFdbSyncConnectionStringResources({
           labels,
         },
         spec: {
+          nodeSelector,
           serviceAccountName: serviceAccount.metadata.name,
           containers: [container],
           securityContext: {

@@ -24,6 +24,7 @@ export function createFdbExporterResources(
     image,
     imagePullPolicy,
     createServiceMonitor,
+    nodeSelector,
   }: {
     name: string;
     namespace: string;
@@ -33,6 +34,7 @@ export function createFdbExporterResources(
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
     createServiceMonitor: boolean;
+    nodeSelector?: Record<string, string>;
   },
 ): FdbExporterResources {
   const labels = {
@@ -71,6 +73,7 @@ export function createFdbExporterResources(
           labels,
         },
         spec: {
+          nodeSelector,
           containers: [{
             name: "exporter",
             image,

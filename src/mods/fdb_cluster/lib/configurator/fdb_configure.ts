@@ -33,6 +33,7 @@ export function createFdbConfigureResources(
     databaseConfig,
     image,
     imagePullPolicy,
+    nodeSelector,
   }: {
     baseName: string;
     namespace: string;
@@ -41,6 +42,7 @@ export function createFdbConfigureResources(
     databaseConfig: FdbDatabaseConfig;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
+    nodeSelector?: Record<string, string>;
   },
 ): FdbConfigureResources {
   const resourceName = `${baseName}-configure`;
@@ -110,6 +112,7 @@ export function createFdbConfigureResources(
           labels: jobLabels,
         },
         spec: {
+          nodeSelector,
           serviceAccountName: serviceAccount.metadata.name,
           containers: [container],
           restartPolicy: "OnFailure",
