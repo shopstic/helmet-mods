@@ -18,7 +18,7 @@ defaults:
 jobs:
   release:
     name: Release ${{ github.event.inputs.version }}
-    runs-on: [self-hosted, nix, arm64-linux, small]
+    runs-on: [self-hosted, nix, general, arm64-linux, small]
     steps:
       - uses: actions/checkout@v3
 
