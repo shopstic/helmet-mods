@@ -45,11 +45,12 @@ export async function* watchMetric(
       if (toDelayMs > 0) {
         await delay(toDelayMs);
       }
-      last = performance.now();
     } catch (error) {
       if (!(error instanceof DOMException) || error.name !== "AbortError") {
         logger.error({ message: "Metric query failed", error });
       }
+    } finally {
+      last = performance.now();
     }
   }
 }
