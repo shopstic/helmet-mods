@@ -147,6 +147,7 @@ release_image() {
   local DEV_TAG=${2:?"Image dev tag is required"}
   local RELEASE_TAG=${3:?"Image release tag is required"}
 
+  set -x
   local DIGEST
   DIGEST=$(regctl manifest digest --list --require-list "${IMAGE_REPOSITORY}/${IMAGE}:${DEV_TAG}") || exit $?
 
