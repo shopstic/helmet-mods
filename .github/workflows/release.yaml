@@ -27,11 +27,14 @@ jobs:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ github.event.inputs.version }}
+          IMAGE_REPOSITORY: public.ecr.aws/shopstic
         shell: nix develop -v -c bash {0}
         run: |
-          IMAGE_TAG=""
+          DEV_TAG=""
           if [[ "${REFERENCE_SHA}" != "" ]]; then
-            IMAGE_TAG="dev-${REFERENCE_SHA}"
+            DEV_TAG="dev-${REFERENCE_SHA}"
+          else
+            DEV_TAG=$(./cli.sh generate_image_tag)
           fi
 
-          ./release.sh release public.ecr.aws/shopstic "${RELEASE_VERSION}" "${IMAGE_TAG}"
+          ./cli.sh release "${DEV_TAG}" "${RELEASE_VERSION}"

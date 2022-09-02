@@ -115,7 +115,8 @@ export function createK8sJobAutoscalerResources({
           containers: [
             {
               name: "kubectl-proxy",
-              image: "public.ecr.aws/shopstic/bin-kubectl:1.23.5",
+              image:
+                "public.ecr.aws/shopstic/bin-kubectl:1.23.5@sha256:f0226b79af58eb2c091f995c57ee2d929608d127b72b76294fcbdb5912aa2fa3",
               command: ["/bin/kubectl", "proxy"],
             },
             {

@@ -22,7 +22,7 @@ import { createFdbExporterResources, FdbExporterResources } from "./lib/fdb_expo
 import { createFdbBackupDeployment } from "./lib/fdb_backup.ts";
 
 import { K8sImagePullPolicy } from "../../deps/helmet.ts";
-import { image as fdbImage } from "../../apps/fdb/meta.ts";
+import { image as fdbImage } from "../../apps/fdb_server/meta.ts";
 import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
 import {
   IoK8sApiCoreV1PodSpec,
@@ -33,8 +33,10 @@ import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
 
-export const fdbExporterImage = "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.11";
-export const defaultDedupProxyImage = "public.ecr.aws/shopstic/dedup-proxy:2.0.1";
+export const fdbExporterImage =
+  "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.21@sha256:34232af0327e7a05580d72efbced682390f277e32af086a4ffed48131db49151";
+export const defaultDedupProxyImage =
+  "public.ecr.aws/shopstic/dedup-proxy:2.0.1@sha256:bc87c6736d0fc1ce4ee57ec4a03839e77515ae323c6f123f5964acea1a799974";
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;

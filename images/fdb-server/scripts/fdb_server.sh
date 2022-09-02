@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 FDB_CONNECTION_STRING=${FDB_CONNECTION_STRING:?"FDB_CONNECTION_STRING env variable is required"}
@@ -23,7 +23,7 @@ FDB_DATA_HALL=${FDB_DATA_HALL:-""}
 
 FDB_PUBLIC_ADDRESS=""
 
-if [[ "${FDB_USE_SERVICE_ADDRESS}" == "true" ]]; then
+if [[ "${FDB_USE_SERVICE_ADDRESS:-"false"}" == "true" ]]; then
   FDB_K8S_SERVICE_HOST_ENV_NAME=${FDB_K8S_SERVICE_HOST_ENV_NAME:?"FDB_K8S_SERVICE_HOST_ENV_NAME env variable is required"}
   FDB_K8S_SERVICE_PORT_ENV_NAME=${FDB_K8S_SERVICE_PORT_ENV_NAME:?"FDB_K8S_SERVICE_PORT_ENV_NAME env variable is required"}
 

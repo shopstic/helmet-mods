@@ -5,13 +5,15 @@
     hotPot.url = "github:shopstic/nix-hot-pot";
     nixpkgs.follows = "hotPot/nixpkgs";
     flakeUtils.follows = "hotPot/flakeUtils";
-    fdbPkgs.url = "github:shopstic/nix-fdb/7.1.11";
+    fdbPkgs.url = "github:shopstic/nix-fdb/7.1.21";
+    nix2containerPkg.follows = "hotPot/nix2containerPkg";
   };
 
-  outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot }:
+  outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot, nix2containerPkg }:
     flakeUtils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ] (system:
       let
         hotPotPkgs = hotPot.packages.${system};
+        nix2container = nix2containerPkg.packages.${system}.nix2container;
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
@@ -36,19 +38,21 @@
           };
         deno = hotPotPkgs.deno;
         buildahBuild = pkgs.callPackage hotPot.lib.buildahBuild;
-        deps = pkgs.callPackage ./build/deps.nix {
+        writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
+        nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
+        deps = pkgs.callPackage ./images/deps.nix {
           inherit src deno;
         };
-        denoBundle = tsPath: pkgs.callPackage ./build/lib/deno-bundle.nix {
+        denoBundle = tsPath: pkgs.callPackage ./images/lib/deno-bundle.nix {
           inherit src tsPath deno deps;
         };
-        fdbConfigurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
-        iacVersionBumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
-        registryAuthenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
-        registrySyncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
-        k8sJobAutoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
-        githubActionsRegistry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
-        vscodeSettings = pkgs.writeTextFile {
+        fdb-configurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
+        iac-version-bumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
+        registry-authenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
+        registry-syncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
+        k8s-job-autoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
+        github-actions-registry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
+        vscode-settings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
             "deno.enable" = true;
@@ -80,47 +84,55 @@
             {
               inherit deno;
               inherit (pkgs)
-                skopeo
                 gh
                 awscli2
                 jq
                 ;
               inherit (hotPotPkgs)
                 manifest-tool
+                skopeo-nix2container
                 regclient
                 ;
             };
           shellHook = ''
             mkdir -p ./.vscode
-            cat ${vscodeSettings} > ./.vscode/settings.json
+            cat ${vscode-settings} > ./.vscode/settings.json
           '';
         };
         packages = {
-          inherit deps fdbConfigurator iacVersionBumper registryAuthenticator registrySyncer k8sJobAutoscaler;
-        } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
-          fdbServerImage = pkgs.callPackage ./build/fdb-server {
-            inherit buildahBuild fdb;
-          };
-          fdbConfiguratorImage = pkgs.callPackage ./build/fdb-configurator {
-            inherit fdbConfigurator buildahBuild fdb deno;
-          };
-          iacVersionBumperImage = pkgs.callPackage ./build/iac-version-bumper {
-            inherit iacVersionBumper buildahBuild deno;
-          };
-          registryAuthenticatorImage = pkgs.callPackage ./build/registry-authenticator {
-            inherit registryAuthenticator buildahBuild deno;
-          };
-          registrySyncerImage = pkgs.callPackage ./build/registry-syncer {
-            inherit registrySyncer buildahBuild deno;
-          };
-          k8sJobAutoscalerImage = pkgs.callPackage ./build/k8s-job-autoscaler {
-            inherit k8sJobAutoscaler deno;
-          };
-          githubActionsRegistryImage = pkgs.callPackage ./build/github-actions-registry {
-            inherit githubActionsRegistry deno;
-          };
-        };
-        defaultPackage = pkgs.linkFarmFromDrvs "helmet-mods-all" (pkgs.lib.attrValues packages);
+          inherit deps fdb-configurator iac-version-bumper registry-authenticator registry-syncer k8s-job-autoscaler;
+        } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
+          let
+            images = {
+              image-fdb-server = pkgs.callPackage ./images/fdb-server {
+                inherit nix2container nonRootShadowSetup fdb;
+              };
+              image-fdb-configurator = pkgs.callPackage ./images/fdb-configurator {
+                inherit nonRootShadowSetup nix2container fdb deno fdb-configurator;
+              };
+              image-iac-version-bumper = pkgs.callPackage ./images/iac-version-bumper {
+                inherit nonRootShadowSetup nix2container iac-version-bumper deno;
+              };
+              image-registry-authenticator = pkgs.callPackage ./images/registry-authenticator {
+                inherit nonRootShadowSetup nix2container registry-authenticator deno;
+              };
+              image-registry-syncer = pkgs.callPackage ./images/registry-syncer {
+                inherit nonRootShadowSetup nix2container registry-syncer deno;
+              };
+              image-k8s-job-autoscaler = pkgs.callPackage ./images/k8s-job-autoscaler {
+                inherit nonRootShadowSetup nix2container k8s-job-autoscaler deno;
+              };
+              image-github-actions-registry = pkgs.callPackage ./images/github-actions-registry {
+                inherit nonRootShadowSetup nix2container github-actions-registry deno;
+              };
+            };
+          in
+          (images // ({
+            all-images = pkgs.linkFarmFromDrvs "all-images" (pkgs.lib.attrValues images);
+          }))
+        );
+        defaultPackage = pkgs.linkFarmFromDrvs "helmet-mods"
+          (pkgs.lib.unique (builtins.attrValues (pkgs.lib.filterAttrs (n: _: (!(pkgs.lib.hasPrefix "image-" n) && n != "all-images")) packages)));
       }
     );
 }

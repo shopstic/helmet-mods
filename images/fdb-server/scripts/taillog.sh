@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 FDB_PROCESS_LOG_DIR=${FDB_PROCESS_LOG_DIR:-"/home/app/log"}
 

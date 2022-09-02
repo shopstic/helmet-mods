@@ -7,90 +7,95 @@ on:
       - 'releases/*'
   pull_request:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  build-x86_64:
-    name: Build x86_64
-    runs-on: [self-hosted, nix, general, amd64-linux, small]
+  build-packages:
+    name: Build packages
     timeout-minutes: 20
-    outputs:
-      digests: ${{ steps.build.outputs.digests }}
+    runs-on:
+      - self-hosted
+      - nix
+      - general
+      - ${{ matrix.runner.runner }}
+      - ${{ matrix.runner.size }}
+    strategy:
+      matrix:
+        runner:
+          - arch: x86_64-linux
+            runner: amd64-linux
+            size: medium
+          - arch: aarch64-linux
+            runner: arm64-linux
+            size: medium
+          - arch: aarch64-darwin
+            runner: arm64-darwin
+            size: small
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/build
-        id: build
-        with:
-          imageRepo: public.ecr.aws/shopstic
-          arch: x86_64
 
-  build-aarch64:
-    name: Build aarch64
-    runs-on: [self-hosted, nix, general, arm64-linux, small]
+      - name: Build all packages
+        run: nix build -L -v '.#defaultPackage.${{ matrix.runner.arch }}'
+
+      - name: Cache all packages
+        env:
+          NIX_OUTPUT: .#defaultPackage.${{ matrix.runner.arch }}
+        shell: nix develop -v -c bash {0}
+        run: |
+          nix store sign "${NIX_OUTPUT}" -v -r -k ~/.secrets/nix-cache-private-key
+          nix copy -v --to s3://nixed/cache "${NIX_OUTPUT}"
+
+  build-push-images:
+    name: Build and push images
     timeout-minutes: 20
-    outputs:
-      digests: ${{ steps.build.outputs.digests }}
+    runs-on: 
+      - self-hosted
+      - nix
+      - general
+      - ${{ matrix.imageArch }}-linux
+      - medium
+    needs: [build-packages]
+    env:
+      IMAGE_REPOSITORY: public.ecr.aws/shopstic
+    strategy:
+      matrix:
+        imageArch: [amd64, arm64]
+
     steps:
-      - uses: actions/checkout@v3    
-      - uses: ./.github/actions/build
-        id: build
-        with:
-          imageRepo: public.ecr.aws/shopstic
-          arch: aarch64
+      - uses: actions/checkout@v3
 
-  push:
-    name: Push
-    runs-on: [self-hosted, nix, general, arm64-linux, small]
+      - name: Build all images
+        shell: nix develop -v -c bash {0}
+        run: |
+          ./cli.sh build_all_images ${{ matrix.imageArch }}
+
+      - name: Login
+        if: github.ref == 'refs/heads/main'
+        shell: nix develop -v -c bash {0}
+        run: |-
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${IMAGE_REPOSITORY}"
+
+      - name: Push all images
+        if: github.ref == 'refs/heads/main'
+        shell: nix develop -v -c bash {0}
+        run: |
+          ./cli.sh push_all_single_arch_images ${{ matrix.imageArch }}
+
+  push-manifests:
+    name: Build and push multi-arch manifests
     timeout-minutes: 20
-    needs: [build-x86_64, build-aarch64]
+    runs-on: [self-hosted, nix, general, arm64-linux, small]
+    needs: [build-push-images]
+    if: github.ref == 'refs/heads/main'
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
       - uses: actions/checkout@v3
 
-      - name: Login to Amazon ECR
-        uses: ./.github/actions/login-to-public-ecr
-        with:
-          imageRepo: ${{ env.IMAGE_REPOSITORY }}
-
-      - name: Push multi-arch manifests
+      - name: Login
         shell: nix develop -v -c bash {0}
-        env:
-          GITHUB_SHA: ${{ github.sha }}
         run: |-
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/iac-version-bumper:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/iac-version-bumper:dev-"${GITHUB_SHA}"
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${IMAGE_REPOSITORY}"
 
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/registry-authenticator:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/registry-authenticator:dev-"${GITHUB_SHA}"
-
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/registry-syncer:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/registry-syncer:dev-"${GITHUB_SHA}"
-
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/fdb-server:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/fdb-server:dev-"${GITHUB_SHA}"
-          
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/fdb-configurator:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/fdb-configurator:dev-"${GITHUB_SHA}"
-          
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/k8s-job-autoscaler:dev-"${GITHUB_SHA}"
-          
-          manifest-tool push from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --template "${IMAGE_REPOSITORY}"/github-actions-registry:dev-ARCH-"${GITHUB_SHA}" \
-            --target "${IMAGE_REPOSITORY}"/github-actions-registry:dev-"${GITHUB_SHA}"
+      - name: Build and push images
+        shell: nix develop -v -c bash {0}
+        run: |
+          ./cli.sh push_all_manifests
