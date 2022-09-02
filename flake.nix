@@ -40,11 +40,11 @@
         buildahBuild = pkgs.callPackage hotPot.lib.buildahBuild;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
-        deps = pkgs.callPackage ./images/deps.nix {
+        deno-deps = pkgs.callPackage ./nix/lib/deno-deps.nix {
           inherit src deno;
         };
-        denoBundle = tsPath: pkgs.callPackage ./images/lib/deno-bundle.nix {
-          inherit src tsPath deno deps;
+        denoBundle = tsPath: pkgs.callPackage ./nix/lib/deno-bundle.nix {
+          inherit src tsPath deno deno-deps;
         };
         fdb-configurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
         iac-version-bumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
@@ -102,29 +102,29 @@
           '';
         };
         packages = {
-          inherit deps fdb-configurator iac-version-bumper registry-authenticator registry-syncer k8s-job-autoscaler;
+          inherit deno-deps fdb-configurator iac-version-bumper registry-authenticator registry-syncer k8s-job-autoscaler;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
             images = {
-              image-fdb-server = pkgs.callPackage ./images/fdb-server {
+              image-fdb-server = pkgs.callPackage ./nix/images/fdb-server {
                 inherit nix2container nonRootShadowSetup fdb;
               };
-              image-fdb-configurator = pkgs.callPackage ./images/fdb-configurator {
+              image-fdb-configurator = pkgs.callPackage ./nix/images/fdb-configurator {
                 inherit nonRootShadowSetup nix2container fdb deno fdb-configurator;
               };
-              image-iac-version-bumper = pkgs.callPackage ./images/iac-version-bumper {
+              image-iac-version-bumper = pkgs.callPackage ./nix/images/iac-version-bumper {
                 inherit nonRootShadowSetup nix2container iac-version-bumper deno;
               };
-              image-registry-authenticator = pkgs.callPackage ./images/registry-authenticator {
+              image-registry-authenticator = pkgs.callPackage ./nix/images/registry-authenticator {
                 inherit nonRootShadowSetup nix2container registry-authenticator deno;
               };
-              image-registry-syncer = pkgs.callPackage ./images/registry-syncer {
+              image-registry-syncer = pkgs.callPackage ./nix/images/registry-syncer {
                 inherit nonRootShadowSetup nix2container registry-syncer deno;
               };
-              image-k8s-job-autoscaler = pkgs.callPackage ./images/k8s-job-autoscaler {
+              image-k8s-job-autoscaler = pkgs.callPackage ./nix/images/k8s-job-autoscaler {
                 inherit nonRootShadowSetup nix2container k8s-job-autoscaler deno;
               };
-              image-github-actions-registry = pkgs.callPackage ./images/github-actions-registry {
+              image-github-actions-registry = pkgs.callPackage ./nix/images/github-actions-registry {
                 inherit nonRootShadowSetup nix2container github-actions-registry deno;
               };
             };

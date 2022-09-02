@@ -86,14 +86,14 @@ build_all_images() {
 
 push_all_single_arch_images() {
   local IMAGE_ARCH=${1:?"Arch is required (amd64 | arm64)"}
-  readarray -t IMAGES < <(find ./images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+  readarray -t IMAGES < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
   parallel -j8 --tagstring "[{}]" --line-buffer --retries=2 \
     "$0" push_single_arch {} "${IMAGE_ARCH}" ::: "${IMAGES[@]}"
 }
 
 push_all_manifests() {
-  readarray -t IMAGES < <(find ./images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+  readarray -t IMAGES < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
   parallel -j8 --tagstring "[{}]" --line-buffer --retries=2 \
     "$0" push_manifest {} ::: "${IMAGES[@]}"
@@ -172,7 +172,7 @@ release() {
   git config --global user.name "CI Runner"
   git checkout -b "${RELEASE_BRANCH}"
 
-  readarray -t IMAGES < <(find ./images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+  readarray -t IMAGES < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
   for IMAGE in "${IMAGES[@]}"; do
     echo "Retagging ${IMAGE} from ${DEV_TAG} to ${RELEASE_VERSION}"
