@@ -87,6 +87,7 @@
                 gh
                 awscli2
                 jq
+                parallel
                 ;
               inherit (hotPotPkgs)
                 manifest-tool
@@ -95,6 +96,7 @@
                 ;
             };
           shellHook = ''
+            echo 'will cite' | parallel --citation >/dev/null 2>&1
             mkdir -p ./.vscode
             cat ${vscode-settings} > ./.vscode/settings.json
           '';
