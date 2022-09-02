@@ -29,7 +29,7 @@ let
   entrypoint = writeShellScript "entrypoint" ''
     set -euo pipefail
     SCRIPT_NAME=''${1:?"Script name is required (either fdb_server.sh or backup_agent.sh"}
-    exec dumb-init -- "${scripts}/$SCRIPT_NAME" "''${@:2}"
+    exec "${scripts}/$SCRIPT_NAME" "''${@:2}"
   '';
   image = nix2container.buildImage
     {
@@ -50,7 +50,7 @@ let
         ];
         user = "${user}:${user}";
         workingdir = "/home/${user}";
-        entrypoint = [ entrypoint ];
+        entrypoint = [ "dumb-init" "--" entrypoint "fdb_server.sh" ];
       };
     };
 in

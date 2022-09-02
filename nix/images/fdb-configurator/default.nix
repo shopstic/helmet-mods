@@ -43,8 +43,7 @@ let
       echo "''${FDB_CONNECTION_STRING}" > "''${FDB_CLUSTER_FILE}"
     fi
 
-    exec dumb-init -- \
-      deno run --no-remote --cached-only -A "${fdb-configurator}" "$@"
+    exec deno run --no-remote --cached-only -A "${fdb-configurator}" "$@"
   '';
   image = nix2container.buildImage
     {
@@ -65,7 +64,7 @@ let
         ];
         user = "${user}:${user}";
         workingdir = "/home/${user}";
-        entrypoint = [ entrypoint ];
+        entrypoint = [ "dumb-init" "--" entrypoint ];
       };
     };
 in

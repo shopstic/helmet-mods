@@ -40,7 +40,7 @@ let
       LogLevel ERROR
     EOF
 
-    exec dumb-init -- deno run --cached-only -A ${iac-version-bumper} auto-bump-versions "$@"
+    exec deno run --cached-only -A ${iac-version-bumper} auto-bump-versions "$@"
   '';
   user = "app";
   shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
@@ -71,7 +71,7 @@ let
       }
     ];
     config = {
-      entrypoint = [ entrypoint ];
+      entrypoint = [ "dumb-init" "--" entrypoint ];
       user = "${user}:${user}";
       env = [
         "PATH=/bin"
