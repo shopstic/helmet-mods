@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version'
+        description: "Release version"
         required: true
       sha:
-        description: 'Reference commit'
+        description: "Reference commit"
         required: false
         default: ""
 
@@ -19,15 +19,21 @@ jobs:
   release:
     name: Release ${{ github.event.inputs.version }}
     runs-on: [self-hosted, nix, general, arm64-linux, small]
+    env:
+      IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
       - uses: actions/checkout@v3
+
+      - name: Login
+        shell: nix develop -v -c bash {0}
+        run: |-
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${IMAGE_REPOSITORY}"
 
       - name: Release
         env:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ github.event.inputs.version }}
-          IMAGE_REPOSITORY: public.ecr.aws/shopstic
         shell: nix develop -v -c bash {0}
         run: |
           DEV_TAG=""
