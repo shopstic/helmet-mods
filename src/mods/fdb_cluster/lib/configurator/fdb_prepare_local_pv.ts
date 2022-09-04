@@ -10,6 +10,7 @@ import {
   K8sImagePullPolicy,
   K8sServiceAccount,
 } from "../../../../deps/helmet.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
 
 export const PENDING_LABEL_VALUE_YES = "yes";
 export const PENDING_LABEL_VALUE_NO = "no";
@@ -36,6 +37,8 @@ export function createFdbPrepareLocalPvResources({
   image,
   imagePullPolicy,
   rootMountPath = "/mnt/fdb",
+  nodeSelector,
+  tolerations,
 }: {
   baseName: string;
   namespace: string;
@@ -43,6 +46,8 @@ export function createFdbPrepareLocalPvResources({
   image: string;
   imagePullPolicy: K8sImagePullPolicy;
   rootMountPath?: string;
+  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
 }): FdbPrepareLocalPvResources {
   const component = "prepare-local-pv";
   const resourceName = `${baseName}-${component}`;
@@ -117,8 +122,10 @@ export function createFdbPrepareLocalPvResources({
             runAsGroup: 0,
           },
           nodeSelector: {
+            ...(nodeSelector ?? {}),
             [pendingLabelName]: PENDING_LABEL_VALUE_YES,
           },
+          tolerations,
         },
       },
     },

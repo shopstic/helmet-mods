@@ -7,7 +7,7 @@ import {
   K8sDeployment,
   K8sImagePullPolicy,
 } from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1TopologySpreadConstraint } from "../../../deps/k8s_utils.ts";
+import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1TopologySpreadConstraint } from "../../../deps/k8s_utils.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
 export function createFdbBackupAgentContainer(
@@ -59,6 +59,7 @@ export function createFdbBackupDeployment(
     volumes,
     topologySpreadConstraints,
     nodeSelector,
+    tolerations,
   }: {
     replicas: number;
     baseName: string;
@@ -70,7 +71,8 @@ export function createFdbBackupDeployment(
     volumes: IoK8sApiCoreV1Volume[];
     baseLabels: Record<string, string>;
     topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
-    nodeSelector?: Record<string, string>;
+    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   },
 ): K8sDeployment {
   const labels = {
@@ -111,6 +113,7 @@ export function createFdbBackupDeployment(
           labels,
         },
         spec: {
+          tolerations,
           nodeSelector,
           containers,
           securityContext: {

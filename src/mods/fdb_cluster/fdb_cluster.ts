@@ -72,7 +72,8 @@ export function createFdbClusterResources(
     createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
     labels: extraLabels = {},
-    helpersNodeSelector = {},
+    helpersNodeSelector,
+    helpersTolerations,
   }: {
     baseName: string;
     namespace: string;
@@ -89,6 +90,7 @@ export function createFdbClusterResources(
       resolverCount: number;
       standbyCount: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+      tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
       resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
       topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
       args?: string[];
@@ -96,6 +98,7 @@ export function createFdbClusterResources(
       mode: "dev";
       count?: number;
       nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+      tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
       resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
       topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
       args?: string[];
@@ -115,7 +118,8 @@ export function createFdbClusterResources(
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
     labels?: Record<string, string>;
-    helpersNodeSelector?: Record<string, string>;
+    helpersNodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    helpersTolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   },
 ): FdbClusterResources {
   const labels = {
@@ -142,6 +146,7 @@ export function createFdbClusterResources(
       imagePullPolicy,
       topologySpreadConstraints: stateless.topologySpreadConstraints,
       nodeSelector: helpersNodeSelector,
+      tolerations: helpersTolerations,
     })
     : undefined;
 
@@ -166,6 +171,7 @@ export function createFdbClusterResources(
       image,
       imagePullPolicy,
       nodeSelector: stateless.nodeSelector,
+      tolerations: stateless.tolerations,
       resourceRequirements: stateless.resourceRequirements,
       locality,
       args: stateless.args,
@@ -184,6 +190,7 @@ export function createFdbClusterResources(
       image,
       imagePullPolicy,
       nodeSelector: stateless.nodeSelector,
+      tolerations: stateless.tolerations,
       resourceRequirements: stateless.resourceRequirements,
       locality,
       args: stateless.args,
@@ -201,6 +208,7 @@ export function createFdbClusterResources(
     image,
     imagePullPolicy,
     nodeSelector: stateless.nodeSelector,
+    tolerations: stateless.tolerations,
     resourceRequirements: stateless.resourceRequirements,
     locality,
     args: stateless.args,
@@ -241,6 +249,8 @@ export function createFdbClusterResources(
     coordinatorServiceNames: coordinatorServiceNames,
     image: configuratorImage,
     imagePullPolicy,
+    nodeSelector: helpersNodeSelector,
+    tolerations: helpersTolerations,
   });
 
   const grvProxyCount = stateless.mode === "prod" ? stateless.grvProxyCount : stateless.count ?? 1;
@@ -271,6 +281,7 @@ export function createFdbClusterResources(
     image: configuratorImage,
     imagePullPolicy,
     nodeSelector: helpersNodeSelector,
+    tolerations: helpersTolerations,
   });
 
   const syncConnectionString = createFdbSyncConnectionStringResources({
@@ -281,6 +292,7 @@ export function createFdbClusterResources(
     image: configuratorImage,
     imagePullPolicy,
     nodeSelector: helpersNodeSelector,
+    tolerations: helpersTolerations,
   });
 
   const exporter = createFdbExporterResources({
@@ -293,6 +305,7 @@ export function createFdbClusterResources(
     imagePullPolicy,
     createServiceMonitor,
     nodeSelector: helpersNodeSelector,
+    tolerations: helpersTolerations,
   });
 
   return {

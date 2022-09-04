@@ -11,6 +11,7 @@ import {
   K8sRoleBinding,
   K8sServiceAccount,
 } from "../../../../deps/helmet.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
 
 export interface FdbSyncConnectionStringResources {
   deployment: K8sDeployment;
@@ -27,6 +28,7 @@ export function createFdbSyncConnectionStringResources({
   image,
   imagePullPolicy,
   nodeSelector,
+  tolerations,
 }: {
   releaseName: string;
   namespace: string;
@@ -34,7 +36,8 @@ export function createFdbSyncConnectionStringResources({
   connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
   image: string;
   imagePullPolicy: K8sImagePullPolicy;
-  nodeSelector?: Record<string, string>;
+  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
 }): FdbSyncConnectionStringResources {
   const resourceName = `${releaseName}-sync-connection-string`;
 
@@ -91,6 +94,7 @@ export function createFdbSyncConnectionStringResources({
           labels,
         },
         spec: {
+          tolerations,
           nodeSelector,
           serviceAccountName: serviceAccount.metadata.name,
           containers: [container],

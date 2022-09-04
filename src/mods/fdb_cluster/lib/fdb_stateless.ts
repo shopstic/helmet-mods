@@ -22,6 +22,7 @@ export function createFdbStatelessDeployment(
     port,
     image,
     imagePullPolicy,
+    tolerations,
     nodeSelector,
     resourceRequirements,
     locality,
@@ -37,6 +38,7 @@ export function createFdbStatelessDeployment(
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
     nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
     resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
     locality: FdbLocalityMode;
     args?: string[];
@@ -98,6 +100,7 @@ export function createFdbStatelessDeployment(
           labels: statelessLabels,
         },
         spec: {
+          tolerations,
           nodeSelector,
           containers: [container],
           securityContext: {

@@ -15,6 +15,7 @@ import {
 } from "../../../../deps/helmet.ts";
 
 import { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
 
 export interface FdbConfigureResources {
   job: K8sJob;
@@ -34,6 +35,7 @@ export function createFdbConfigureResources(
     image,
     imagePullPolicy,
     nodeSelector,
+    tolerations,
   }: {
     baseName: string;
     namespace: string;
@@ -42,7 +44,8 @@ export function createFdbConfigureResources(
     databaseConfig: FdbDatabaseConfig;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    nodeSelector?: Record<string, string>;
+    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   },
 ): FdbConfigureResources {
   const resourceName = `${baseName}-configure`;
@@ -112,6 +115,7 @@ export function createFdbConfigureResources(
           labels: jobLabels,
         },
         spec: {
+          tolerations,
           nodeSelector,
           serviceAccountName: serviceAccount.metadata.name,
           containers: [container],

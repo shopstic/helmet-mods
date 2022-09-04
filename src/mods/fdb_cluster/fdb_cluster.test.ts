@@ -2,30 +2,44 @@ import { FdbStatefulConfig } from "./lib/fdb_stateful.ts";
 import { assertEquals, assertNotEquals } from "../../deps/std_testing.ts";
 
 import { createFdbClusterResources } from "./fdb_cluster.ts";
+import { IoK8sApiCoreV1Container, IoK8sApiCoreV1PodTemplateSpec } from "../../deps/k8s_utils.ts";
 
 Deno.test("fdb_cluster should work", () => {
   const baseName = "test";
   const namespace = "test";
+  const nodeSelector = {
+    foo: "bar",
+  };
+
+  const tolerations = [{
+    key: "foo",
+    operator: "Equal",
+    value: "bar",
+    effect: "NoExecute",
+  }];
 
   const fdbStatefulConfigs: Record<string, FdbStatefulConfig> = {
     "coordinator": {
       processClass: "coordinator",
       servers: [{ port: 4500 }],
-      nodeSelector: {},
+      nodeSelector,
+      tolerations,
       volumeSize: "1Gi",
       storageClassName: "local-path",
     },
     "log": {
       processClass: "log",
       servers: [{ port: 4500 }],
-      nodeSelector: {},
+      nodeSelector,
+      tolerations,
       volumeSize: "1Gi",
       storageClassName: "local-path",
     },
     "storage": {
       processClass: "storage",
       servers: [{ port: 4500 }],
-      nodeSelector: {},
+      nodeSelector,
+      tolerations,
       volumeSize: "1Gi",
       storageClassName: "local-path",
       resourceRequirements: {
@@ -47,8 +61,12 @@ Deno.test("fdb_cluster should work", () => {
       commitProxyCount: 1,
       resolverCount: 1,
       standbyCount: 0,
+      nodeSelector,
+      tolerations,
     },
     stateful: fdbStatefulConfigs,
+    helpersNodeSelector: nodeSelector,
+    helpersTolerations: tolerations,
     labels: {
       foo: "bar",
     },
@@ -68,14 +86,29 @@ Deno.test("fdb_cluster should work", () => {
     1,
   );
 
-  const allContainers = [
-    ...(cluster.statelessDeployment.spec!.template.spec!.containers),
-    ...(cluster.grvProxyDeployment!.spec!.template.spec!.containers),
-    ...(cluster.commitProxyDeployment!.spec!.template.spec!.containers),
-    ...(cluster.statefulSets.flatMap((s) => s.spec!.template.spec!.containers)),
+  const allWorkloadPodTemplates: IoK8sApiCoreV1PodTemplateSpec[] = [
+    cluster.statelessDeployment.spec!.template,
+    cluster.grvProxyDeployment!.spec!.template,
+    cluster.commitProxyDeployment!.spec!.template,
+    ...(cluster.statefulSets.map((s) => s.spec!.template)),
   ];
 
-  allContainers.forEach((container) => {
+  const allPodTemplates: IoK8sApiCoreV1PodTemplateSpec[] = [
+    ...allWorkloadPodTemplates,
+    cluster.createConnectionString.job.spec!.template,
+    cluster.configure.job.spec!.template,
+    cluster.exporter.deployment.spec!.template,
+    cluster.syncConnectionString.deployment.spec!.template,
+  ];
+
+  allPodTemplates.forEach((template) => {
+    assertEquals(template.spec!.nodeSelector, nodeSelector);
+    assertEquals(template.spec!.tolerations, tolerations);
+  });
+
+  const allWorkloadContainers: IoK8sApiCoreV1Container[] = allWorkloadPodTemplates.flatMap((t) => t.spec!.containers);
+
+  allWorkloadContainers.forEach((container) => {
     assertNotEquals(
       container.env!.find(({ name }) => name === "FDB_DATA_HALL"),
       undefined,

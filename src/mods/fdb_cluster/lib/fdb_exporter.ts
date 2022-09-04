@@ -6,6 +6,7 @@ import {
   K8sImagePullPolicy,
   K8sService,
 } from "../../../deps/helmet.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../../prometheus_operator/prometheus_operator.ts";
 
 export interface FdbExporterResources {
@@ -25,6 +26,7 @@ export function createFdbExporterResources(
     imagePullPolicy,
     createServiceMonitor,
     nodeSelector,
+    tolerations,
   }: {
     name: string;
     namespace: string;
@@ -34,7 +36,8 @@ export function createFdbExporterResources(
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
     createServiceMonitor: boolean;
-    nodeSelector?: Record<string, string>;
+    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   },
 ): FdbExporterResources {
   const labels = {
@@ -74,6 +77,7 @@ export function createFdbExporterResources(
         },
         spec: {
           nodeSelector,
+          tolerations,
           containers: [{
             name: "exporter",
             image,

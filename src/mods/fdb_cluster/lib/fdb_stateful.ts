@@ -27,6 +27,7 @@ export interface FdbStatefulConfig {
   volumeSize: string;
   storageClassName: string;
   nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   args?: string[];
   affinity?: IoK8sApiCoreV1Affinity;
   topologySpreadConstraints?: Array<IoK8sApiCoreV1TopologySpreadConstraint>;
@@ -132,6 +133,7 @@ export function createFdbStatefulResources(
           processClass,
           servers,
           nodeSelector,
+          tolerations,
           affinity,
           topologySpreadConstraints,
           args,
@@ -213,6 +215,7 @@ export function createFdbStatefulResources(
                 fsGroupChangePolicy: "OnRootMismatch",
               },
               nodeSelector,
+              tolerations,
               volumes: [
                 {
                   name: dataVolumeName,
