@@ -15,6 +15,7 @@ import { deferred } from "../../deps/async_utils.ts";
 import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
+import { captureExec } from "../../deps/exec_utils.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -37,6 +38,8 @@ interface QueuedJobs {
   jobs: Array<{
     name: string;
     labels: string[];
+    status: "queued" | "in_progress" | "completed";
+    runnerName: string | null;
   }>;
 }
 
@@ -48,6 +51,7 @@ function renderQueueJobsMetrics() {
       const item = {
         name: job.name,
         labels: job.labels.slice().sort(),
+        status: job.status,
       };
 
       const hash = stableHash(item);
@@ -59,13 +63,13 @@ function renderQueueJobsMetrics() {
       }
 
       return map;
-    }, new Map<string, { item: { name: string; labels: string[] }; count: number }>());
+    }, new Map<string, { item: { name: string; labels: string[]; status: string }; count: number }>());
 
     return Array
-      .from(countMap.values()).map(({ item: { name, labels }, count }) => {
+      .from(countMap.values()).map(({ item: { name, labels, status }, count }) => {
         return `github_actions_pending_jobs{owner=${JSON.stringify(owner)},repo=${JSON.stringify(repo)},name=${
           JSON.stringify(name)
-        },labels=${JSON.stringify(`,${labels.join(",")},`)}} ${count}`;
+        },labels=${JSON.stringify(`,${labels.join(",")},`)},status=${status}} ${count}`;
       });
   });
 
@@ -75,13 +79,56 @@ function renderQueueJobsMetrics() {
   ].concat(lines).join("\n");
 }
 
-async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequest>) {
+async function runReconciliationLoop(
+  { requests, namespace, inProgressPodAnnotation }: {
+    requests: AsyncGenerator<ReconciliationRequest>;
+    namespace: string;
+    inProgressPodAnnotation: string;
+  },
+) {
   for await (const { org: owner, repo } of requests) {
     const client = await accessClientPromise;
+
     logger.info({ message: "Getting repo pending jobs", owner, repo });
     const jobs = await getRepoPendingJobs({ client, owner, repo });
+
     logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
     jobsByRepoMap.set(`${owner}/${repo}`, { owner, repo, jobs });
+
+    await Promise.all(
+      jobs.filter((j) => j.status === "in_progress" && j.runnerName).map(async (job) => {
+        try {
+          const result = await captureExec({
+            cmd: [
+              "kubectl",
+              "annotate",
+              "pod",
+              "-n",
+              namespace,
+              "--overwrite",
+              job.runnerName!,
+              inProgressPodAnnotation,
+            ],
+          });
+
+          logger.info({
+            message: "Annotated an in-progress job pod",
+            namespace,
+            runnerName: job.runnerName,
+            inProgressPodAnnotation,
+            result,
+          });
+        } catch (error) {
+          logger.error({
+            message: "Failed annotating an in-progress job pod",
+            namespace,
+            runnerName: job.runnerName,
+            inProgressPodAnnotation,
+            error,
+          });
+        }
+      }),
+    );
   }
 }
 
@@ -92,6 +139,8 @@ const program = new CliProgram()
       GithubActionsRegistryParamsSchema,
       async (
         {
+          namespace: maybeNamespace,
+          inProgressPodAnnotation,
           org,
           appId,
           installationId,
@@ -107,6 +156,8 @@ const program = new CliProgram()
         _,
         signal,
       ) => {
+        const namespace = maybeNamespace ??
+          (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
         const sign = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
 
         (async () => {
@@ -172,7 +223,11 @@ const program = new CliProgram()
             logger.info({ message: "Create reconciliation loop", id: request.id, perRepoMinRefreshIntervalMs });
             const rl = createReconciliationLoop<ReconciliationRequest>();
             reconciliationLoopByIdMap.set(request.id, rl);
-            runReconciliationLoop(agThrottle(rl.loop, perRepoMinRefreshIntervalMs));
+            runReconciliationLoop({
+              requests: agThrottle(rl.loop, perRepoMinRefreshIntervalMs),
+              namespace,
+              inProgressPodAnnotation,
+            });
           }
           reconciliationLoopByIdMap.get(request.id)!.request(request);
         }
@@ -213,7 +268,7 @@ const program = new CliProgram()
 
               if (
                 typeof payload === "object" && "action" in payload && "workflow_job" in payload &&
-                (payload.action === "queued" || payload.action === "completed")
+                (payload.action === "queued" || payload.action === "completed" || payload.action === "in_progress")
               ) {
                 const event: WorkflowJobEvent = payload;
 

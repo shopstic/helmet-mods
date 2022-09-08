@@ -74,9 +74,13 @@ export async function getRepoPendingJobs(
       })).data.jobs;
   }))).flat();
 
-  return jobs.filter((j) => j.status !== "completed").map((j) => ({
-    name: j.name,
-    labels: j.labels,
+  return jobs.filter(({ status }) => status !== "completed").map((
+    { name, labels, status, runner_name: runnerName },
+  ) => ({
+    name,
+    labels,
+    status,
+    runnerName,
   }));
 }
 

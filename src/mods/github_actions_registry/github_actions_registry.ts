@@ -1,10 +1,16 @@
 import {
   createK8sDeployment,
   createK8sIngress,
+  createK8sRole,
+  createK8sRoleBinding,
   createK8sService,
+  createK8sServiceAccount,
   K8sDeployment,
   K8sIngress,
+  K8sRole,
+  K8sRoleBinding,
   K8sService,
+  K8sServiceAccount,
 } from "../../deps/helmet.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
 import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
@@ -17,6 +23,9 @@ export interface GithubActionsRegistryResources {
   ingress?: K8sIngress;
   serviceMonitor?: ServiceMonitorV1;
   deployment: K8sDeployment;
+  role: K8sRole;
+  roleBinding: K8sRoleBinding;
+  serviceAccount: K8sServiceAccount;
 }
 
 export function createGithubActionsRegistryResources({
@@ -24,6 +33,7 @@ export function createGithubActionsRegistryResources({
   image = defaultGithubActionsRegistryImage,
   namespace,
   ingress: ingressConfig,
+  inProgressPodAnnotation,
   appId,
   installationId,
   org,
@@ -60,6 +70,7 @@ export function createGithubActionsRegistryResources({
   }
   & Pick<
     GithubActionsRegistryParams,
+    | "inProgressPodAnnotation"
     | "appId"
     | "installationId"
     | "org"
@@ -142,6 +153,7 @@ export function createGithubActionsRegistryResources({
   const webhookSigningKeyMountPath = `${secretsMountPath}/${webhookSigningKeyFileName}`;
 
   const args: GithubActionsRegistryParams = {
+    inProgressPodAnnotation,
     appId,
     installationId,
     org,
@@ -154,6 +166,46 @@ export function createGithubActionsRegistryResources({
     privateKeyPath: privateKeyMountPath,
     webhookSigningKeyPath: webhookSigningKeyMountPath,
   };
+
+  const serviceAccount = createK8sServiceAccount({
+    metadata: {
+      name,
+      namespace,
+    },
+  });
+
+  const role = createK8sRole({
+    metadata: {
+      name,
+      namespace,
+    },
+    rules: [
+      {
+        apiGroups: [""],
+        resources: ["pods"],
+        verbs: ["get", "update", "patch"],
+      },
+    ],
+  });
+
+  const roleBinding = createK8sRoleBinding({
+    metadata: {
+      name,
+      namespace,
+    },
+    subjects: [
+      {
+        kind: "ServiceAccount",
+        name,
+        namespace,
+      },
+    ],
+    roleRef: {
+      kind: "Role",
+      name,
+      apiGroup: "rbac.authorization.k8s.io",
+    },
+  });
 
   const deployment = createK8sDeployment({
     metadata: {
@@ -177,6 +229,7 @@ export function createGithubActionsRegistryResources({
             runAsUser: 1001,
             runAsGroup: 1001,
           },
+          serviceAccountName: serviceAccount.metadata.name,
           containers: [
             {
               name: "registry",
@@ -248,5 +301,8 @@ export function createGithubActionsRegistryResources({
     ingress,
     deployment,
     serviceMonitor,
+    role,
+    roleBinding,
+    serviceAccount,
   };
 }
