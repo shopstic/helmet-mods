@@ -69,7 +69,7 @@ function renderQueueJobsMetrics() {
       .from(countMap.values()).map(({ item: { name, labels, status }, count }) => {
         return `github_actions_pending_jobs{owner=${JSON.stringify(owner)},repo=${JSON.stringify(repo)},name=${
           JSON.stringify(name)
-        },labels=${JSON.stringify(`,${labels.join(",")},`)},status=${status}} ${count}`;
+        },labels=${JSON.stringify(`,${labels.join(",")},`)},status=${JSON.stringify(status)}} ${count}`;
       });
   });
 
