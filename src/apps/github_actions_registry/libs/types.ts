@@ -12,6 +12,8 @@ export const GithubActionsRegistryParamsSchema = Type.Object({
   webhookSigningKeyPath: Type.String({ minLength: 1 }),
   webhookServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
   registryServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
+  busyJobAnnotation: Type.String({ minLength: 1 }),
+  namespace: Type.Optional(Type.String({ minLength: 1 })),
 });
 
 export type GithubActionsRegistryParams = Static<typeof GithubActionsRegistryParamsSchema>;

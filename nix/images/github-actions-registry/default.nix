@@ -6,6 +6,7 @@
 , nix2container
 , deno
 , dumb-init
+, kubectl
 , github-actions-registry
 }:
 let
@@ -19,6 +20,7 @@ let
     paths = [
       dumb-init
       deno
+      kubectl
     ];
   };
   image = nix2container.buildImage {

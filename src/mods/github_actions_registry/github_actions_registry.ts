@@ -40,6 +40,7 @@ export function createGithubActionsRegistryResources({
   perRepoMinRefreshIntervalMs,
   allReposRefreshIntervalSeconds,
   activeReposLastPushedWithinHours,
+  busyJobAnnotation,
   secrets: {
     privateKey,
     webhookSigningKey,
@@ -76,6 +77,7 @@ export function createGithubActionsRegistryResources({
     | "perRepoMinRefreshIntervalMs"
     | "allReposRefreshIntervalSeconds"
     | "activeReposLastPushedWithinHours"
+    | "busyJobAnnotation"
   >): GithubActionsRegistryResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,
@@ -162,6 +164,7 @@ export function createGithubActionsRegistryResources({
     registryServerPort,
     privateKeyPath: privateKeyMountPath,
     webhookSigningKeyPath: webhookSigningKeyMountPath,
+    busyJobAnnotation,
   };
 
   const serviceAccount = createK8sServiceAccount({
@@ -178,8 +181,8 @@ export function createGithubActionsRegistryResources({
     },
     rules: [
       {
-        apiGroups: [""],
-        resources: ["pods"],
+        apiGroups: ["batch"],
+        resources: ["jobs"],
         verbs: ["get", "update", "patch"],
       },
     ],

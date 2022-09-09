@@ -15,6 +15,7 @@ import { deferred } from "../../deps/async_utils.ts";
 import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
+import { captureExec } from "https://deno.land/x/utils@2.7.2/exec_utils.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -108,10 +109,14 @@ const program = new CliProgram()
           webhookSigningKeyPath,
           webhookServerPort,
           registryServerPort,
+          busyJobAnnotation,
+          namespace: maybeNamespace,
         },
         _,
         signal,
       ) => {
+        const namespace = maybeNamespace ??
+          (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
         const sign = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
 
         (async () => {
@@ -273,6 +278,42 @@ const program = new CliProgram()
               if (url.pathname === "/runner-token") {
                 const token = await createOrgRunnerRegistrationToken({ client: await accessClientPromise, org });
                 return new Response(token, { status: 200 });
+              }
+
+              if (url.pathname === "/annotate-busy-job") {
+                const jobName = url.searchParams.get("jobName");
+
+                if (!jobName) {
+                  return new Response("jobName query parameter is required", { status: 400 });
+                }
+
+                try {
+                  const result = await captureExec({
+                    cmd: [
+                      "kubectl",
+                      "annotate",
+                      "job",
+                      "-n",
+                      namespace,
+                      jobName,
+                      busyJobAnnotation,
+                    ],
+                  });
+
+                  return new Response(JSON.stringify(result), {
+                    status: 200,
+                    headers: {
+                      "content-type": "application/json",
+                    },
+                  });
+                } catch (e) {
+                  return new Response(JSON.stringify(e), {
+                    status: 400,
+                    headers: {
+                      "content-type": "application/json",
+                    },
+                  });
+                }
               }
             }
 
