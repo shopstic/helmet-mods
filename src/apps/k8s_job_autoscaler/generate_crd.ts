@@ -94,6 +94,18 @@ const crd = {
                       maxReplicas: {
                         type: "number",
                       },
+                      busyAnnotation: {
+                        type: "object",
+                        required: ["name", "value"],
+                        properties: {
+                          name: {
+                            type: "string",
+                          },
+                          value: {
+                            type: "string",
+                          },
+                        },
+                      },
                     },
                   },
                   persistentVolumes: {

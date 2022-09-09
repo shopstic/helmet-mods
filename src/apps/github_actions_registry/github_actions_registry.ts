@@ -15,7 +15,6 @@ import { deferred } from "../../deps/async_utils.ts";
 import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
-import { captureExec } from "../../deps/exec_utils.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -79,13 +78,7 @@ function renderQueueJobsMetrics() {
   ].concat(lines).join("\n");
 }
 
-async function runReconciliationLoop(
-  { requests, namespace, inProgressPodAnnotation }: {
-    requests: AsyncGenerator<ReconciliationRequest>;
-    namespace: string;
-    inProgressPodAnnotation: string;
-  },
-) {
+async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequest>) {
   for await (const { org: owner, repo } of requests) {
     const client = await accessClientPromise;
 
@@ -94,41 +87,6 @@ async function runReconciliationLoop(
 
     logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
     jobsByRepoMap.set(`${owner}/${repo}`, { owner, repo, jobs });
-
-    await Promise.all(
-      jobs.filter((j) => j.status === "in_progress" && j.runnerName).map(async (job) => {
-        try {
-          const result = await captureExec({
-            cmd: [
-              "kubectl",
-              "annotate",
-              "pod",
-              "-n",
-              namespace,
-              "--overwrite",
-              job.runnerName!,
-              inProgressPodAnnotation,
-            ],
-          });
-
-          logger.info({
-            message: "Annotated an in-progress job pod",
-            namespace,
-            runnerName: job.runnerName,
-            inProgressPodAnnotation,
-            result,
-          });
-        } catch (error) {
-          logger.error({
-            message: "Failed annotating an in-progress job pod",
-            namespace,
-            runnerName: job.runnerName,
-            inProgressPodAnnotation,
-            error,
-          });
-        }
-      }),
-    );
   }
 }
 
@@ -139,8 +97,6 @@ const program = new CliProgram()
       GithubActionsRegistryParamsSchema,
       async (
         {
-          namespace: maybeNamespace,
-          inProgressPodAnnotation,
           org,
           appId,
           installationId,
@@ -156,8 +112,6 @@ const program = new CliProgram()
         _,
         signal,
       ) => {
-        const namespace = maybeNamespace ??
-          (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
         const sign = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
 
         (async () => {
@@ -223,11 +177,7 @@ const program = new CliProgram()
             logger.info({ message: "Create reconciliation loop", id: request.id, perRepoMinRefreshIntervalMs });
             const rl = createReconciliationLoop<ReconciliationRequest>();
             reconciliationLoopByIdMap.set(request.id, rl);
-            runReconciliationLoop({
-              requests: agThrottle(rl.loop, perRepoMinRefreshIntervalMs),
-              namespace,
-              inProgressPodAnnotation,
-            });
+            runReconciliationLoop(agThrottle(rl.loop, perRepoMinRefreshIntervalMs));
           }
           reconciliationLoopByIdMap.get(request.id)!.request(request);
         }

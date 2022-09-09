@@ -1,8 +1,6 @@
 import { Static, Type } from "../../../deps/typebox.ts";
 
 export const GithubActionsRegistryParamsSchema = Type.Object({
-  namespace: Type.Optional(Type.String({ minLength: 1 })),
-  inProgressPodAnnotation: Type.String({ minLength: 1 }),
   org: Type.String({ minLength: 1 }),
   appId: Type.String({ minLength: 1 }),
   installationId: Type.Number(),

@@ -14,6 +14,10 @@ export type AutoscaledJobAutoscaling = {
   intervalSeconds: number;
   metricServerUrl: string;
   maxReplicas: number;
+  busyAnnotation?: {
+    name: string;
+    value: string;
+  };
 };
 
 export type AutoscaledJob = {

@@ -73,33 +73,40 @@ await new CliProgram()
           }
 
           for (const [uid, autoscaledJob] of jobGroupMap) {
-            const maxReplicas = autoscaledJob.spec.autoscaling.maxReplicas;
-            const desiredJobCount = autoscalingValues.get(uid) || 0;
-            const currentJobs = (activeJobsByGroupUid.get(uid) || []);
-            const currentJobCount = currentJobs.length;
+            const { maxReplicas, busyAnnotation } = autoscaledJob.spec.autoscaling;
+            const desiredFreeJobCount = autoscalingValues.get(uid) || 0;
+            const currentAllJobs = (activeJobsByGroupUid.get(uid) || []);
+            const currentBusyJobs = busyAnnotation
+              ? currentAllJobs.filter((j) =>
+                j.metadata?.annotations &&
+                j.metadata.annotations[busyAnnotation.name] === busyAnnotation.value
+              )
+              : [];
+            const currentFreeJobCount = currentAllJobs.length - currentBusyJobs.length;
+            const totalDesiredJobCount = currentBusyJobs.length + desiredFreeJobCount;
 
-            if (desiredJobCount > maxReplicas) {
+            if (totalDesiredJobCount > maxReplicas) {
               logger.warn({
-                message: `Desired count (${desiredJobCount}) is greater than max allowed ${maxReplicas}`,
+                message: `Desired count (${totalDesiredJobCount}) is greater than max allowed ${maxReplicas}`,
                 name: autoscaledJob.metadata.name,
-                desired: desiredJobCount,
+                desired: totalDesiredJobCount,
                 maxAllowed: maxReplicas,
               });
             }
 
-            const targetJobCount = Math.min(desiredJobCount, maxReplicas);
+            const targetFreeJobCount = Math.min(desiredFreeJobCount, maxReplicas - currentBusyJobs.length);
 
-            if (targetJobCount > currentJobCount) {
-              const currentIndexes = currentJobs.map((j) => Number(j.metadata!.labels![jobReplicaIndexLabel]));
-              const toCreateCount = targetJobCount - currentJobCount;
-              const toCreateIndexes = Array.from({ length: targetJobCount }).map((_, i) => i).filter((i) =>
+            if (targetFreeJobCount > currentFreeJobCount) {
+              const currentIndexes = currentAllJobs.map((j) => Number(j.metadata!.labels![jobReplicaIndexLabel]));
+              const toCreateCount = targetFreeJobCount - currentFreeJobCount;
+              const toCreateIndexes = Array.from({ length: targetFreeJobCount }).map((_, i) => i).filter((i) =>
                 !currentIndexes.includes(i)
               );
 
               logger.info({
                 message: `Creating ${toCreateCount} extra jobs`,
-                targetJobCount,
-                currentJobCount,
+                targetFreeJobCount,
+                currentFreeJobCount,
                 uid,
                 name: autoscaledJob.metadata.name,
               });
@@ -163,8 +170,8 @@ await new CliProgram()
             } else {
               logger.info({
                 message: `Nothing to do`,
-                targetJobCount,
-                currentJobCount,
+                targetFreeJobCount,
+                currentFreeJobCount,
                 name: autoscaledJob.metadata.name,
                 uid,
               });

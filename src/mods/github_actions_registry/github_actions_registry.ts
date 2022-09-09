@@ -33,7 +33,6 @@ export function createGithubActionsRegistryResources({
   image = defaultGithubActionsRegistryImage,
   namespace,
   ingress: ingressConfig,
-  inProgressPodAnnotation,
   appId,
   installationId,
   org,
@@ -70,7 +69,6 @@ export function createGithubActionsRegistryResources({
   }
   & Pick<
     GithubActionsRegistryParams,
-    | "inProgressPodAnnotation"
     | "appId"
     | "installationId"
     | "org"
@@ -153,7 +151,6 @@ export function createGithubActionsRegistryResources({
   const webhookSigningKeyMountPath = `${secretsMountPath}/${webhookSigningKeyFileName}`;
 
   const args: GithubActionsRegistryParams = {
-    inProgressPodAnnotation,
     appId,
     installationId,
     org,
