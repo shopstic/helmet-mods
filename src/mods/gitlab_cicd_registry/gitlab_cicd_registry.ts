@@ -63,8 +63,6 @@ export function createGitlabCicdRegistryResources({
   & Pick<
     GitlabCicdRegistryParams,
     | "groupId"
-    | "accessToken"
-    | "webhookSecretToken"
     | "activeProjectLastPushedWithinHours"
     | "allProjectsRefreshIntervalSeconds"
     | "perProjectMinRefreshIntervalMs"
