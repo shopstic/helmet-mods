@@ -116,19 +116,23 @@ await new CliProgram()
                   if (!draft.metadata) {
                     draft.metadata = {};
                   }
-                  if (!draft.metadata.labels) {
-                    draft.metadata.labels = {};
+
+                  const metadata = draft.metadata;
+
+                  if (!metadata.labels) {
+                    metadata.labels = {};
                   }
-                  draft.metadata.labels[jobReplicaIndexLabel] = String(index);
-                  draft.metadata.name = (draft.metadata.name ?? autoscaledJob.metadata.name) +
+
+                  metadata.labels[jobReplicaIndexLabel] = String(index);
+                  metadata.name = (draft.metadata.name ?? autoscaledJob.metadata.name) +
                     `-${index}-${ulid().toLowerCase()}`;
-                  draft.metadata.namespace = autoscaledJob.metadata.namespace;
+                  metadata.namespace = autoscaledJob.metadata.namespace;
 
-                  if (!draft.metadata.ownerReferences) {
-                    draft.metadata.ownerReferences = [];
+                  if (!metadata.ownerReferences) {
+                    metadata.ownerReferences = [];
                   }
 
-                  draft.metadata.ownerReferences.push({
+                  metadata.ownerReferences.push({
                     apiVersion: autoscaledJob.apiVersion,
                     kind: autoscaledJob.kind,
                     name: autoscaledJob.metadata.name,
@@ -137,11 +141,12 @@ await new CliProgram()
                   });
 
                   if (autoscaledJob.spec.persistentVolumes) {
-                    if (!draft.spec!.template!.spec!.volumes) {
-                      draft.spec!.template!.spec!.volumes = [];
+                    const templateSpec = draft.spec!.template!.spec!;
+                    if (!templateSpec.volumes) {
+                      templateSpec.volumes = [];
                     }
                     autoscaledJob.spec.persistentVolumes.forEach((pv) => {
-                      draft.spec!.template!.spec!.volumes!.push({
+                      templateSpec.volumes!.push({
                         name: pv.volumeName,
                         persistentVolumeClaim: {
                           claimName: `${pv.claimPrefix}${index}`,

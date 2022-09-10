@@ -12,6 +12,7 @@ const autoscaledJob: AutoscaledJob = {
       query: "vector(1)",
       metricServerUrl: "https://vm.wok.run/prometheus/api/v1",
       intervalSeconds: 5,
+      maxReplicas: 5,
     },
     persistentVolumes: [{
       volumeName: "test",

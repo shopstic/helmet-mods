@@ -52,6 +52,7 @@
         registry-syncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
         k8s-job-autoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
         github-actions-registry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
+        gitlab-cicd-registry = denoBundle "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
         vscode-settings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -99,6 +100,10 @@
             echo 'will cite' | parallel --citation >/dev/null 2>&1
             mkdir -p ./.vscode
             cat ${vscode-settings} > ./.vscode/settings.json
+
+            if [[ -f ./.env ]]; then 
+              source ./.env
+            fi
           '';
         };
         packages = {
@@ -126,6 +131,9 @@
               };
               image-github-actions-registry = pkgs.callPackage ./nix/images/github-actions-registry {
                 inherit nonRootShadowSetup nix2container github-actions-registry deno;
+              };
+              image-gitlab-cicd-registry = pkgs.callPackage ./nix/images/gitlab-cicd-registry {
+                inherit nonRootShadowSetup nix2container gitlab-cicd-registry deno;
               };
             };
           in

@@ -15,7 +15,7 @@ import { deferred } from "../../deps/async_utils.ts";
 import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
-import { captureExec } from "https://deno.land/x/utils@2.7.2/exec_utils.ts";
+import { captureExec } from "../../deps/exec_utils.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -32,21 +32,23 @@ const githubApiRateUsedGauge = Gauge.with({
   help: "The current number of used API calls.",
 });
 
-interface QueuedJobs {
-  owner: string;
-  repo: string;
-  jobs: Array<{
-    name: string;
-    labels: string[];
-    status: "queued" | "in_progress" | "completed";
-    runnerName: string | null;
-  }>;
+interface GithubJob {
+  name: string;
+  labels: string[];
+  status: "queued" | "in_progress" | "completed";
+  runnerName: string | null;
 }
 
-const jobsByRepoMap = new Map<string, QueuedJobs>();
+interface GithubWorkflow {
+  owner: string;
+  repo: string;
+  jobs: Array<GithubJob>;
+}
+
+const workflowsByRepoMap = new Map<string, GithubWorkflow>();
 
 function renderQueueJobsMetrics() {
-  const lines = Array.from(jobsByRepoMap.values()).flatMap(({ owner, repo, jobs }) => {
+  const lines = Array.from(workflowsByRepoMap.values()).flatMap(({ owner, repo, jobs }) => {
     const countMap = jobs.reduce((map, job) => {
       const item = {
         name: job.name,
@@ -63,7 +65,7 @@ function renderQueueJobsMetrics() {
       }
 
       return map;
-    }, new Map<string, { item: { name: string; labels: string[]; status: string }; count: number }>());
+    }, new Map<string, { item: Omit<GithubJob, "runnerName">; count: number }>());
 
     return Array
       .from(countMap.values()).map(({ item: { name, labels, status }, count }) => {
@@ -87,7 +89,7 @@ async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequ
     const jobs = await getRepoPendingJobs({ client, owner, repo });
 
     logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
-    jobsByRepoMap.set(`${owner}/${repo}`, { owner, repo, jobs });
+    workflowsByRepoMap.set(`${owner}/${repo}`, { owner, repo, jobs });
   }
 }
 
@@ -117,7 +119,7 @@ const program = new CliProgram()
       ) => {
         const namespace = maybeNamespace ??
           (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
-        const sign = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
+        const signWebhookRequest = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
 
         (async () => {
           for await (const _ of agInterval(5000)) {
@@ -205,7 +207,7 @@ const program = new CliProgram()
             }
 
             const rawBody = await request.arrayBuffer();
-            const signed = await sign(rawBody);
+            const signed = await signWebhookRequest(rawBody);
 
             if (!constantTimeCompare(signed, signature)) {
               logger.warn({
