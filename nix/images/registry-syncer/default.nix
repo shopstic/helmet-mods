@@ -6,6 +6,7 @@
 , runCommand
 , deno
 , dumb-init
+, coreutils
 , regclient
 , cacert
 , registry-syncer
@@ -20,6 +21,7 @@ let
     pathsToLink = [ "/bin" ];
     paths = [
       dumb-init
+      coreutils
       deno
       regclient.regctl
     ];

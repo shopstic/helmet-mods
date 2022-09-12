@@ -6,6 +6,7 @@
 , runCommand
 , deno
 , dumb-init
+, coreutils
 , awscli2
 , registry-authenticator
 }:
@@ -19,6 +20,7 @@ let
     pathsToLink = [ "/bin" ];
     paths = [
       dumb-init
+      coreutils
       deno
       awscli2
     ];

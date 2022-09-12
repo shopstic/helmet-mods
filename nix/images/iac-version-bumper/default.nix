@@ -29,7 +29,7 @@ let
         email = ''${COMMITTER_EMAIL}
     EOF
 
-    mkdir $HOME/.ssh
+    mkdir -p $HOME/.ssh
     chmod 0700 $HOME/.ssh
 
     cat << EOF > /home/app/.ssh/config
