@@ -33,7 +33,10 @@ let
   '';
   user = "app";
   shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
-  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}'';
+  dirs = runCommand "sdir" { } ''
+    mkdir -p $out/home/${user}
+    mkdir -p $out/tmp
+  '';
   nix-bin = buildEnv {
     name = "nix-bin";
     pathsToLink = [ "/bin" ];
@@ -50,12 +53,17 @@ let
   image = nix2container.buildImage {
     inherit name;
     tag = iac-version-bumper.version;
-    copyToRoot = [ nix-bin shadow home-dir ];
+    copyToRoot = [ nix-bin shadow dirs ];
     maxLayers = 80;
     perms = [
       {
-        path = home-dir;
+        path = dirs;
         regex = "/home/${user}$";
+        mode = "0777";
+      }
+      {
+        path = dirs;
+        regex = "/tmp$";
         mode = "0777";
       }
     ];
