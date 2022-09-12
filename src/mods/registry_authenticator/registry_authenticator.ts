@@ -10,6 +10,7 @@ import {
   IoK8sApiCoreV1VolumeMount,
   K8sSecret,
 } from "../../deps/helmet.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export interface RegistryAuthenticatorResources {
   registryAuthContainer: IoK8sApiCoreV1Container;

@@ -10,6 +10,7 @@ import {
 import { image as defaultRegistrySyncImage } from "../../apps/registry_syncer/meta.ts";
 import { RegistrySyncJobs, RegistrySyncParams } from "../../apps/registry_syncer/libs/types.ts";
 import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export const defaultName = "iac-version-bumper";
 
@@ -28,12 +29,16 @@ export function createRegistrySyncerResources({
   digestCheckIntervalSeconds,
   configCheckIntervalSeconds,
   jobs,
+  nodeSelector,
+  tolerations,
 }: {
   name?: string;
   image?: string;
   serviceAccountName?: string;
   registryAuthResources: RegistryAuthenticatorResources;
   jobs: RegistrySyncJobs;
+  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
 } & Omit<RegistrySyncParams, "configFile">): RegistrySyncerResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,
@@ -95,6 +100,8 @@ export function createRegistrySyncerResources({
             fsGroup: 1001,
             fsGroupChangePolicy: "OnRootMismatch",
           },
+          nodeSelector,
+          tolerations,
           containers: [
             registryAuthContainer,
             {

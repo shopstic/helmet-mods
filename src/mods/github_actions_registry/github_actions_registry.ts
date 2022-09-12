@@ -15,6 +15,7 @@ import {
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
 import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export const defaultName = "github-actions-registry";
 
@@ -46,6 +47,8 @@ export function createGithubActionsRegistryResources({
     webhookSigningKey,
   },
   createServiceMonitor,
+  nodeSelector,
+  tolerations,
 }:
   & {
     name?: string;
@@ -67,6 +70,8 @@ export function createGithubActionsRegistryResources({
       };
     };
     createServiceMonitor: boolean;
+    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   }
   & Pick<
     GithubActionsRegistryParams,
@@ -230,6 +235,8 @@ export function createGithubActionsRegistryResources({
             runAsGroup: 1001,
           },
           serviceAccountName: serviceAccount.metadata.name,
+          nodeSelector,
+          tolerations,
           containers: [
             {
               name: "registry",

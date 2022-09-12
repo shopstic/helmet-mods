@@ -15,7 +15,7 @@ import {
 import { image as defaultGitlabCicdRegistryImage } from "../../apps/gitlab_cicd_registry/meta.ts";
 import { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/types.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
-import { IoK8sApiCoreV1SecretKeySelector } from "../../deps/k8s_utils.ts";
+import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1SecretKeySelector } from "../../deps/k8s_utils.ts";
 
 export const defaultName = "gitlab-cicd-registry";
 
@@ -44,6 +44,8 @@ export function createGitlabCicdRegistryResources({
     webhookSecretToken,
   },
   createServiceMonitor,
+  nodeSelector,
+  tolerations,
 }:
   & {
     name?: string;
@@ -59,6 +61,8 @@ export function createGitlabCicdRegistryResources({
       webhookSecretToken: IoK8sApiCoreV1SecretKeySelector;
     };
     createServiceMonitor: boolean;
+    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
+    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
   }
   & Pick<
     GitlabCicdRegistryParams,
@@ -207,6 +211,8 @@ export function createGitlabCicdRegistryResources({
             runAsGroup: 1001,
           },
           serviceAccountName: serviceAccount.metadata.name,
+          nodeSelector,
+          tolerations,
           containers: [
             {
               name: "registry",
