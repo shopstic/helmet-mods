@@ -19,7 +19,7 @@ export interface IacVersionBumperResources {
   targetsConfigMap: K8sConfigMap;
   registryAuthConfigSecret: K8sSecret;
   registryAuthSecret: K8sSecret;
-  sshPrivateKeySecret: K8sSecret;
+  sshSecret: K8sSecret;
   deployment: K8sDeployment;
 }
 
@@ -65,23 +65,42 @@ export function createIacVersionBumperResources({
     },
   });
 
-  const sshPrivateKeySecret = createK8sSecret({
+  const sshSecret = createK8sSecret({
     metadata: {
-      name: `${name}-ssh-private-key`,
+      name: `${name}-ssh`,
     },
     type: "kubernetes.io/ssh-auth",
     data: {
       "ssh-privatekey": btoa(sshPrivateKey),
+      "ssh-config": btoa([
+        "Host *",
+        "  IdentityFile ~/.ssh/id_rsa",
+        "  IdentitiesOnly yes",
+        "  StrictHostKeyChecking no",
+        "  LogLevel ERROR",
+      ].join("\n")),
     },
   });
 
   const sshPrivateKeyVolume = createK8sVolume({
     name: "ssh-private-key",
     secret: {
-      secretName: sshPrivateKeySecret.metadata.name,
+      secretName: sshSecret.metadata.name,
       items: [{
         key: "ssh-privatekey",
         path: "id_rsa",
+        mode: 256,
+      }],
+    },
+  });
+
+  const sshConfigVolume = createK8sVolume({
+    name: "ssh-config",
+    secret: {
+      secretName: sshSecret.metadata.name,
+      items: [{
+        key: "ssh-config",
+        path: "config",
         mode: 256,
       }],
     },
@@ -154,6 +173,11 @@ export function createIacVersionBumperResources({
                   mountPath: "/home/app/.ssh/id_rsa",
                   subPath: sshPrivateKeyVolume.secret!.items![0].path,
                 },
+                {
+                  name: sshConfigVolume.name,
+                  mountPath: "/home/app/.ssh/config",
+                  subPath: sshConfigVolume.secret!.items![0].path,
+                },
               ],
               env: [{
                 name: "COMMITTER_NAME",
@@ -169,6 +193,7 @@ export function createIacVersionBumperResources({
             registryAuthConfigVolume,
             dockerConfigVolume,
             sshPrivateKeyVolume,
+            sshConfigVolume,
             registryAuthSecretVolume,
           ],
         },
@@ -180,7 +205,7 @@ export function createIacVersionBumperResources({
     targetsConfigMap,
     registryAuthConfigSecret,
     registryAuthSecret,
-    sshPrivateKeySecret,
+    sshSecret,
     deployment,
   };
 }

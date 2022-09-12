@@ -29,23 +29,11 @@ let
         email = ''${COMMITTER_EMAIL}
     EOF
 
-    mkdir -p $HOME/.ssh
-
-    cat << EOF > /home/app/.ssh/config
-    Host *
-      IdentityFile ~/.ssh/id_rsa
-      IdentitiesOnly yes
-      StrictHostKeyChecking no
-      LogLevel ERROR
-    EOF
-
-    chmod -R 0700 $HOME/.ssh
-
     exec deno run --cached-only -A ${iac-version-bumper} auto-bump-versions "$@"
   '';
   user = "app";
   shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
-  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}/.ssh'';
+  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}'';
   nix-bin = buildEnv {
     name = "nix-bin";
     pathsToLink = [ "/bin" ];
