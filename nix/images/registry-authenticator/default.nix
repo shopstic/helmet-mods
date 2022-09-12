@@ -7,20 +7,22 @@
 , deno
 , dumb-init
 , coreutils
+, bash
 , awscli2
 , registry-authenticator
 }:
 let
   name = "registry-authenticator";
   user = "app";
-  shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "/bin/false"; };
-  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}'';
+  shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
+  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}/.aws/cli/cache'';
   nix-bin = buildEnv {
     name = "nix-bin";
     pathsToLink = [ "/bin" ];
     paths = [
       dumb-init
       coreutils
+      bash
       deno
       awscli2
     ];

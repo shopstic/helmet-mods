@@ -30,7 +30,6 @@ let
     EOF
 
     mkdir -p $HOME/.ssh
-    chmod 0700 $HOME/.ssh
 
     cat << EOF > /home/app/.ssh/config
     Host *
@@ -40,11 +39,13 @@ let
       LogLevel ERROR
     EOF
 
+    chmod -R 0700 $HOME/.ssh
+
     exec deno run --cached-only -A ${iac-version-bumper} auto-bump-versions "$@"
   '';
   user = "app";
   shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
-  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}'';
+  home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}/.ssh'';
   nix-bin = buildEnv {
     name = "nix-bin";
     pathsToLink = [ "/bin" ];
