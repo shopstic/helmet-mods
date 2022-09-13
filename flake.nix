@@ -5,11 +5,11 @@
     hotPot.url = "github:shopstic/nix-hot-pot";
     nixpkgs.follows = "hotPot/nixpkgs";
     flakeUtils.follows = "hotPot/flakeUtils";
-    fdbPkgs.url = "github:shopstic/nix-fdb/7.1.21";
+    fdbPkg.follows = "hotPot/fdbPkg";
     nix2containerPkg.follows = "hotPot/nix2containerPkg";
   };
 
-  outputs = { self, nixpkgs, flakeUtils, fdbPkgs, hotPot, nix2containerPkg }:
+  outputs = { self, nixpkgs, flakeUtils, fdbPkg, hotPot, nix2containerPkg }:
     flakeUtils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ] (system:
       let
         hotPotPkgs = hotPot.packages.${system};
@@ -25,7 +25,7 @@
             allowBroken = true;
           };
         };
-        fdb = fdbPkgs.packages.${system}.fdb_7;
+        fdb = fdbPkg.packages.${system}.fdb_7;
         src = builtins.path
           {
             path = ./.;
