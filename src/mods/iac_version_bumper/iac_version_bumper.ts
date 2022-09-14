@@ -8,7 +8,7 @@ import {
   K8sConfigMap,
   K8sDeployment,
   K8sSecret,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
 import { image as defaultIacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
 import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";

@@ -1,5 +1,5 @@
 import { toSnakeCase } from "../../../deps/case.ts";
-import { K8s, K8sContainer, K8sImagePullPolicy } from "../../../deps/k8s_utils.ts";
+import { K8s, K8sContainer, K8sImagePullPolicy } from "../../../deps/helmet.ts";
 
 export type FdbConfiguredProcessClass =
   | "coordinator"

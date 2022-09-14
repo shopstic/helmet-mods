@@ -12,7 +12,7 @@ import {
   K8sRoleBinding,
   K8sService,
   K8sServiceAccount,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 import { image as defaultGitlabCicdRegistryImage } from "../../apps/gitlab_cicd_registry/meta.ts";
 import { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/types.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";

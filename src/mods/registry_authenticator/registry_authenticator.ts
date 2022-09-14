@@ -7,7 +7,7 @@ import {
   createK8sVolumeMount,
   K8s,
   K8sSecret,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 
 export interface RegistryAuthenticatorResources {
   registryAuthContainer: K8s["core.v1.Container"];

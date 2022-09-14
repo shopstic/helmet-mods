@@ -5,7 +5,7 @@ import { Static, TSchema, Type } from "../../../deps/typebox.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
 import { commandWithTimeout } from "../../../libs/utils.ts";
-import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
+import { createK8sConfigMap } from "../../../deps/helmet.ts";
 import { Logger } from "../../../libs/logger.ts";
 
 const logger = new Logger({ ctx: "utils" });

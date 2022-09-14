@@ -12,7 +12,7 @@ import {
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../../../deps/k8s_utils.ts";
+} from "../../../../deps/helmet.ts";
 
 import { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
 

@@ -2,7 +2,7 @@ import { FdbStatefulConfig } from "./lib/fdb_stateful.ts";
 import { assertEquals, assertNotEquals } from "../../deps/std_testing.ts";
 
 import { createFdbClusterResources } from "./fdb_cluster.ts";
-import { K8s } from "../../deps/k8s_utils.ts";
+import { K8s } from "../../deps/helmet.ts";
 
 Deno.test("fdb_cluster should work", () => {
   const baseName = "test";

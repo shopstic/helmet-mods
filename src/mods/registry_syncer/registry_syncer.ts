@@ -7,7 +7,7 @@ import {
   K8sConfigMap,
   K8sDeployment,
   K8sSecret,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 import { image as defaultRegistrySyncImage } from "../../apps/registry_syncer/meta.ts";
 import { RegistrySyncJobs, RegistrySyncParams } from "../../apps/registry_syncer/libs/types.ts";
 import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";

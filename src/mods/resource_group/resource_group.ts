@@ -1,6 +1,6 @@
 import { defineChart } from "../../deps/helmet.ts";
-import { K8sResource } from "../../deps/k8s_utils.ts";
-import { K8sCrd } from "../../deps/k8s_utils.ts";
+import { K8sResource } from "../../deps/helmet.ts";
+import { K8sCrd } from "../../deps/helmet.ts";
 import releaseVersion from "../../version.ts";
 
 export interface ResourceGroupParams {

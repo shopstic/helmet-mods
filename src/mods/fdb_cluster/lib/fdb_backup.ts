@@ -1,4 +1,4 @@
-import { createK8sDeployment, K8s, K8sDeployment, K8sImagePullPolicy } from "../../../deps/k8s_utils.ts";
+import { createK8sDeployment, K8s, K8sDeployment, K8sImagePullPolicy } from "../../../deps/helmet.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
 export function createFdbBackupAgentContainer(

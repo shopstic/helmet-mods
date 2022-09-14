@@ -8,7 +8,7 @@ import {
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autoscaler/meta.ts";
 import crd from "./crd.json" assert { type: "json" };
 import { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/types.ts";

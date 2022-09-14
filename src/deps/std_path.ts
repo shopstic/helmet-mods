@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.17.0/deps/std_path.ts";
+export * from "https://deno.land/x/helmet@1.17.1/deps/std_path.ts";

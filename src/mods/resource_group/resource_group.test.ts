@@ -5,7 +5,7 @@ import {
   createK8sSecret,
   createK8sService,
   createK8sVolume,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 import { assertEquals } from "../../deps/std_testing.ts";
 import { extractK8sResources } from "./resource_group.ts";
 

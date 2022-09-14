@@ -7,7 +7,7 @@ import {
   K8sPvc,
   K8sService,
   K8sStatefulSet,
-} from "../../../deps/k8s_utils.ts";
+} from "../../../deps/helmet.ts";
 import { createFdbContainer, FdbConfiguredProcessClass, FdbLocalityMode } from "./fdb_container.ts";
 
 export interface FdbStatefulServer {

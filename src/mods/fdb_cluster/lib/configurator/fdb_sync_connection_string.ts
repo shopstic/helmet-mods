@@ -10,7 +10,7 @@ import {
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../../../deps/k8s_utils.ts";
+} from "../../../../deps/helmet.ts";
 
 export interface FdbSyncConnectionStringResources {
   deployment: K8sDeployment;

@@ -10,7 +10,7 @@ import {
   K8sDaemonSet,
   K8sImagePullPolicy,
   K8sServiceAccount,
-} from "../../../../deps/k8s_utils.ts";
+} from "../../../../deps/helmet.ts";
 
 export const PENDING_LABEL_VALUE_YES = "yes";
 export const PENDING_LABEL_VALUE_NO = "no";

@@ -1,4 +1,4 @@
-import { K8s, K8sDeployment, K8sService, K8sStatefulSet } from "../../deps/k8s_utils.ts";
+import { K8s, K8sDeployment, K8sService, K8sStatefulSet } from "../../deps/helmet.ts";
 import { createFdbConfigureResources, FdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
 import {
   createFdbCreateConnectionStringResources,
@@ -14,7 +14,7 @@ import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources, FdbExporterResources } from "./lib/fdb_exporter.ts";
 import { createFdbBackupDeployment } from "./lib/fdb_backup.ts";
 
-import { K8sImagePullPolicy } from "../../deps/k8s_utils.ts";
+import { K8sImagePullPolicy } from "../../deps/helmet.ts";
 import { image as fdbImage } from "../../apps/fdb_server/meta.ts";
 import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
 import { FdbLocalityMode } from "./lib/fdb_container.ts";

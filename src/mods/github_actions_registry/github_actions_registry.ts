@@ -12,7 +12,7 @@ import {
   K8sRoleBinding,
   K8sService,
   K8sServiceAccount,
-} from "../../deps/k8s_utils.ts";
+} from "../../deps/helmet.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
 import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
