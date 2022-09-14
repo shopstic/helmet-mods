@@ -1,5 +1,4 @@
 import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
-import { loggerWithContext } from "../../libs/logger.ts";
 import { RegistrySyncJob, RegistrySyncJobs, RegistrySyncJobsSchema, RegistrySyncParamsSchema } from "./libs/types.ts";
 import { commandWithTimeout, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
@@ -21,6 +20,7 @@ import {
   throwError,
 } from "../../deps/rxjs.ts";
 import { equal } from "../../deps/std_testing.ts";
+import { Logger } from "../../libs/logger.ts";
 
 function getElapsedSeconds(startTime: number) {
   return Math.round((performance.now() - startTime) * 100) / 100000;
@@ -43,13 +43,17 @@ export async function sync(
     abortSignal?: AbortSignal;
   },
 ) {
-  const logger = loggerWithContext(`sync-${name}`);
+  const logger = new Logger({ ctx: `sync-${name}` });
 
   const getManifestDigestCmdArgs = (platform === "all") ? ["--list", "--require-list"] : ["--platform", platform];
   const fromRef = `${fromImage}:${tag}`;
   const toRef = `${toImage}:${tag}`;
 
-  logger.info(`Fetching manifest digest for '${fromRef}' with platform '${platform}'`);
+  logger.info({
+    msg: "Fetching manifest digest",
+    fromRef,
+    platform,
+  });
   const digest = await (async () => {
     try {
       const ret = (await captureExec({
@@ -67,9 +71,10 @@ export async function sync(
       return ret;
     } catch (e) {
       if (e instanceof NonZeroExitError) {
-        logger.error(`Command failed: ${e.command.join(" ")}`);
-        logger.error(`stdout: ${e.output?.out.trim()}`);
-        logger.error(`stderr: ${e.output?.err.trim()}`);
+        logger.error({
+          msg: "Command failed",
+          error: e,
+        });
         return null;
       }
 
@@ -82,11 +87,21 @@ export async function sync(
   }
 
   if (digest !== lastDigest) {
-    logger.info(`Digest changed from '${lastDigest ?? "<first-sync>"}' to '${digest}', going to sync to '${toRef}'`);
+    logger.info({
+      msg: "Digest changed, going to sync",
+      lastDigest: lastDigest ?? "<first-sync>",
+      digest,
+      toRef,
+    });
 
     const startTime = performance.now();
     const timer = setInterval(() => {
-      logger.info(`Still syncing digest '${digest}' to '${toRef}', elapsed: ${getElapsedSeconds(startTime)}s`);
+      logger.info({
+        msg: "Still syncing",
+        digest,
+        toRef,
+        elapsedSeconds: getElapsedSeconds(startTime),
+      });
     }, 5000);
 
     try {
@@ -101,18 +116,27 @@ export async function sync(
       clearInterval(timer);
     }
 
-    logger.info(`Completed sync to '${toRef}' in ${getElapsedSeconds(startTime)}s`);
+    logger.info({
+      msg: "Completed sync",
+      toRef,
+      elapsedSeconds: getElapsedSeconds(startTime),
+    });
     return digest;
   } else {
-    logger.info("Digest hasn't changed, nothing to do");
+    logger.info({
+      msg: "Digest hasn't changed, nothing to do",
+    });
     return lastDigest;
   }
 }
 
 async function loadConfig(configFile: string): Promise<RegistrySyncJobs> {
-  const logger = loggerWithContext("config");
+  const logger = new Logger({ ctx: "config" });
 
-  logger.info(`Reading jobs config from '${configFile}'`);
+  logger.info({
+    msg: "Reading jobs config",
+    configFile,
+  });
 
   const jobsConfigHandle = await Deno.open(configFile, { read: true, write: false });
 
@@ -148,7 +172,7 @@ await new CliProgram()
           configCheckIntervalSeconds,
         },
       ) => {
-        const logger = loggerWithContext("main");
+        const logger = new Logger({ ctx: "main" });
 
         const seedConfig: RegistrySyncJobs | null = null;
 
@@ -158,18 +182,21 @@ await new CliProgram()
             concatMap(() => loadConfig(configFile)),
             switchScan((previous, next) => {
               if (equal(previous, next)) {
-                logger.info("Config hasn't changed");
+                logger.info({ msg: "Config hasn't changed" });
                 return EMPTY;
               }
               return of(next);
             }, seedConfig),
             switchMap((jobs) => {
               if (jobs.length === 0) {
-                logger.info(`Config is empty, nothing to do`);
+                logger.info({ msg: "Config is empty, nothing to do" });
                 return EMPTY;
               }
 
-              logger.info(`Using config with jobs: ${jobs.map(({ name }) => name).join(", ")}`);
+              logger.info({
+                msg: "Using config with jobs",
+                jobs: jobs.map(({ name }) => name),
+              });
 
               return withAbortSignal((abortSignal) =>
                 merge.apply(
@@ -196,9 +223,7 @@ await new CliProgram()
             }),
             catchError((e) => {
               if (e instanceof NonZeroExitError) {
-                logger.error(`Command failed: ${e.command.join(" ")}`);
-                logger.error(`stdout: ${e.output?.out.trim()}`);
-                logger.error(`stderr: ${e.output?.err.trim()}`);
+                logger.error({ msg: "Command failed", error: e });
               }
               return throwError(() => e);
             }),

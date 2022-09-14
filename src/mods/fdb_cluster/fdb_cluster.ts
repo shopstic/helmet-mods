@@ -1,11 +1,4 @@
-import {
-  IoK8sApiCoreV1Volume,
-  IoK8sApiCoreV1VolumeMount,
-  K8sDeployment,
-  K8sService,
-  K8sStatefulSet,
-} from "../../deps/helmet.ts";
-import { IoK8sApiCoreV1ConfigMapKeySelector } from "../../deps/helmet.ts";
+import { K8s, K8sDeployment, K8sService, K8sStatefulSet } from "../../deps/k8s_utils.ts";
 import { createFdbConfigureResources, FdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
 import {
   createFdbCreateConnectionStringResources,
@@ -21,14 +14,9 @@ import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources, FdbExporterResources } from "./lib/fdb_exporter.ts";
 import { createFdbBackupDeployment } from "./lib/fdb_backup.ts";
 
-import { K8sImagePullPolicy } from "../../deps/helmet.ts";
+import { K8sImagePullPolicy } from "../../deps/k8s_utils.ts";
 import { image as fdbImage } from "../../apps/fdb_server/meta.ts";
 import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
-import {
-  IoK8sApiCoreV1PodSpec,
-  IoK8sApiCoreV1ResourceRequirements,
-  IoK8sApiCoreV1TopologySpreadConstraint,
-} from "../../deps/k8s_utils.ts";
 import { FdbLocalityMode } from "./lib/fdb_container.ts";
 
 export { fdbConfiguratorImage };
@@ -89,25 +77,25 @@ export function createFdbClusterResources(
       commitProxyCount: number;
       resolverCount: number;
       standbyCount: number;
-      nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-      tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
-      resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
-      topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
+      nodeSelector?: Record<string, string>;
+      tolerations?: K8s["core.v1.Toleration"][];
+      resourceRequirements?: K8s["core.v1.ResourceRequirements"];
+      topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
       args?: string[];
     } | {
       mode: "dev";
       count?: number;
-      nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-      tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
-      resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
-      topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
+      nodeSelector?: Record<string, string>;
+      tolerations?: K8s["core.v1.Toleration"][];
+      resourceRequirements?: K8s["core.v1.ResourceRequirements"];
+      topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
       args?: string[];
     };
     backup?: {
       podCount: number;
       agentCountPerPod: number;
-      volumeMounts: IoK8sApiCoreV1VolumeMount[];
-      volumes: IoK8sApiCoreV1Volume[];
+      volumeMounts: K8s["core.v1.VolumeMount"][];
+      volumes: K8s["core.v1.Volume"][];
     };
     stateful: Record<string, FdbStatefulConfig>;
     locality?: FdbLocalityMode;
@@ -118,8 +106,8 @@ export function createFdbClusterResources(
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
     labels?: Record<string, string>;
-    helpersNodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    helpersTolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+    helpersNodeSelector?: Record<string, string>;
+    helpersTolerations?: K8s["core.v1.Toleration"][];
   },
 ): FdbClusterResources {
   const labels = {
@@ -128,7 +116,7 @@ export function createFdbClusterResources(
     ...extraLabels,
   };
 
-  const connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector = {
+  const connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"] = {
     name: `${baseName}-connection-string`,
     key: "connectionString",
   };

@@ -67,12 +67,6 @@ jobs:
         run: |
           ./cli.sh build_all_images ${{ matrix.imageArch }}
 
-      - name: Login
-        if: github.ref == 'refs/heads/main'
-        shell: nix develop -v -c bash {0}
-        run: |-
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${IMAGE_REPOSITORY}"
-
       - name: Push all images
         if: github.ref == 'refs/heads/main'
         shell: nix develop -v -c bash {0}
@@ -89,11 +83,6 @@ jobs:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
       - uses: actions/checkout@v3
-
-      - name: Login
-        shell: nix develop -v -c bash {0}
-        run: |-
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${IMAGE_REPOSITORY}"
 
       - name: Build and push images
         shell: nix develop -v -c bash {0}

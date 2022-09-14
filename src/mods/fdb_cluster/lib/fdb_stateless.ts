@@ -1,14 +1,4 @@
-import {
-  createK8sDeployment,
-  IoK8sApiCoreV1ConfigMapKeySelector,
-  K8sDeployment,
-  K8sImagePullPolicy,
-} from "../../../deps/helmet.ts";
-import {
-  IoK8sApiCoreV1PodSpec,
-  IoK8sApiCoreV1ResourceRequirements,
-  IoK8sApiCoreV1TopologySpreadConstraint,
-} from "../../../deps/k8s_utils.ts";
+import { createK8sDeployment, K8s, K8sDeployment, K8sImagePullPolicy } from "../../../deps/k8s_utils.ts";
 import { createFdbContainer, FdbLocalityMode } from "./fdb_container.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
@@ -33,16 +23,16 @@ export function createFdbStatelessDeployment(
     processClass: "grv_proxy" | "commit_proxy" | "stateless";
     replicas: number;
     baseLabels: Record<string, string>;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
     port: number;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
-    resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
+    resourceRequirements?: K8s["core.v1.ResourceRequirements"];
     locality: FdbLocalityMode;
     args?: string[];
-    topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
+    topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
   },
 ): K8sDeployment {
   const statelessLabels = {

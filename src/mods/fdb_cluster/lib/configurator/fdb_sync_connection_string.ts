@@ -4,14 +4,13 @@ import {
   createK8sRole,
   createK8sRoleBinding,
   createK8sServiceAccount,
-  IoK8sApiCoreV1ConfigMapKeySelector,
+  K8s,
   K8sDeployment,
   K8sImagePullPolicy,
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
+} from "../../../../deps/k8s_utils.ts";
 
 export interface FdbSyncConnectionStringResources {
   deployment: K8sDeployment;
@@ -33,11 +32,11 @@ export function createFdbSyncConnectionStringResources({
   releaseName: string;
   namespace: string;
   baseLabels: Record<string, string>;
-  connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
+  connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
   image: string;
   imagePullPolicy: K8sImagePullPolicy;
-  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+  nodeSelector?: Record<string, string>;
+  tolerations?: K8s["core.v1.Toleration"][];
 }): FdbSyncConnectionStringResources {
   const resourceName = `${releaseName}-sync-connection-string`;
 

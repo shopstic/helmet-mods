@@ -3,14 +3,14 @@ import {
   createK8sDeployment,
   createK8sVolume,
   createK8sVolumeMount,
+  K8s,
   K8sConfigMap,
   K8sDeployment,
   K8sSecret,
-} from "../../deps/helmet.ts";
+} from "../../deps/k8s_utils.ts";
 import { image as defaultRegistrySyncImage } from "../../apps/registry_syncer/meta.ts";
 import { RegistrySyncJobs, RegistrySyncParams } from "../../apps/registry_syncer/libs/types.ts";
 import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export const defaultName = "iac-version-bumper";
 
@@ -37,8 +37,8 @@ export function createRegistrySyncerResources({
   serviceAccountName?: string;
   registryAuthResources: RegistryAuthenticatorResources;
   jobs: RegistrySyncJobs;
-  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+  nodeSelector?: Record<string, string>;
+  tolerations?: K8s["core.v1.Toleration"][];
 } & Omit<RegistrySyncParams, "configFile">): RegistrySyncerResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,

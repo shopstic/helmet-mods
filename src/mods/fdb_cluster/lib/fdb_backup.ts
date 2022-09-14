@@ -1,13 +1,4 @@
-import {
-  createK8sDeployment,
-  IoK8sApiCoreV1ConfigMapKeySelector,
-  IoK8sApiCoreV1Container,
-  IoK8sApiCoreV1Volume,
-  IoK8sApiCoreV1VolumeMount,
-  K8sDeployment,
-  K8sImagePullPolicy,
-} from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec, IoK8sApiCoreV1TopologySpreadConstraint } from "../../../deps/k8s_utils.ts";
+import { createK8sDeployment, K8s, K8sDeployment, K8sImagePullPolicy } from "../../../deps/k8s_utils.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";
 
 export function createFdbBackupAgentContainer(
@@ -21,10 +12,10 @@ export function createFdbBackupAgentContainer(
     index: number;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    volumeMounts: IoK8sApiCoreV1VolumeMount[];
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
+    volumeMounts: K8s["core.v1.VolumeMount"][];
   },
-): IoK8sApiCoreV1Container {
+): K8s["core.v1.Container"] {
   return {
     name: `backup-agent-${index}`,
     image,
@@ -66,13 +57,13 @@ export function createFdbBackupDeployment(
     processCountPerPod: number;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    volumeMounts: IoK8sApiCoreV1VolumeMount[];
-    volumes: IoK8sApiCoreV1Volume[];
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
+    volumeMounts: K8s["core.v1.VolumeMount"][];
+    volumes: K8s["core.v1.Volume"][];
     baseLabels: Record<string, string>;
-    topologySpreadConstraints?: (labels: Record<string, string>) => Array<IoK8sApiCoreV1TopologySpreadConstraint>;
-    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+    topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
   },
 ): K8sDeployment {
   const labels = {

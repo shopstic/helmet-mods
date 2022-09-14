@@ -5,17 +5,17 @@ import {
   createK8sRoleBinding,
   createK8sService,
   createK8sServiceAccount,
+  K8s,
   K8sDeployment,
   K8sIngress,
   K8sRole,
   K8sRoleBinding,
   K8sService,
   K8sServiceAccount,
-} from "../../deps/helmet.ts";
+} from "../../deps/k8s_utils.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
 import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export const defaultName = "github-actions-registry";
 
@@ -70,8 +70,8 @@ export function createGithubActionsRegistryResources({
       };
     };
     createServiceMonitor: boolean;
-    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
   }
   & Pick<
     GithubActionsRegistryParams,

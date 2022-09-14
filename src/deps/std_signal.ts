@@ -1,1 +1,1 @@
-export { signal as watchOsSignal } from "https://deno.land/std@0.142.0/signal/mod.ts";
+export { signal as watchOsSignal } from "https://deno.land/std@0.155.0/signal/mod.ts";

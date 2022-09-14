@@ -1,4 +1,4 @@
-import { z } from "https://deno.land/x/zod@v3.18.0/mod.ts";
+import { z } from "../deps/zod.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");

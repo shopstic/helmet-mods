@@ -1,5 +1,5 @@
 import { validate } from "../../../deps/validation_utils.ts";
-import { Logger2 } from "../../../libs/logger.ts";
+import { Logger } from "../../../libs/logger.ts";
 import { GitlabJob, GitlabJobListSchema, GitlabProject, GitlabProjectListSchema } from "./types.ts";
 
 export async function fetchLastActiveProjects(
@@ -7,7 +7,7 @@ export async function fetchLastActiveProjects(
     accessToken: string;
     groupId: number;
     lastActivityWithinHours: number;
-    logger: Logger2;
+    logger: Logger;
   },
 ): Promise<GitlabProject[]> {
   const url = new URL(`https://gitlab.com/api/v4/groups/${groupId}/projects?per_page=100&order_by=last_activity_at`);
@@ -28,7 +28,7 @@ export async function fetchLastActiveProjects(
 
   if (!validation.isSuccess) {
     logger.error({
-      message: "Failed validation response schema against GitlabProjectListSchema",
+      msg: "Failed validation response schema against GitlabProjectListSchema",
       body,
       errors: validation.errors,
     });
@@ -40,7 +40,7 @@ export async function fetchLastActiveProjects(
 }
 
 export async function fetchProjectPendingJobs(
-  { accessToken, projectId, logger }: { accessToken: string; projectId: number; logger: Logger2 },
+  { accessToken, projectId, logger }: { accessToken: string; projectId: number; logger: Logger },
 ): Promise<GitlabJob[]> {
   const results = await Promise.all(["pending", "running", "waiting_for_resource"].map(async (status) => {
     const url = new URL(`https://gitlab.com/api/v4/projects/${projectId}/jobs?scope=${status}&per_page=100`);
@@ -61,7 +61,7 @@ export async function fetchProjectPendingJobs(
 
     if (!validation.isSuccess) {
       logger.error({
-        message: "Failed validation response schema against GitlabJobListSchema",
+        msg: "Failed validation response schema against GitlabJobListSchema",
         body,
         errors: validation.errors,
       });

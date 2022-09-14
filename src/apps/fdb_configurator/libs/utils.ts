@@ -2,13 +2,13 @@ import { captureExec, inheritExec, StdInputBehavior } from "../../../deps/exec_u
 import { validate } from "../../../deps/validation_utils.ts";
 import { memoizePromise } from "../../../deps/async_utils.ts";
 import { Static, TSchema, Type } from "../../../deps/typebox.ts";
-import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
-import { loggerWithContext } from "../../../libs/logger.ts";
 import { commandWithTimeout } from "../../../libs/utils.ts";
+import { createK8sConfigMap } from "../../../deps/k8s_utils.ts";
+import { Logger } from "../../../libs/logger.ts";
 
-const logger = loggerWithContext("utils");
+const logger = new Logger({ ctx: "utils" });
 
 function trimFdbCliOutput(output: string): string {
   let newLineCount = 0;
@@ -83,7 +83,7 @@ export async function fetchStatus(
     try {
       return JSON.parse(json);
     } catch (e) {
-      logger.error(json);
+      logger.error({ error: json });
       throw e;
     }
   })();
@@ -91,10 +91,9 @@ export async function fetchStatus(
   const statusValidation = validate(FdbStatusSchema, parsed);
 
   if (!statusValidation.isSuccess) {
-    logger.error(json);
-    throw new Error(
-      `FDB status JSON payload failed schema validation: ${JSON.stringify(statusValidation.errors, null, 2)}`,
-    );
+    const errorMessage = "FDB status JSON payload failed schema validation";
+    logger.error({ msg: errorMessage, payload: json, errors: statusValidation.errors });
+    throw new Error(errorMessage);
   }
 
   return statusValidation.value;
@@ -131,14 +130,15 @@ export const readCurrentNamespace = memoizePromise(() =>
 export async function readClusterConfig(
   configFile: string,
 ): Promise<FdbDatabaseConfig> {
-  const configJson = JSON.parse(await Deno.readTextFile(configFile));
+  const raw = await Deno.readTextFile(configFile);
+  const configJson = JSON.parse(raw);
   const configValidation = validate(
     FdbDatabaseConfigSchema,
     configJson,
   );
 
   if (!configValidation.isSuccess) {
-    logger.error(configValidation.errors);
+    logger.error({ msg: "Invalid cluster config", config: configJson, errors: configValidation.errors });
     throw new Error("Invalid cluster config");
   }
 
@@ -209,15 +209,13 @@ export async function kubectlGetJson<T extends TSchema>({
     timeoutSeconds,
   });
 
-  const validation = validate(schema, JSON.parse(output));
+  const json = JSON.parse(output);
+  const validation = validate(schema, json);
 
   if (!validation.isSuccess) {
-    logger.error(output);
-    throw new Error(
-      `'kubectl ${fullArgs.join(" ")}' output failed schema validation. Errors: ${
-        JSON.stringify(validation.errors, null, 2)
-      }`,
-    );
+    const errorMessage = `'kubectl ${fullArgs.join(" ")}' output failed schema validation`;
+    logger.error({ msg: errorMessage, output: json, errors: validation.errors });
+    throw new Error(errorMessage);
   }
 
   return validation.value;

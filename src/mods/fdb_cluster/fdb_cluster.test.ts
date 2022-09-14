@@ -2,7 +2,7 @@ import { FdbStatefulConfig } from "./lib/fdb_stateful.ts";
 import { assertEquals, assertNotEquals } from "../../deps/std_testing.ts";
 
 import { createFdbClusterResources } from "./fdb_cluster.ts";
-import { IoK8sApiCoreV1Container, IoK8sApiCoreV1PodTemplateSpec } from "../../deps/k8s_utils.ts";
+import { K8s } from "../../deps/k8s_utils.ts";
 
 Deno.test("fdb_cluster should work", () => {
   const baseName = "test";
@@ -86,14 +86,14 @@ Deno.test("fdb_cluster should work", () => {
     1,
   );
 
-  const allWorkloadPodTemplates: IoK8sApiCoreV1PodTemplateSpec[] = [
+  const allWorkloadPodTemplates: Array<NonNullable<K8s["core.v1.PodTemplate"]["template"]>> = [
     cluster.statelessDeployment.spec!.template,
     cluster.grvProxyDeployment!.spec!.template,
     cluster.commitProxyDeployment!.spec!.template,
     ...(cluster.statefulSets.map((s) => s.spec!.template)),
   ];
 
-  const allPodTemplates: IoK8sApiCoreV1PodTemplateSpec[] = [
+  const allPodTemplates: Array<NonNullable<K8s["core.v1.PodTemplate"]["template"]>> = [
     ...allWorkloadPodTemplates,
     cluster.createConnectionString.job.spec!.template,
     cluster.configure.job.spec!.template,
@@ -106,7 +106,7 @@ Deno.test("fdb_cluster should work", () => {
     assertEquals(template.spec!.tolerations, tolerations);
   });
 
-  const allWorkloadContainers: IoK8sApiCoreV1Container[] = allWorkloadPodTemplates.flatMap((t) => t.spec!.containers);
+  const allWorkloadContainers: K8s["core.v1.Container"][] = allWorkloadPodTemplates.flatMap((t) => t.spec!.containers);
 
   allWorkloadContainers.forEach((container) => {
     assertNotEquals(

@@ -3,10 +3,10 @@ import { dirname, joinPath } from "../../deps/std_path.ts";
 import { CliProgram, createCliAction } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import { readAll } from "../../deps/std_stream.ts";
-import { loggerWithContext } from "../../libs/logger.ts";
 import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
 import { commandWithTimeout } from "../../libs/utils.ts";
 import { delay } from "../../deps/async_utils.ts";
+import { Logger } from "../../libs/logger.ts";
 
 async function updateDigests({ repoPath, targets }: {
   repoPath: string;
@@ -14,7 +14,7 @@ async function updateDigests({ repoPath, targets }: {
 }) {
   const promises = targets
     .map(async ({ name, versionFilePath, image, platform }) => {
-      const logger = loggerWithContext(name);
+      const logger = new Logger({ ctx: name });
       const fullVersionFilePath = joinPath(repoPath, versionFilePath);
       const getManifestDigestCmdArgs = (platform === "all") ? ["--list", "--require-list"] : ["--platform", platform];
 
@@ -30,7 +30,7 @@ async function updateDigests({ repoPath, targets }: {
         }
       })();
 
-      logger.info(`Fetching manifest digest for '${image}' with platform '${platform}'`);
+      logger.info({ msg: `Fetching manifest digest for '${image}' with platform '${platform}'` });
 
       const digest = await (async () => {
         try {
@@ -48,9 +48,10 @@ async function updateDigests({ repoPath, targets }: {
           return ret;
         } catch (e) {
           if (e instanceof NonZeroExitError) {
-            logger.error(`Command failed: ${e.command.join(" ")}`);
-            logger.error(`stdout: ${e.output?.out.trim()}`);
-            logger.error(`stderr: ${e.output?.err.trim()}`);
+            logger.error({
+              msg: "Command failed",
+              error: e,
+            });
             return null;
           }
 
@@ -62,7 +63,12 @@ async function updateDigests({ repoPath, targets }: {
         return null;
       }
 
-      logger.info(`Got digest for ${image}: ${digest} vs. ${currentDigest || "unknown"}`);
+      logger.info({
+        msg: "Got digest",
+        image,
+        digest,
+        currentDigest: currentDigest ?? "unknown",
+      });
 
       if (digest !== currentDigest) {
         return {
@@ -101,7 +107,7 @@ export async function autoBumpVersions(
     groupingDelayMs: number;
   },
 ) {
-  const logger = loggerWithContext("bump");
+  const logger = new Logger({ ctx: "bump" });
 
   const gitPullCmd = ["git", "pull", "--rebase", "origin", gitBranch];
 
@@ -111,7 +117,10 @@ export async function autoBumpVersions(
 
   if (changes.length > 0) {
     logger.info(
-      `Got ${changes.length} changes so far, going to check once more after ${groupingDelayMs}ms to group more changes`,
+      {
+        message:
+          `Got ${changes.length} changes so far, going to check once more after ${groupingDelayMs}ms to group more changes`,
+      },
     );
     await delay(groupingDelayMs);
     changes.push.apply(changes, await updateDigests({ repoPath, targets }));
@@ -122,7 +131,10 @@ export async function autoBumpVersions(
   )).out;
 
   if (!gitStatus.includes("nothing to commit, working tree clean")) {
-    logger.info("Needs to commit, git status:", gitStatus);
+    logger.info({
+      msg: "Need to commit",
+      gitStatus,
+    });
 
     await inheritExec({ cmd: commandWithTimeout(["git", "add", "*"], 5), cwd: repoPath });
 
@@ -142,7 +154,7 @@ export async function autoBumpVersions(
       cwd: repoPath,
     });
   } else {
-    logger.info("Nothing to commit");
+    logger.info({ msg: "Nothing to commit" });
   }
 }
 
@@ -160,14 +172,17 @@ await new CliProgram()
           groupingDelaySeconds,
         },
       ) => {
-        const logger = loggerWithContext("main");
+        const logger = new Logger({ ctx: "main" });
 
         const repoPath = await Deno.makeTempDir();
 
         await inheritExec({ cmd: commandWithTimeout(["git", "clone", gitRepoUri, repoPath], 5) });
 
         while (true) {
-          logger.info(`Reading targets config from: ${targetsConfigFile}`);
+          logger.info({
+            msg: "Reading targets config",
+            targetsConfigFile,
+          });
 
           const targetsConfigHandle = await Deno.open(
             targetsConfigFile,

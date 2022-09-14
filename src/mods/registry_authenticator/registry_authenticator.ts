@@ -5,20 +5,18 @@ import {
   createK8sSecret,
   createK8sVolume,
   createK8sVolumeMount,
-  IoK8sApiCoreV1Container,
-  IoK8sApiCoreV1Volume,
-  IoK8sApiCoreV1VolumeMount,
+  K8s,
   K8sSecret,
-} from "../../deps/helmet.ts";
+} from "../../deps/k8s_utils.ts";
 
 export interface RegistryAuthenticatorResources {
-  registryAuthContainer: IoK8sApiCoreV1Container;
-  registryAuthConfigVolume: IoK8sApiCoreV1Volume;
+  registryAuthContainer: K8s["core.v1.Container"];
+  registryAuthConfigVolume: K8s["core.v1.Volume"];
   registryAuthConfigSecret: K8sSecret;
-  dockerConfigVolume: IoK8sApiCoreV1Volume;
-  dockerConfigVolumeMount: IoK8sApiCoreV1VolumeMount;
+  dockerConfigVolume: K8s["core.v1.Volume"];
+  dockerConfigVolumeMount: K8s["core.v1.VolumeMount"];
   registryAuthSecret: K8sSecret;
-  registryAuthSecretVolume: IoK8sApiCoreV1Volume;
+  registryAuthSecretVolume: K8s["core.v1.Volume"];
 }
 
 export function createRegistryAuthenticatorResources({

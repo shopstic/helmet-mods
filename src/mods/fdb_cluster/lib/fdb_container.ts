@@ -1,12 +1,5 @@
 import { toSnakeCase } from "../../../deps/case.ts";
-import {
-  IoK8sApiCoreV1ConfigMapKeySelector,
-  IoK8sApiCoreV1EnvVar,
-  IoK8sApiCoreV1VolumeMount,
-  K8sContainer,
-  K8sImagePullPolicy,
-} from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1ResourceRequirements } from "../../../deps/k8s_utils.ts";
+import { K8s, K8sContainer, K8sImagePullPolicy } from "../../../deps/k8s_utils.ts";
 
 export type FdbConfiguredProcessClass =
   | "coordinator"
@@ -44,13 +37,13 @@ export function createFdbContainer(
     processClass: FdbConfiguredProcessClass;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
-    volumeMounts: IoK8sApiCoreV1VolumeMount[];
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
+    volumeMounts: K8s["core.v1.VolumeMount"][];
     port: number;
     locality: FdbLocalityMode;
     serviceName?: string;
     args?: string[];
-    resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+    resourceRequirements?: K8s["core.v1.ResourceRequirements"];
   },
 ): K8sContainer {
   const serviceNameUpperSnakeCased = serviceName ? toSnakeCase(serviceName).toUpperCase() : "";
@@ -77,7 +70,7 @@ export function createFdbContainer(
       },
     ];
 
-  const localityEnv: Array<IoK8sApiCoreV1EnvVar> = (() => {
+  const localityEnv: Array<K8s["core.v1.EnvVar"]> = (() => {
     switch (locality) {
       case "none":
         return [];

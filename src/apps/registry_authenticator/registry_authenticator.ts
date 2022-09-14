@@ -1,5 +1,4 @@
 import { captureExec, ExecAbortedError, NonZeroExitError } from "../../deps/exec_utils.ts";
-import { loggerWithContext } from "../../libs/logger.ts";
 import { commandWithTimeout, exhaustiveMatchingGuard, NonEmptyString, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { readAll } from "../../deps/std_stream.ts";
@@ -24,7 +23,8 @@ import {
   throwError,
 } from "../../deps/rxjs.ts";
 import { equal } from "../../deps/std_testing.ts";
-import { dirname, resolvePath } from "../../deps/helmet.ts";
+import { dirname, resolvePath } from "../../deps/std_path.ts";
+import { Logger } from "../../libs/logger.ts";
 
 interface AuthResult {
   auth: string;
@@ -32,11 +32,14 @@ interface AuthResult {
 }
 
 export function authenticate(auth: RegistryAuth): Observable<AuthResult> {
-  const logger = loggerWithContext("auth");
+  const logger = new Logger({ ctx: "auth" });
 
   if (auth.type === "static") {
     const { registry, username, password } = auth;
-    logger.info(`Authenticating to '${registry}' with username and password`);
+    logger.info({
+      msg: "Authenticating with username and password",
+      registry,
+    });
 
     return of({ registry, auth: btoa(`${username}:${password}`) });
   } else if (auth.type === "ecr") {
@@ -47,7 +50,10 @@ export function authenticate(auth: RegistryAuth): Observable<AuthResult> {
         .pipe(
           startWith(-1),
           exhaustMap(async () => {
-            logger.info(`Authenticating to '${registry}' with AWS CLI`);
+            logger.info({
+              msg: "Authenticating with AWS CLI",
+              registry,
+            });
             const token = (await captureExec({
               cmd: commandWithTimeout(["aws", "ecr", "get-login-password", "--region", region], 5),
               abortSignal,
@@ -65,9 +71,12 @@ export function authenticate(auth: RegistryAuth): Observable<AuthResult> {
 }
 
 async function loadConfig(configFile: string): Promise<RegistryAuthConfig> {
-  const logger = loggerWithContext("config");
+  const logger = new Logger({ ctx: "config" });
 
-  logger.info(`Reading config from '${configFile}'`);
+  logger.info({
+    msg: "Reading config",
+    configFile,
+  });
 
   const configHandle = await Deno.open(configFile, { read: true, write: false });
 
@@ -98,7 +107,7 @@ await new CliProgram()
         configLoadIntervalSeconds: Type.Number({ minimum: 1 }),
       }),
       async ({ configFile, outputFile, configLoadIntervalSeconds }) => {
-        const logger = loggerWithContext("main");
+        const logger = new Logger({ ctx: "main" });
 
         const seedConfig: RegistryAuthConfig | null = null;
 
@@ -116,18 +125,21 @@ await new CliProgram()
             concatMap(() => loadConfig(configFile)),
             switchScan((previous, next) => {
               if (equal(previous, next)) {
-                logger.info("Config hasn't changed");
+                logger.info({ msg: "Config hasn't changed" });
                 return EMPTY;
               }
               return of(next);
             }, seedConfig),
             switchMap((auths) => {
               if (auths.length === 0) {
-                logger.info("Config is empty, nothing to do");
+                logger.info({ msg: "Config is empty, nothing to do" });
                 return EMPTY;
               }
 
-              logger.info(`Using config with registries: ${auths.map(({ registry }) => registry).join(", ")}`);
+              logger.info({
+                msg: "Using config with registries",
+                registries: auths.map(({ registry }) => registry),
+              });
 
               return combineLatest(auths.map((auth) => authenticate(auth)))
                 .pipe(
@@ -141,13 +153,11 @@ await new CliProgram()
             concatMap((auths) => Deno.writeTextFile(outputFile, JSON.stringify({ auths }, null, 2))),
             catchError((e) => {
               if (e instanceof NonZeroExitError) {
-                logger.error(`Command failed: ${e.command.join(" ")}`);
-                logger.error(`stdout: ${e.output?.out.trim()}`);
-                logger.error(`stderr: ${e.output?.err.trim()}`);
+                logger.error({ msg: "Command failed", error: e });
               }
               return throwError(() => e);
             }),
-            tap(() => logger.info(`Updated ${outputFile}`)),
+            tap(() => logger.info({ msg: "Updated output file", outputFile })),
           );
 
         await lastValueFrom(stream);

@@ -1,6 +1,6 @@
 import { delay } from "../../../deps/async_utils.ts";
 import { K8s, k8sApiWatch, OpenapiClient } from "../../../deps/k8s_openapi.ts";
-import { Logger2 } from "../../../libs/logger.ts";
+import { Logger } from "../../../libs/logger.ts";
 import { createPromApiClient } from "../../../libs/prom_api_client.ts";
 import { exhaustiveMatchingGuard } from "../../../libs/utils.ts";
 import { AutoscaledJob, AutoscaledJobAutoscaling, Paths } from "./types.ts";
@@ -11,7 +11,7 @@ export async function* watchMetric(
   { autoscaling: { query, intervalSeconds, metricServerUrl }, signal, logger }: {
     autoscaling: AutoscaledJobAutoscaling;
     signal: AbortSignal;
-    logger: Logger2;
+    logger: Logger;
   },
 ) {
   const promClient = createPromApiClient(metricServerUrl);
@@ -47,7 +47,7 @@ export async function* watchMetric(
       }
     } catch (error) {
       if (!(error instanceof DOMException) || error.name !== "AbortError") {
-        logger.error({ message: "Metric query failed", error });
+        logger.error({ msg: "Metric query failed", error });
       }
     } finally {
       last = performance.now();
@@ -60,7 +60,7 @@ export async function getJobs(
     client: OpenapiClient<Paths>;
     namespace: string;
   },
-): Promise<Array<K8s["io.k8s.api.batch.v1.Job"]>> {
+): Promise<Array<K8s["batch.v1.Job"]>> {
   const jobList = (await client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get")({
     path: {
       namespace,

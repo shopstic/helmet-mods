@@ -5,7 +5,7 @@ import { delay } from "../../deps/async_utils.ts";
 import { ulid } from "../../deps/ulid.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { AutoscaledJob, AutoscaledJobAutoscaling, K8sJobAutoscalerParamsSchema, Paths } from "./libs/types.ts";
-import { Logger2 } from "../../libs/logger.ts";
+import { Logger } from "../../libs/logger.ts";
 import { createOpenapiClient, K8s } from "../../deps/k8s_openapi.ts";
 import { createReconciliationLoop } from "../../libs/utils.ts";
 
@@ -35,15 +35,15 @@ await new CliProgram()
           abortController: AbortController;
           autoscaling: AutoscaledJobAutoscaling;
         }> = new Map();
-        const logger = new Logger2();
+        const logger = new Logger();
         const autoscalingValues: Map<string, number> = new Map();
         const reconcileLoop = createReconciliationLoop();
 
         async function reconcile() {
-          logger.info({ message: "Reconcile" });
+          logger.info({ msg: "Reconcile" });
 
           const jobs = await getJobs({ client, namespace });
-          const activeJobsByGroupUid: Map<string, Array<K8s["io.k8s.api.batch.v1.Job"]>> = new Map();
+          const activeJobsByGroupUid: Map<string, Array<K8s["batch.v1.Job"]>> = new Map();
 
           for (const job of jobs) {
             if (
@@ -87,7 +87,7 @@ await new CliProgram()
 
             if (totalDesiredJobCount > maxReplicas) {
               logger.warn({
-                message: `Desired count (${totalDesiredJobCount}) is greater than max allowed ${maxReplicas}`,
+                msg: `Desired count (${totalDesiredJobCount}) is greater than max allowed ${maxReplicas}`,
                 name: autoscaledJob.metadata.name,
                 desired: totalDesiredJobCount,
                 maxAllowed: maxReplicas,
@@ -104,7 +104,7 @@ await new CliProgram()
               );
 
               logger.info({
-                message: `Creating ${toCreateCount} extra jobs`,
+                msg: `Creating ${toCreateCount} extra jobs`,
                 targetFreeJobCount,
                 currentFreeJobCount,
                 uid,
@@ -164,7 +164,7 @@ await new CliProgram()
                     query: {},
                     body: newJob,
                   });
-                  logger.info({ message: "Created job", name: created.data.metadata?.name });
+                  logger.info({ msg: "Created job", name: created.data.metadata?.name });
                 } catch (exception) {
                   logger.error({ error: "Failed creating job", exception });
                   throw exception;
@@ -174,7 +174,7 @@ await new CliProgram()
               await Promise.all(createJobPromises);
             } else {
               logger.info({
-                message: `Nothing to do`,
+                msg: `Nothing to do`,
                 targetFreeJobCount,
                 currentFreeJobCount,
                 name: autoscaledJob.metadata.name,
@@ -201,7 +201,7 @@ await new CliProgram()
 
               if (!equal(currentMetricWatch.autoscaling, autoscaling)) {
                 logger.info({
-                  message: "Autoscaling config changed",
+                  msg: "Autoscaling config changed",
                   uid,
                   name: autoscaledJob.metadata.name,
                   autoscaling,
@@ -238,7 +238,7 @@ await new CliProgram()
         }
 
         const groupWatchPromise = (async () => {
-          logger.info({ message: "Watching autoscaled jobs" });
+          logger.info({ msg: "Watching autoscaled jobs" });
           for await (
             jobGroupMap of watchJobGroups({
               client,
@@ -246,14 +246,14 @@ await new CliProgram()
               signal,
             })
           ) {
-            logger.info({ message: "Autoscaled job watch changed" });
+            logger.info({ msg: "Autoscaled job watch changed" });
             await reconcileMetricWatches();
             reconcileLoop.request();
           }
         })();
 
         const jobWatchPromise = (async () => {
-          logger.info({ message: "Watching jobs" });
+          logger.info({ msg: "Watching jobs" });
           for await (
             const event of watchJobs({
               client,
@@ -261,19 +261,19 @@ await new CliProgram()
               signal,
             })
           ) {
-            logger.info({ message: "Job changed", change: event.type, name: event.object.metadata?.name });
+            logger.info({ msg: "Job changed", change: event.type, name: event.object.metadata?.name });
             reconcileLoop.request();
           }
         })();
 
         const mainPromise = (async () => {
-          logger.info({ message: "Running reconcile loop" });
+          logger.info({ msg: "Running reconcile loop" });
           let last = performance.now();
           for await (const _ of reconcileLoop.loop) {
             const now = performance.now();
             const elapseMs = now - last;
             const delayMs = Math.max(minReconcileIntervalMs - elapseMs, 0);
-            logger.info({ message: `Going to reconcile ${delayMs > 0 ? `in ${delayMs}ms` : "now"}` });
+            logger.info({ msg: `Going to reconcile ${delayMs > 0 ? `in ${delayMs}ms` : "now"}` });
 
             if (delayMs > 0) {
               await delay(delayMs);

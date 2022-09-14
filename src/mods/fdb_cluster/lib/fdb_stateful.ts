@@ -2,17 +2,11 @@ import {
   createK8sPvc,
   createK8sService,
   createK8sStatefulSet,
-  IoK8sApiCoreV1ConfigMapKeySelector,
+  K8s,
   K8sImagePullPolicy,
   K8sPvc,
   K8sService,
   K8sStatefulSet,
-} from "../../../deps/helmet.ts";
-import {
-  IoK8sApiCoreV1Affinity,
-  IoK8sApiCoreV1PodSpec,
-  IoK8sApiCoreV1ResourceRequirements,
-  IoK8sApiCoreV1TopologySpreadConstraint,
 } from "../../../deps/k8s_utils.ts";
 import { createFdbContainer, FdbConfiguredProcessClass, FdbLocalityMode } from "./fdb_container.ts";
 
@@ -26,12 +20,12 @@ export interface FdbStatefulConfig {
   processClass: "coordinator" | "storage" | "log";
   volumeSize: string;
   storageClassName: string;
-  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+  nodeSelector?: Record<string, string>;
+  tolerations?: K8s["core.v1.Toleration"][];
   args?: string[];
-  affinity?: IoK8sApiCoreV1Affinity;
-  topologySpreadConstraints?: Array<IoK8sApiCoreV1TopologySpreadConstraint>;
-  resourceRequirements?: IoK8sApiCoreV1ResourceRequirements;
+  affinity?: K8s["core.v1.Affinity"];
+  topologySpreadConstraints?: Array<K8s["core.v1.TopologySpreadConstraint"]>;
+  resourceRequirements?: K8s["core.v1.ResourceRequirements"];
 }
 
 export const STATEFUL_ID_LABEL = "helmet.run/fdb-stateful-id";
@@ -109,7 +103,7 @@ export function createFdbStatefulResources(
   }: {
     baseName: string;
     baseLabels: Record<string, string>;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
     configs: Record<string, FdbStatefulConfig>;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;

@@ -4,14 +4,13 @@ import {
   createK8sRole,
   createK8sRoleBinding,
   createK8sServiceAccount,
-  IoK8sApiCoreV1ConfigMapKeySelector,
+  K8s,
   K8sImagePullPolicy,
   K8sJob,
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
+} from "../../../../deps/k8s_utils.ts";
 
 export interface FdbCreateConnectionStringResources {
   job: K8sJob;
@@ -35,12 +34,12 @@ export function createFdbCreateConnectionStringResources(
     baseName: string;
     namespace: string;
     baseLabels: Record<string, string>;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
     coordinatorServiceNames: string[];
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
   },
 ): FdbCreateConnectionStringResources {
   const resourceName = `${baseName}-create-connection-string`;

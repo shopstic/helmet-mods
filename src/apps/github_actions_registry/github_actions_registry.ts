@@ -2,7 +2,7 @@ import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { createOpenapiClient, OpenapiClient } from "../../deps/k8s_openapi.ts";
 import { ConnInfo, serveHttp } from "../../deps/std_http.ts";
 import { constantTimeCompare, createWebhookSigner } from "../../libs/crypto_utils.ts";
-import { Logger2 } from "../../libs/logger.ts";
+import { Logger } from "../../libs/logger.ts";
 import { agInterval, agThrottle, createReconciliationLoop, ReconciliationLoop } from "../../libs/utils.ts";
 import {
   createOrgRunnerRegistrationToken,
@@ -23,7 +23,7 @@ interface ReconciliationRequest {
   repo: string;
 }
 const GITHUB_SIGNATURE_HEADER = "X-Hub-Signature-256";
-const logger = new Logger2();
+const logger = new Logger();
 const reconciliationLoopByIdMap = new Map<string, ReconciliationLoop<ReconciliationRequest>>();
 let accessClientPromise = deferred<OpenapiClient<GhPaths>>();
 
@@ -85,10 +85,10 @@ async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequ
   for await (const { org: owner, repo } of requests) {
     const client = await accessClientPromise;
 
-    logger.info({ message: "Getting repo pending jobs", owner, repo });
+    logger.info({ msg: "Getting repo pending jobs", owner, repo });
     const jobs = await getRepoPendingJobs({ client, owner, repo });
 
-    logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
+    logger.info({ msg: `Got ${jobs.length} pending jobs`, jobs, owner, repo });
     workflowsByRepoMap.set(`${owner}/${repo}`, { owner, repo, jobs });
   }
 }
@@ -126,7 +126,7 @@ const program = new CliProgram()
             const accessClient = await accessClientPromise;
             const rate = (await accessClient.endpoint("/rate_limit").method("get")({})).data.rate;
             githubApiRateUsedGauge.set(rate.used);
-            logger.info({ message: "Github rate", rate });
+            logger.info({ msg: "Github rate", rate });
           }
         })();
 
@@ -153,7 +153,7 @@ const program = new CliProgram()
               }),
             })
           ) {
-            logger.info({ message: "Refresh access token" });
+            logger.info({ msg: "Refresh access token" });
             if (accessClientPromise.state !== "pending") {
               accessClientPromise = deferred();
             }
@@ -163,7 +163,7 @@ const program = new CliProgram()
 
         (async () => {
           for await (const _ of agInterval(allReposRefreshIntervalSeconds * 1000)) {
-            logger.info({ message: "Polling from all active repos" });
+            logger.info({ msg: "Polling from all active repos" });
 
             const activeRepos = await getLastActiveRepoNames({
               client: await accessClientPromise,
@@ -171,7 +171,7 @@ const program = new CliProgram()
               lastPushedWithinHours: activeReposLastPushedWithinHours,
             });
 
-            logger.info({ message: `Got ${activeRepos.length} active repos`, activeRepos });
+            logger.info({ msg: `Got ${activeRepos.length} active repos`, activeRepos });
 
             activeRepos.forEach((repo) => {
               requestReconciliation({ org, repo, id: `${org}/${repo}` });
@@ -181,7 +181,7 @@ const program = new CliProgram()
 
         function requestReconciliation(request: ReconciliationRequest) {
           if (!reconciliationLoopByIdMap.has(request.id)) {
-            logger.info({ message: "Create reconciliation loop", id: request.id, perRepoMinRefreshIntervalMs });
+            logger.info({ msg: "Create reconciliation loop", id: request.id, perRepoMinRefreshIntervalMs });
             const rl = createReconciliationLoop<ReconciliationRequest>();
             reconciliationLoopByIdMap.set(request.id, rl);
             runReconciliationLoop(agThrottle(rl.loop, perRepoMinRefreshIntervalMs));
@@ -199,7 +199,7 @@ const program = new CliProgram()
 
             if (!signature) {
               logger.warn({
-                message: `Got a request with missing ${GITHUB_SIGNATURE_HEADER} header`,
+                msg: `Got a request with missing ${GITHUB_SIGNATURE_HEADER} header`,
                 headers: request.headers,
                 remoteAddr: connInfo.remoteAddr,
               });
@@ -211,7 +211,7 @@ const program = new CliProgram()
 
             if (!constantTimeCompare(signed, signature)) {
               logger.warn({
-                message: `Got a request with invalid ${GITHUB_SIGNATURE_HEADER} header value`,
+                msg: `Got a request with invalid ${GITHUB_SIGNATURE_HEADER} header value`,
                 expected: signed,
                 received: signature,
                 headers: request.headers,
@@ -231,7 +231,7 @@ const program = new CliProgram()
 
                 const { repository: { owner: { login: org }, name: repo, full_name: id } } = event;
                 logger.info({
-                  message: "Request reconciliation",
+                  msg: "Request reconciliation",
                   org,
                   repo,
                   action: payload.action,
@@ -239,13 +239,13 @@ const program = new CliProgram()
                 });
                 requestReconciliation({ org, repo, id });
               } else {
-                logger.debug({ message: "Ignored webhook payload", payload });
+                logger.debug({ msg: "Ignored webhook payload", payload });
               }
 
               return new Response("OK", { status: 200 });
             } catch (error) {
               logger.error({
-                message: "Failed parsing request body",
+                msg: "Failed parsing request body",
                 error,
                 headers: request.headers,
                 remoteAddr: connInfo.remoteAddr,
@@ -258,7 +258,7 @@ const program = new CliProgram()
         }
 
         const registryServerPromise = (async () => {
-          logger.info({ message: `Starting registry server on port ${registryServerPort}` });
+          logger.info({ msg: `Starting registry server on port ${registryServerPort}` });
           await serveHttp(async (request: Request) => {
             if (request.method === "GET") {
               const url = new URL(request.url);
@@ -324,18 +324,18 @@ const program = new CliProgram()
             port: registryServerPort,
             signal,
             onListen({ hostname, port }) {
-              logger.info({ message: `Registry server is up at http://${hostname}:${port}` });
+              logger.info({ msg: `Registry server is up at http://${hostname}:${port}` });
             },
           });
         })();
 
         const webhookServerPromise = (async () => {
-          logger.info({ message: `Starting webhook server on port ${webhookServerPort}` });
+          logger.info({ msg: `Starting webhook server on port ${webhookServerPort}` });
           await serveHttp(webhookHandler, {
             port: webhookServerPort,
             signal,
             onListen({ hostname, port }) {
-              logger.info({ message: `Webhook server is up at http://${hostname}:${port}` });
+              logger.info({ msg: `Webhook server is up at http://${hostname}:${port}` });
             },
           });
         })();

@@ -4,13 +4,13 @@ import {
   createK8sContainer,
   createK8sDaemonSet,
   createK8sServiceAccount,
+  K8s,
   K8sClusterRole,
   K8sClusterRoleBinding,
   K8sDaemonSet,
   K8sImagePullPolicy,
   K8sServiceAccount,
-} from "../../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
+} from "../../../../deps/k8s_utils.ts";
 
 export const PENDING_LABEL_VALUE_YES = "yes";
 export const PENDING_LABEL_VALUE_NO = "no";
@@ -46,8 +46,8 @@ export function createFdbPrepareLocalPvResources({
   image: string;
   imagePullPolicy: K8sImagePullPolicy;
   rootMountPath?: string;
-  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+  nodeSelector?: Record<string, string>;
+  tolerations?: K8s["core.v1.Toleration"][];
 }): FdbPrepareLocalPvResources {
   const component = "prepare-local-pv";
   const resourceName = `${baseName}-${component}`;

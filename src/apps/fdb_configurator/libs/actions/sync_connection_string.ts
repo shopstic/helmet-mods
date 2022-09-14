@@ -1,11 +1,11 @@
 import { delay } from "../../../../deps/async_utils.ts";
 import { createCliAction } from "../../../../deps/cli_utils.ts";
 import { Type } from "../../../../deps/typebox.ts";
-import { loggerWithContext } from "../../../../libs/logger.ts";
+import { Logger } from "../../../../libs/logger.ts";
 import { NonEmptyString } from "../types.ts";
 import { fdbcliCaptureExec, updateConnectionStringConfigMap } from "../utils.ts";
 
-const logger = loggerWithContext("main");
+const logger = new Logger();
 const FDB_CLUSTER_FILE = "FDB_CLUSTER_FILE";
 const connectionStringResultRegex = /`\\xff\\xff\/connection_string' is `([^']+)'/;
 
@@ -30,11 +30,11 @@ export default createCliAction(
 
     let lastConnectionString = (await Deno.readTextFile(clusterFile)).trim();
 
-    logger.info("Connection string sync loop started with last value", lastConnectionString);
+    logger.info({ msg: "Connection string sync loop started with last value", lastConnectionString });
 
     while (true) {
       try {
-        logger.debug("Getting current connection string");
+        logger.debug({ msg: "Getting current connection string" });
         const connectionStringResult = await fdbcliCaptureExec(
           // Must issue "status minimal" here such that connection
           // string is updated timely
@@ -54,11 +54,15 @@ export default createCliAction(
         const connectionString = connectionStringMatch[1];
 
         if (connectionString === lastConnectionString) {
-          logger.debug(`Connection string hasn't changed`, connectionString);
+          logger.debug({ msg: "Connection string hasn't changed", connectionString });
         } else {
-          logger.info(`Connection string changed from '${lastConnectionString}' to ${connectionString}`);
+          logger.info({
+            msg: "Connection string changed",
+            lastConnectionString,
+            connectionString,
+          });
           logger.info(
-            `Going to update ConfigMap '${configMapName}' with data key '${configMapKey}' and value '${connectionString}'`,
+            { msg: "Going to update ConfigMap", configMapName, configMapKey, connectionString },
           );
 
           await updateConnectionStringConfigMap({
@@ -67,7 +71,10 @@ export default createCliAction(
             connectionString,
           });
 
-          logger.info(`ConfigMap '${configMapName}' updated successfully!`);
+          logger.info({
+            msg: "ConfigMap updated successfully!",
+            configMapName,
+          });
 
           lastConnectionString = connectionString;
         }

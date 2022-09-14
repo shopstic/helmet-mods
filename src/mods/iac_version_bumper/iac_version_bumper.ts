@@ -4,14 +4,14 @@ import {
   createK8sSecret,
   createK8sVolume,
   createK8sVolumeMount,
+  K8s,
   K8sConfigMap,
   K8sDeployment,
   K8sSecret,
-} from "../../deps/helmet.ts";
+} from "../../deps/k8s_utils.ts";
 import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
 import { image as defaultIacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
 import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../deps/k8s_utils.ts";
 
 export const defaultName = "iac-version-bumper";
 
@@ -47,8 +47,8 @@ export function createIacVersionBumperResources({
   committerEmail: string;
   sshPrivateKey: string;
   targets: VersionBumpTargets;
-  nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-  tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+  nodeSelector?: Record<string, string>;
+  tolerations?: K8s["core.v1.Toleration"][];
 } & Omit<VersionBumpParams, "targetsConfigFile">): IacVersionBumperResources {
   const labels = {
     "app.kubernetes.io/name": defaultName,

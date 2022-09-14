@@ -4,7 +4,7 @@ import { stableHash } from "../../deps/stable_hash.ts";
 import { ConnInfo, serveHttp } from "../../deps/std_http.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import { constantTimeCompare } from "../../libs/crypto_utils.ts";
-import { Logger2 } from "../../libs/logger.ts";
+import { Logger } from "../../libs/logger.ts";
 import { agInterval, agThrottle, createReconciliationLoop, ReconciliationLoop } from "../../libs/utils.ts";
 import {
   GitlabCicdRegistryParamsSchema,
@@ -14,7 +14,7 @@ import {
 import { fetchLastActiveProjects, fetchProjectPendingJobs } from "./libs/gitlab_api_service.ts";
 
 const GITLAB_WEBHOOK_TOKEN_HEADER = "X-Gitlab-Token";
-const logger = new Logger2();
+const logger = new Logger();
 
 interface ReconciliationRequest {
   accessToken: string;
@@ -33,10 +33,10 @@ const jobsByProjectIdMap = new Map<string, GitlabProjectJobs>();
 
 async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequest>) {
   for await (const { projectId, projectName, accessToken } of requests) {
-    logger.info({ message: "Getting project pending jobs", projectId, projectName });
+    logger.info({ msg: "Getting project pending jobs", projectId, projectName });
     const jobs = await fetchProjectPendingJobs({ accessToken, projectId, logger });
 
-    logger.info({ message: `Got ${jobs.length} pending jobs`, jobs, projectId, projectName });
+    logger.info({ msg: `Got ${jobs.length} pending jobs`, jobs, projectId, projectName });
     jobsByProjectIdMap.set(String(projectId), { projectId, projectName, jobs });
   }
 }
@@ -119,7 +119,7 @@ const program = new CliProgram()
         function requestReconciliation(request: ReconciliationRequest) {
           if (!reconciliationLoopByIdMap.has(request.projectId)) {
             logger.info({
-              message: "Create reconciliation loop",
+              msg: "Create reconciliation loop",
               projectId: request.projectId,
               projectName: request.projectName,
               perProjectMinRefreshIntervalMs,
@@ -134,7 +134,7 @@ const program = new CliProgram()
 
         (async () => {
           for await (const _ of agInterval(allProjectsRefreshIntervalSeconds * 1000)) {
-            logger.info({ message: "Fetching all active projects" });
+            logger.info({ msg: "Fetching all active projects" });
             const activeProjects = await fetchLastActiveProjects({
               accessToken,
               groupId,
@@ -143,7 +143,7 @@ const program = new CliProgram()
             });
 
             logger.info({
-              message: `Got ${activeProjects.length} active projects`,
+              msg: `Got ${activeProjects.length} active projects`,
               projects: activeProjects.map(({ id, name, last_activity_at }) => ({
                 id,
                 name,
@@ -167,7 +167,7 @@ const program = new CliProgram()
 
             if (!receivedToken) {
               logger.warn({
-                message: `Got a request with missing ${GITLAB_WEBHOOK_TOKEN_HEADER} header`,
+                msg: `Got a request with missing ${GITLAB_WEBHOOK_TOKEN_HEADER} header`,
                 headers: request.headers,
                 remoteAddr: connInfo.remoteAddr,
               });
@@ -176,7 +176,7 @@ const program = new CliProgram()
 
             if (!constantTimeCompare(webhookSecretToken, receivedToken)) {
               logger.warn({
-                message: `Got a request with invalid ${GITLAB_WEBHOOK_TOKEN_HEADER} header value`,
+                msg: `Got a request with invalid ${GITLAB_WEBHOOK_TOKEN_HEADER} header value`,
                 received: receivedToken,
                 headers: request.headers,
                 remoteAddr: connInfo.remoteAddr,
@@ -190,7 +190,7 @@ const program = new CliProgram()
 
               if (!validation.isSuccess) {
                 logger.warn({
-                  message: "Got a request with an unexpected payload",
+                  msg: "Got a request with an unexpected payload",
                   payload: payload,
                   headers: request.headers,
                   remoteAddr: connInfo.remoteAddr,
@@ -200,7 +200,7 @@ const program = new CliProgram()
                 const projectName = validation.value.project_name;
 
                 logger.info({
-                  message: "Got a build webhook request, going to reconcile",
+                  msg: "Got a build webhook request, going to reconcile",
                   projectId,
                   projectName,
                 });
@@ -210,7 +210,7 @@ const program = new CliProgram()
               return new Response("OK", { status: 200 });
             } catch (error) {
               logger.error({
-                message: "Failed parsing request body",
+                msg: "Failed parsing request body",
                 error,
                 headers: request.headers,
                 remoteAddr: connInfo.remoteAddr,
@@ -223,18 +223,18 @@ const program = new CliProgram()
         }
 
         const webhookServerPromise = (async () => {
-          logger.info({ message: `Starting webhook server on port ${webhookServerPort}` });
+          logger.info({ msg: `Starting webhook server on port ${webhookServerPort}` });
           await serveHttp(webhookHandler, {
             port: webhookServerPort,
             signal,
             onListen({ hostname, port }) {
-              logger.info({ message: `Webhook server is up at http://${hostname}:${port}` });
+              logger.info({ msg: `Webhook server is up at http://${hostname}:${port}` });
             },
           });
         })();
 
         const registryServerPromise = (async () => {
-          logger.info({ message: `Starting registry server on port ${registryServerPort}` });
+          logger.info({ msg: `Starting registry server on port ${registryServerPort}` });
           await serveHttp(async (request: Request) => {
             if (request.method === "GET") {
               const url = new URL(request.url);
@@ -289,7 +289,7 @@ const program = new CliProgram()
             port: registryServerPort,
             signal,
             onListen({ hostname, port }) {
-              logger.info({ message: `Registry server is up at http://${hostname}:${port}` });
+              logger.info({ msg: `Registry server is up at http://${hostname}:${port}` });
             },
           });
         })();

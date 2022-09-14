@@ -1,12 +1,11 @@
 import {
   createK8sDeployment,
   createK8sService,
-  IoK8sApiCoreV1ConfigMapKeySelector,
+  K8s,
   K8sDeployment,
   K8sImagePullPolicy,
   K8sService,
-} from "../../../deps/helmet.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../deps/k8s_utils.ts";
+} from "../../../deps/k8s_utils.ts";
 import { createServiceMonitorV1, ServiceMonitorV1 } from "../../prometheus_operator/prometheus_operator.ts";
 
 export interface FdbExporterResources {
@@ -32,12 +31,12 @@ export function createFdbExporterResources(
     namespace: string;
     dedupProxyImage: string;
     baseLabels: Record<string, string>;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
     createServiceMonitor: boolean;
-    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
   },
 ): FdbExporterResources {
   const labels = {

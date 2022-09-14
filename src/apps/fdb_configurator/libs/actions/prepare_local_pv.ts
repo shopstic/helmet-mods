@@ -4,9 +4,9 @@ import { Type } from "../../../../deps/typebox.ts";
 import { NonEmptyString } from "../types.ts";
 import { captureExec, inheritExec } from "../../../../deps/exec_utils.ts";
 import { kubectlGetJson, kubectlInherit, toRootElevatedCommand } from "../utils.ts";
-import { loggerWithContext } from "../../../../libs/logger.ts";
+import { Logger } from "../../../../libs/logger.ts";
 
-const logger = loggerWithContext("main");
+const logger = new Logger();
 
 export default createCliAction(
   Type.Object({
@@ -42,11 +42,9 @@ export default createCliAction(
     const deviceIds = deviceIdsString.split(",");
 
     if (deviceIds.length === 0) {
-      logger.info(`Node annotation '${pendingDeviceIdsAnnotationName}' is empty, nothing to do`);
+      logger.info({ msg: `Node annotation '${pendingDeviceIdsAnnotationName}' is empty, nothing to do` });
     } else {
-      logger.info(
-        `Going to prepare the following ${deviceIds.length} devices: ${deviceIds.join(", ")}`,
-      );
+      logger.info({ msg: `Going to prepare the following ${deviceIds.length} devices: ${deviceIds.join(", ")}` });
 
       for (const deviceId of deviceIds) {
         const devicePath = joinPath("/dev/disk/by-id", deviceId);
@@ -66,32 +64,34 @@ export default createCliAction(
         const isMounted = (await mountpointCheck.status()).code === 0;
 
         if (!isMounted) {
-          logger.info(`${deviceMountTargetPath} is not mounted`);
-          logger.info(`Checking for existing file system inside ${devicePath}`);
+          logger.info({ msg: `${deviceMountTargetPath} is not mounted` });
+          logger.info({ msg: `Checking for existing file system inside ${devicePath}` });
 
           const wipefsTest = (await captureExec({
             cmd: toRootElevatedCommand(["wipefs", "-a", "-n", devicePath]),
           })).out;
 
           if (wipefsTest.trim().length > 0) {
-            logger.error(`Device possibly contains an existing file system, wipefs test output: ${wipefsTest}`);
+            logger.error({
+              msg: `Device possibly contains an existing file system, wipefs test output: ${wipefsTest}`,
+            });
             return ExitCode.One;
           }
 
-          logger.info(`Making sure /etc/fstab does not already contain a reference to ${devicePath}`);
+          logger.info({ msg: `Making sure /etc/fstab does not already contain a reference to ${devicePath}` });
           const currentFstabContent = (await captureExec({
             cmd: toRootElevatedCommand(["cat", "/etc/fstab"]),
           })).out;
 
           if (currentFstabContent.indexOf(devicePath) !== -1) {
-            logger.error(`Device ${devicePath} found inside /etc/fstab`);
+            logger.error({ msg: `Device ${devicePath} found inside /etc/fstab` });
             return ExitCode.One;
           }
 
-          logger.info(`Formatting ${devicePath}`);
+          logger.info({ msg: `Formatting ${devicePath}` });
           await inheritExec({ cmd: toRootElevatedCommand(["mkfs.ext4", devicePath]) });
 
-          logger.info(`Writing to /etc/fstab`);
+          logger.info({ msg: `Writing to /etc/fstab` });
           await inheritExec({
             cmd: toRootElevatedCommand(["tee", "/etc/fstab"]),
             stdin: {
@@ -103,7 +103,7 @@ ${logMountSourcePath}  ${logBindMountTargetPath}  none  bind  0 0
             },
           });
 
-          logger.info(`Creating mount paths`);
+          logger.info({ msg: `Creating mount paths` });
           await inheritExec({
             cmd: toRootElevatedCommand([
               "mkdir",
@@ -114,7 +114,7 @@ ${logMountSourcePath}  ${logBindMountTargetPath}  none  bind  0 0
             ]),
           });
 
-          logger.info(`Making mount target paths immutable`);
+          logger.info({ msg: `Making mount target paths immutable` });
           await inheritExec({
             cmd: toRootElevatedCommand([
               "chattr",
@@ -125,17 +125,19 @@ ${logMountSourcePath}  ${logBindMountTargetPath}  none  bind  0 0
             ]),
           });
 
-          logger.info(`Mounting ${devicePath} to ${deviceMountTargetPath}`);
+          logger.info({ msg: `Mounting ${devicePath} to ${deviceMountTargetPath}` });
           await inheritExec({
             cmd: toRootElevatedCommand(["mount", `--source=${devicePath}`]),
           });
 
-          logger.info(`Creating bind-mount source paths: ${storageMountSourcePath} and ${logMountSourcePath}`);
+          logger.info({
+            msg: `Creating bind-mount source paths: ${storageMountSourcePath} and ${logMountSourcePath}`,
+          });
           await inheritExec({
             cmd: toRootElevatedCommand(["mkdir", "-p", storageMountSourcePath, logMountSourcePath]),
           });
 
-          logger.info(`Bind-mounting ${storageMountSourcePath} to ${storageBindMountTargetPath}`);
+          logger.info({ msg: `Bind-mounting ${storageMountSourcePath} to ${storageBindMountTargetPath}` });
           await inheritExec({
             cmd: toRootElevatedCommand([
               "mount",
@@ -143,7 +145,7 @@ ${logMountSourcePath}  ${logBindMountTargetPath}  none  bind  0 0
             ]),
           });
 
-          logger.info(`Bind-mounting ${logMountSourcePath} to ${logBindMountTargetPath}`);
+          logger.info({ msg: `Bind-mounting ${logMountSourcePath} to ${logBindMountTargetPath}` });
           await inheritExec({
             cmd: toRootElevatedCommand([
               "mount",
@@ -151,20 +153,20 @@ ${logMountSourcePath}  ${logBindMountTargetPath}  none  bind  0 0
             ]),
           });
         } else {
-          logger.info(`${deviceMountTargetPath} is already a mountpoint, nothing to do`);
+          logger.info({ msg: `${deviceMountTargetPath} is already a mountpoint, nothing to do` });
         }
       }
     }
 
     logger.info(
-      `Removing '${pendingDeviceIdsAnnotationName}' annotation from node ${nodeName}`,
+      { msg: `Removing '${pendingDeviceIdsAnnotationName}' annotation from node ${nodeName}` },
     );
     await kubectlInherit({
       args: ["annotate", `node/${nodeName}`, `${pendingDeviceIdsAnnotationName}-`],
     });
 
     logger.info(
-      `Setting label '${pendingLabelName}=${pendingLabelCompletedValue}' for node ${nodeName}`,
+      { msg: `Setting label '${pendingLabelName}=${pendingLabelCompletedValue}' for node ${nodeName}` },
     );
     await kubectlInherit({
       args: [

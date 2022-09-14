@@ -1,21 +1,4 @@
-import { ConsoleStream, Logger, TokenReplacer } from "../deps/optic.ts";
 import { exhaustiveMatchingGuard } from "./utils.ts";
-
-export function loggerWithContext(ctx: string): Logger {
-  return new Logger()
-    .addStream(
-      new ConsoleStream()
-        .withLogHeader(false)
-        .withLogFooter(false)
-        .withFormat(
-          new TokenReplacer()
-            .withFormat(`{dateTime} [{level}][${ctx}] {msg} {metadata}`)
-            .withDateTimeFormat("YYYY-MM-DD hh:mm:ss")
-            .withLevelPadding(0)
-            .withColor(false),
-        ),
-    );
-}
 
 function serializeLog(event: unknown) {
   return JSON.stringify(event, (_, value) => {
@@ -27,7 +10,7 @@ function serializeLog(event: unknown) {
   });
 }
 
-export class Logger2 {
+export class Logger {
   context: Record<string, unknown>;
   constructor(initialContext: Record<string, unknown> = {}) {
     this.context = initialContext;
@@ -38,8 +21,8 @@ export class Logger2 {
   }
   log(record: Record<string, unknown>, level: "debug" | "info" | "warn" | "error" = "info") {
     const out = serializeLog({
-      time: new Date(),
-      level,
+      t: new Date(),
+      l: level,
       ...record,
     });
 

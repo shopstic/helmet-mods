@@ -5,17 +5,16 @@ import {
   createK8sRole,
   createK8sRoleBinding,
   createK8sServiceAccount,
-  IoK8sApiCoreV1ConfigMapKeySelector,
+  K8s,
   K8sConfigMap,
   K8sImagePullPolicy,
   K8sJob,
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../../../deps/helmet.ts";
+} from "../../../../deps/k8s_utils.ts";
 
 import { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
-import { IoK8sApiCoreV1PodSpec } from "../../../../deps/k8s_utils.ts";
 
 export interface FdbConfigureResources {
   job: K8sJob;
@@ -40,12 +39,12 @@ export function createFdbConfigureResources(
     baseName: string;
     namespace: string;
     baseLabels: Record<string, string>;
-    connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector;
+    connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"];
     databaseConfig: FdbDatabaseConfig;
     image: string;
     imagePullPolicy: K8sImagePullPolicy;
-    nodeSelector?: IoK8sApiCoreV1PodSpec["nodeSelector"];
-    tolerations?: IoK8sApiCoreV1PodSpec["tolerations"];
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
   },
 ): FdbConfigureResources {
   const resourceName = `${baseName}-configure`;

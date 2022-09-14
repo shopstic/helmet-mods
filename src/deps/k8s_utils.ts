@@ -1,7 +1,5 @@
-export { IoK8sApiCoreV1PodSpec } from "https://deno.land/x/k8s@1.22/models/IoK8sApiCoreV1PodSpec.ts";
-export { IoK8sApiCoreV1Affinity } from "https://deno.land/x/k8s@1.22/models/IoK8sApiCoreV1Affinity.ts";
-export { IoK8sApiCoreV1ResourceRequirements } from "https://deno.land/x/k8s@1.22/models/IoK8sApiCoreV1ResourceRequirements.ts";
-export { IoK8sApiCoreV1TopologySpreadConstraint } from "https://deno.land/x/k8s@1.22/models/IoK8sApiCoreV1TopologySpreadConstraint.ts";
-export { IoK8sApiCoreV1PodTemplateSpec } from "https://deno.land/x/k8s@1.22/models/IoK8sApiCoreV1PodTemplateSpec.ts";
-export { IoK8sApiCoreV1SecretKeySelector } from "https://deno.land/x/k8s@1.22/models/IoK8sApiCoreV1SecretKeySelector.ts";
-export * from "https://deno.land/x/helmet@1.16.8/deps/k8s_utils.ts";
+export * from "https://deno.land/x/utils@2.8.0/k8s_utils.ts";
+import { K8sCrdSchema } from "https://deno.land/x/utils@2.8.0/k8s_utils.ts";
+import { Static } from "./typebox.ts";
+
+export type K8sCrd = Static<typeof K8sCrdSchema>;

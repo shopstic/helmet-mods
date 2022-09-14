@@ -10,7 +10,7 @@
   };
 
   outputs = { self, nixpkgs, flakeUtils, fdbPkg, hotPot, nix2containerPkg }:
-    flakeUtils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ] (system:
+    flakeUtils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (system:
       let
         hotPotPkgs = hotPot.packages.${system};
         nix2container = nix2containerPkg.packages.${system}.nix2container;

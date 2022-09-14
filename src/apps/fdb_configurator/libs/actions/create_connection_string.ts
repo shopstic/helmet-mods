@@ -5,11 +5,11 @@ import {
   readCurrentNamespace,
   updateConnectionStringConfigMap,
 } from "../utils.ts";
-import { loggerWithContext } from "../../../../libs/logger.ts";
 import { NonEmptyString } from "../types.ts";
 import { commandWithTimeout } from "../../../../libs/utils.ts";
+import { Logger } from "../../../../libs/logger.ts";
 
-const logger = loggerWithContext("main");
+const logger = new Logger();
 
 function generateString(length: number): string {
   return Array
@@ -60,14 +60,12 @@ export default createCliAction(
         return false;
       }
 
-      logger.error(cmd.join(" "));
-      throw new Error(
-        `Command exited with code '${code}' and stderr: ${stderr}`,
-      );
+      logger.error({ msg: "Command failed", cmd, code, stderr });
+      throw new Error("Command failed");
     })();
 
     if (hasExistingConfigMap) {
-      logger.info(`ConfigMap '${configMapName}' already exists, nothing to do`);
+      logger.info({ msg: "ConfigMap already exists, nothing to do", configMapName });
       return ExitCode.Zero;
     }
 
@@ -76,9 +74,7 @@ export default createCliAction(
     const clusterId = generateString(8);
     const connectionString = `${clusterDescription}:${clusterId}@${coordinatorEndpoints.join(",")}`;
 
-    logger.info(
-      `Going to create ConfigMap '${configMapName}' with data key '${configMapKey}' and value '${connectionString}'`,
-    );
+    logger.info({ msg: "Going to create ConfigMap", configMapKey, configMapName, connectionString });
 
     await updateConnectionStringConfigMap({
       configMapKey,
@@ -86,7 +82,7 @@ export default createCliAction(
       connectionString,
     });
 
-    logger.info(`ConfigMap '${configMapName}' created successfully!`);
+    logger.info({ msg: "ConfigMap created successfully!", configMapName });
 
     return ExitCode.Zero;
   },
