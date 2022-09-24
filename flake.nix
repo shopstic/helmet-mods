@@ -16,14 +16,6 @@
         nix2container = nix2containerPkg.packages.${system}.nix2container;
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [
-            (final: prev: {
-              regclient = hotPotPkgs.regclient;
-            })
-          ];
-          config = {
-            allowBroken = true;
-          };
         };
         fdb = fdbPkg.packages.${system}.fdb_7;
         src = builtins.path
@@ -76,6 +68,9 @@
             "nix.enableLanguageServer" = true;
             "nix.formatterPath" = pkgs.nixpkgs-fmt + "/bin/nixpkgs-fmt";
             "nix.serverPath" = pkgs.rnix-lsp + "/bin/rnix-lsp";
+            "[nix]" = {
+              "editor.defaultFormatter" = "jnoortheen.nix-ide";
+            };
           };
         };
       in
