@@ -1,4 +1,4 @@
-import { z } from "../deps/zod.ts";
+import { z, ZodTypeDef } from "../deps/zod.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");
@@ -94,7 +94,7 @@ export class PromApiError extends Error {
   }
 }
 
-async function promFetch<O, D, I>(
+async function promFetch<O, D extends ZodTypeDef, I>(
   schema: z.ZodType<O, D, I>,
   url: string,
   init: RequestInit = {},
