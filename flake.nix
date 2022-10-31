@@ -111,7 +111,14 @@
           '';
         };
         packages = {
-          inherit deno-deps fdb-configurator iac-version-bumper registry-authenticator registry-syncer k8s-job-autoscaler;
+          inherit
+            deno-deps
+            fdb-configurator
+            iac-version-bumper
+            registry-authenticator
+            registry-syncer
+            k8s-job-autoscaler
+            openapi-merger;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
             images = {
