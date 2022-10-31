@@ -34,6 +34,7 @@ smoke_test() {
   test_app ./src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts
   test_app ./src/apps/github_actions_registry/github_actions_registry.ts
   test_app ./src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts
+  test_app ./src/apps/openapi_merger/openapi_merger.ts
   test
 }
 

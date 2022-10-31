@@ -45,6 +45,7 @@
         k8s-job-autoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
         github-actions-registry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
         gitlab-cicd-registry = denoBundle "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
+        openapi-merger = denoBundle "src/apps/openapi_merger/openapi_merger.ts";
         vscode-settings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -55,6 +56,14 @@
             "deno.suggest.imports.hosts" = {
               "https://deno.land" = false;
             };
+            "editor.inlayHints.enabled" = "offUnlessPressed";
+            "deno.inlayHints.enumMemberValues.enabled" = true;
+            "deno.inlayHints.functionLikeReturnTypes.enabled" = true;
+            "deno.inlayHints.parameterNames.enabled" = "all";
+            "deno.inlayHints.parameterNames.suppressWhenArgumentMatchesName" = true;
+            "deno.inlayHints.parameterTypes.enabled" = true;
+            "deno.inlayHints.propertyDeclarationTypes.enabled" = true;
+            "deno.inlayHints.variableTypes.enabled" = true;
             "editor.tabSize" = 2;
             "[typescript]" = {
               "editor.defaultFormatter" = "denoland.vscode-deno";
@@ -129,6 +138,9 @@
               };
               image-gitlab-cicd-registry = pkgs.callPackage ./nix/images/gitlab-cicd-registry {
                 inherit nonRootShadowSetup nix2container gitlab-cicd-registry deno;
+              };
+              image-openapi-merger = pkgs.callPackage ./nix/images/openapi-merger {
+                inherit nonRootShadowSetup nix2container openapi-merger deno;
               };
             };
           in
