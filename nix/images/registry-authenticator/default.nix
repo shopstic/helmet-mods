@@ -35,7 +35,7 @@ let
     perms = [
       {
         path = home-dir;
-        regex = "/home/${user}$";
+        regex = "/home/${user}";
         mode = "0777";
       }
     ];
