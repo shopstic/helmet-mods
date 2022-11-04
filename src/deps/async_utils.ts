@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.19.1/deps/async_utils.ts";
+export * from "https://deno.land/x/helmet@1.19.2/deps/async_utils.ts";
