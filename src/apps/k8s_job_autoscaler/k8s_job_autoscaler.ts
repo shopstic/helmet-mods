@@ -9,6 +9,17 @@ import { Logger } from "../../libs/logger.ts";
 import { createOpenapiClient, K8s } from "../../deps/k8s_openapi.ts";
 import { createReconciliationLoop } from "../../libs/utils.ts";
 
+function findNextAvailableIndex(unavailable: number[]) {
+  let i = 0;
+
+  while (true) {
+    if (!unavailable.includes(i)) {
+      return i;
+    }
+    i++;
+  }
+}
+
 await new CliProgram()
   .addAction(
     "run",
@@ -99,9 +110,9 @@ await new CliProgram()
             if (targetFreeJobCount > currentFreeJobCount) {
               const currentIndexes = currentAllJobs.map((j) => Number(j.metadata!.labels![jobReplicaIndexLabel]));
               const toCreateCount = targetFreeJobCount - currentFreeJobCount;
-              const toCreateIndexes = Array.from({ length: targetFreeJobCount }).map((_, i) => i).filter((i) =>
-                !currentIndexes.includes(i)
-              );
+              const toCreateIndexes = Array
+                .from({ length: toCreateCount })
+                .map(() => findNextAvailableIndex(currentIndexes));
 
               logger.info({
                 msg: `Creating ${toCreateCount} extra jobs`,
@@ -109,6 +120,7 @@ await new CliProgram()
                 currentFreeJobCount,
                 uid,
                 name: autoscaledJob.metadata.name,
+                toCreateIndexes,
               });
 
               const createJobPromises = toCreateIndexes.map(async (index) => {
