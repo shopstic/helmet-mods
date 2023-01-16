@@ -120,7 +120,7 @@ export async function* generateAccessClient(
       iss: appId,
     }, key);
 
-    const ret = (await client
+    const ret = await client
       .endpoint("/app/installations/{installation_id}/access_tokens").method("post")({
         path: {
           installation_id: installationId,
@@ -137,7 +137,7 @@ export async function* generateAccessClient(
           return Promise.resolve(null);
         }
         throw e;
-      }));
+      });
 
     if (ret === null) {
       return;

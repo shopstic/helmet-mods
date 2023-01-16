@@ -25,7 +25,7 @@
             filter = with pkgs.lib; (path: type:
               hasInfix "/src" path ||
               hasSuffix "/cli.sh" path ||
-              hasSuffix "/lock.json" path
+              hasSuffix "/deno.lock" path
             );
           };
         deno = hotPotPkgs.deno;

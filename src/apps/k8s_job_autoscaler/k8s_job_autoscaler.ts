@@ -90,7 +90,7 @@ await new CliProgram()
           for (const [uid, autoscaledJob] of jobGroupMap) {
             const { maxReplicas, busyAnnotation } = autoscaledJob.spec.autoscaling;
             const desiredFreeJobCount = autoscalingValues.get(uid) || 0;
-            const currentAllJobs = (activeJobsByGroupUid.get(uid) || []);
+            const currentAllJobs = activeJobsByGroupUid.get(uid) || [];
             const currentBusyJobs = busyAnnotation
               ? currentAllJobs.filter((j) =>
                 j.metadata?.annotations &&

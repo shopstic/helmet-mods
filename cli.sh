@@ -13,16 +13,15 @@ test() {
 }
 
 update_cache() {
-  deno cache --lock=lock.json ./src/deps/*
+  deno cache --lock=deno.lock ./src/deps/*
 }
 
 update_lock() {
-  deno cache --reload ./src/deps/*
-  deno cache ./src/deps/* --lock ./lock.json --lock-write
+  deno cache --reload --lock ./deno.lock --lock-write ./src/deps/*
 }
 
 bundle_app() {
-  deno bundle --lock=lock.json "$@"
+  deno bundle --lock=deno.lock "$@"
 }
 
 smoke_test() {
