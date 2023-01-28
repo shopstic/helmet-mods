@@ -236,7 +236,7 @@ export default createCliAction(
             });
 
             await fdbcliInheritExec(
-              `include ${toBeIncludedProcesses.map((p) => `locality_processid:${p.id}`).join(" ")}`,
+              `include ${toBeIncludedAddresses.join(" ")}`,
             );
           }
 
@@ -289,7 +289,7 @@ export default createCliAction(
               return false;
             } else {
               await fdbcliInheritExec(
-                `exclude FORCE ${toBeExcludedProcesses.map((p) => `locality_processid:${p.id}`).join(" ")}`,
+                `exclude FORCE ${toBeExcludedProcesses.join(" ")}`,
                 Infinity,
               );
             }
