@@ -159,6 +159,16 @@ export function createFdbClusterResources(
   const currentBaseName = `${baseName}${currentGeneration.id.length > 0 ? `-${currentGeneration.id}` : ""}`;
   const nextBaseName = `${baseName}${nextGeneration ? `-${nextGeneration.id}` : ""}`;
 
+  const currentLabels = {
+    ...labels,
+    "app.kubernetes.io/generation": currentBaseName,
+  };
+
+  const nextLabels = {
+    ...labels,
+    "app.kubernetes.io/generation": nextBaseName,
+  };
+
   const { services: coordinatorServices, statefulSets: coordinatorStatefulSets } = createFdbStatefulResources({
     baseName,
     baseLabels: labels,
@@ -171,7 +181,7 @@ export function createFdbClusterResources(
 
   const { services: currentStatefulServices, statefulSets: currentStatefulSets } = createFdbStatefulResources({
     baseName: currentBaseName,
-    baseLabels: labels,
+    baseLabels: currentLabels,
     configs: currentGeneration.stateful,
     connectionStringConfigMapRef,
     image: currentImage,
@@ -182,7 +192,7 @@ export function createFdbClusterResources(
   const { services: nextStatefulServices, statefulSets: nextStatefulSets } = nextGeneration
     ? createFdbStatefulResources({
       baseName: nextBaseName,
-      baseLabels: labels,
+      baseLabels: nextLabels,
       configs: nextGeneration.stateful,
       connectionStringConfigMapRef,
       image: nextImage,
@@ -199,7 +209,7 @@ export function createFdbClusterResources(
       baseName: currentBaseName,
       processClass: "grv_proxy",
       replicas: currentStateless.grvProxyCount,
-      baseLabels: labels,
+      baseLabels: currentLabels,
       connectionStringConfigMapRef,
       port: 4500,
       image: currentImage,
@@ -218,7 +228,7 @@ export function createFdbClusterResources(
       baseName: nextBaseName,
       processClass: "grv_proxy",
       replicas: nextStateless.grvProxyCount,
-      baseLabels: labels,
+      baseLabels: nextLabels,
       connectionStringConfigMapRef,
       port: 4500,
       image: nextImage,
@@ -237,7 +247,7 @@ export function createFdbClusterResources(
       baseName: currentBaseName,
       processClass: "commit_proxy",
       replicas: currentStateless.commitProxyCount,
-      baseLabels: labels,
+      baseLabels: currentLabels,
       connectionStringConfigMapRef,
       port: 4500,
       image: currentImage,
@@ -256,7 +266,7 @@ export function createFdbClusterResources(
       baseName: nextBaseName,
       processClass: "commit_proxy",
       replicas: nextStateless.commitProxyCount,
-      baseLabels: labels,
+      baseLabels: nextLabels,
       connectionStringConfigMapRef,
       port: 4500,
       image: nextImage,
@@ -276,7 +286,7 @@ export function createFdbClusterResources(
     replicas: (currentStateless.mode === "prod")
       ? currentStateless.resolverCount + currentStateless.standbyCount + 4
       : currentStateless.count ?? 1,
-    baseLabels: labels,
+    baseLabels: currentLabels,
     connectionStringConfigMapRef,
     port: 4500,
     image: currentImage,
@@ -296,7 +306,7 @@ export function createFdbClusterResources(
       replicas: (nextStateless.mode === "prod")
         ? nextStateless.resolverCount + nextStateless.standbyCount + 4
         : nextStateless.count ?? 1,
-      baseLabels: labels,
+      baseLabels: nextLabels,
       connectionStringConfigMapRef,
       port: 4500,
       image: nextImage,
