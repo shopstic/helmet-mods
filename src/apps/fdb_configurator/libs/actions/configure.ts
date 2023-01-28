@@ -280,6 +280,7 @@ export default createCliAction(
 
             if (!status.client.database_status.available) {
               logger.error({ msg: "Database is not available, going to skip excluding" });
+              return false;
             } else {
               await fdbcliInheritExec(
                 `exclude ${toBeExcludedAddresses.join(" ")}`,
