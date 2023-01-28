@@ -287,6 +287,8 @@ export default createCliAction(
               );
             }
           }
+
+          return true;
         },
       },
     ];
