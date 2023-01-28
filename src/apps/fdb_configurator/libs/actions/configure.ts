@@ -289,7 +289,7 @@ export default createCliAction(
               return false;
             } else {
               await fdbcliInheritExec(
-                `exclude FORCE ${toBeExcludedProcesses.join(" ")}`,
+                `exclude FORCE ${toBeExcludedAddresses.join(" ")}`,
                 Infinity,
               );
             }
