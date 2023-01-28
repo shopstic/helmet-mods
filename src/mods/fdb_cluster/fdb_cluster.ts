@@ -325,7 +325,7 @@ export function createFdbClusterResources(
         .servers
         .filter((s) => nextGeneration !== undefined || s.excluded)
         .map((s) => ({
-          name: `${baseName}-${id}`,
+          name: `${currentBaseName}-${id}`,
           port: s.port,
         }))
     );
