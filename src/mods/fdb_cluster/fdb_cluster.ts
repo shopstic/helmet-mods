@@ -28,23 +28,55 @@ export const defaultDedupProxyImage =
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;
-  grvProxyDeployment?: K8sDeployment;
-  commitProxyDeployment?: K8sDeployment;
-  statefulServices: K8sService[];
-  statefulSets: K8sStatefulSet[];
-  statelessDeployment: K8sDeployment;
+  coordinatorServices: K8sService[];
+  coordinatorStatefulSets: K8sStatefulSet[];
+  currentGrvProxyDeployment?: K8sDeployment;
+  nextGrvProxyDeployment?: K8sDeployment;
+  currentCommitProxyDeployment?: K8sDeployment;
+  nextCommitProxyDeployment?: K8sDeployment;
+  currentStatefulServices: K8sService[];
+  nextStatefulServices: K8sService[];
+  currentStatefulSets: K8sStatefulSet[];
+  nextStatefulSets: K8sStatefulSet[];
+  currentStatelessDeployment: K8sDeployment;
+  nextStatelessDeployment?: K8sDeployment;
   createConnectionString: FdbCreateConnectionStringResources;
   configure: FdbConfigureResources;
   syncConnectionString: FdbSyncConnectionStringResources;
   exporter: FdbExporterResources;
 }
 
+export interface FdbClusterGeneration {
+  id: string;
+  stateless: {
+    mode: "prod";
+    grvProxyCount: number;
+    commitProxyCount: number;
+    resolverCount: number;
+    standbyCount: number;
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
+    resourceRequirements?: K8s["core.v1.ResourceRequirements"];
+    topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
+    args?: string[];
+  } | {
+    mode: "dev";
+    count?: number;
+    nodeSelector?: Record<string, string>;
+    tolerations?: K8s["core.v1.Toleration"][];
+    resourceRequirements?: K8s["core.v1.ResourceRequirements"];
+    topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
+    args?: string[];
+  };
+  stateful: Record<string, FdbStatefulConfig>;
+  image?: string;
+  labels?: Record<string, string>;
+}
+
 export function createFdbClusterResources(
   {
     storageEngine,
     redundancyMode,
-    stateless,
-    stateful,
     backup,
     baseName,
     namespace,
@@ -52,8 +84,10 @@ export function createFdbClusterResources(
     perpetualStorageWiggleLocality = "0",
     tenantMode = "disabled",
     storageMigrationType = "disabled",
+    coordinators,
+    currentGeneration,
+    nextGeneration,
     locality = "none",
-    image = fdbImage,
     configuratorImage = fdbConfiguratorImage,
     exporterImage = fdbExporterImage,
     dedupProxyImage = defaultDedupProxyImage,
@@ -71,35 +105,16 @@ export function createFdbClusterResources(
     perpetualStorageWiggleLocality?: FdbDatabaseConfig["perpetualStorageWiggleLocality"];
     tenantMode?: FdbDatabaseConfig["tenantMode"];
     storageMigrationType?: FdbDatabaseConfig["storageMigrationType"];
-    stateless: {
-      mode: "prod";
-      grvProxyCount: number;
-      commitProxyCount: number;
-      resolverCount: number;
-      standbyCount: number;
-      nodeSelector?: Record<string, string>;
-      tolerations?: K8s["core.v1.Toleration"][];
-      resourceRequirements?: K8s["core.v1.ResourceRequirements"];
-      topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
-      args?: string[];
-    } | {
-      mode: "dev";
-      count?: number;
-      nodeSelector?: Record<string, string>;
-      tolerations?: K8s["core.v1.Toleration"][];
-      resourceRequirements?: K8s["core.v1.ResourceRequirements"];
-      topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
-      args?: string[];
-    };
+    coordinators: Record<string, FdbStatefulConfig>;
+    currentGeneration: FdbClusterGeneration;
+    nextGeneration?: FdbClusterGeneration;
     backup?: {
       podCount: number;
       agentCountPerPod: number;
       volumeMounts: K8s["core.v1.VolumeMount"][];
       volumes: K8s["core.v1.Volume"][];
     };
-    stateful: Record<string, FdbStatefulConfig>;
     locality?: FdbLocalityMode;
-    image?: string;
     configuratorImage?: string;
     exporterImage?: string;
     dedupProxyImage?: string;
@@ -121,6 +136,9 @@ export function createFdbClusterResources(
     key: "connectionString",
   };
 
+  const currentImage = currentGeneration.image ?? fdbImage;
+  const nextImage = nextGeneration?.image ?? fdbImage;
+
   const backupDeployment = backup
     ? createFdbBackupDeployment({
       replicas: backup.podCount,
@@ -130,81 +148,170 @@ export function createFdbClusterResources(
       connectionStringConfigMapRef,
       volumeMounts: backup.volumeMounts,
       volumes: backup.volumes,
-      image,
+      image: currentImage,
       imagePullPolicy,
-      topologySpreadConstraints: stateless.topologySpreadConstraints,
+      topologySpreadConstraints: currentGeneration.stateless.topologySpreadConstraints,
       nodeSelector: helpersNodeSelector,
       tolerations: helpersTolerations,
     })
     : undefined;
 
-  const { services: statefulServices, statefulSets } = createFdbStatefulResources({
+  const currentBaseName = `${baseName}${currentGeneration.id.length > 0 ? `-${currentGeneration.id}` : ""}`;
+  const nextBaseName = `${baseName}${nextGeneration ? `-${nextGeneration.id}` : ""}`;
+
+  const { services: coordinatorServices, statefulSets: coordinatorStatefulSets } = createFdbStatefulResources({
     baseName,
     baseLabels: labels,
-    configs: stateful,
+    configs: coordinators,
     connectionStringConfigMapRef,
-    image,
+    image: currentImage,
     imagePullPolicy,
     locality,
   });
 
-  const grvProxyDeployment = (stateless.mode === "prod")
+  const { services: currentStatefulServices, statefulSets: currentStatefulSets } = createFdbStatefulResources({
+    baseName: currentBaseName,
+    baseLabels: labels,
+    configs: currentGeneration.stateful,
+    connectionStringConfigMapRef,
+    image: currentImage,
+    imagePullPolicy,
+    locality,
+  });
+
+  const { services: nextStatefulServices, statefulSets: nextStatefulSets } = nextGeneration
+    ? createFdbStatefulResources({
+      baseName: nextBaseName,
+      baseLabels: labels,
+      configs: nextGeneration.stateful,
+      connectionStringConfigMapRef,
+      image: nextImage,
+      imagePullPolicy,
+      locality,
+    })
+    : { services: [], statefulSets: [] };
+
+  const currentStateless = currentGeneration.stateless;
+  const nextStateless = nextGeneration?.stateless;
+
+  const currentGrvProxyDeployment = (currentStateless.mode === "prod")
     ? createFdbStatelessDeployment({
-      baseName,
+      baseName: currentBaseName,
       processClass: "grv_proxy",
-      replicas: stateless.grvProxyCount,
+      replicas: currentStateless.grvProxyCount,
       baseLabels: labels,
       connectionStringConfigMapRef,
       port: 4500,
-      image,
+      image: currentImage,
       imagePullPolicy,
-      nodeSelector: stateless.nodeSelector,
-      tolerations: stateless.tolerations,
-      resourceRequirements: stateless.resourceRequirements,
+      nodeSelector: currentStateless.nodeSelector,
+      tolerations: currentStateless.tolerations,
+      resourceRequirements: currentStateless.resourceRequirements,
       locality,
-      args: stateless.args,
-      topologySpreadConstraints: stateless.topologySpreadConstraints,
+      args: currentStateless.args,
+      topologySpreadConstraints: currentStateless.topologySpreadConstraints,
     })
     : undefined;
 
-  const commitProxyDeployment = (stateless.mode === "prod")
+  const nextGrvProxyDeployment = (nextStateless?.mode === "prod")
     ? createFdbStatelessDeployment({
-      baseName,
-      processClass: "commit_proxy",
-      replicas: stateless.commitProxyCount,
+      baseName: nextBaseName,
+      processClass: "grv_proxy",
+      replicas: nextStateless.grvProxyCount,
       baseLabels: labels,
       connectionStringConfigMapRef,
       port: 4500,
-      image,
+      image: nextImage,
       imagePullPolicy,
-      nodeSelector: stateless.nodeSelector,
-      tolerations: stateless.tolerations,
-      resourceRequirements: stateless.resourceRequirements,
+      nodeSelector: nextStateless.nodeSelector,
+      tolerations: nextStateless.tolerations,
+      resourceRequirements: nextStateless.resourceRequirements,
       locality,
-      args: stateless.args,
-      topologySpreadConstraints: stateless.topologySpreadConstraints,
+      args: nextStateless.args,
+      topologySpreadConstraints: nextStateless.topologySpreadConstraints,
     })
     : undefined;
 
-  const statelessDeployment = createFdbStatelessDeployment({
-    baseName,
+  const currentCommitProxyDeployment = (currentStateless.mode === "prod")
+    ? createFdbStatelessDeployment({
+      baseName: currentBaseName,
+      processClass: "commit_proxy",
+      replicas: currentStateless.commitProxyCount,
+      baseLabels: labels,
+      connectionStringConfigMapRef,
+      port: 4500,
+      image: currentImage,
+      imagePullPolicy,
+      nodeSelector: currentStateless.nodeSelector,
+      tolerations: currentStateless.tolerations,
+      resourceRequirements: currentStateless.resourceRequirements,
+      locality,
+      args: currentStateless.args,
+      topologySpreadConstraints: currentStateless.topologySpreadConstraints,
+    })
+    : undefined;
+
+  const nextCommitProxyDeployment = (nextStateless?.mode === "prod")
+    ? createFdbStatelessDeployment({
+      baseName: nextBaseName,
+      processClass: "commit_proxy",
+      replicas: nextStateless.commitProxyCount,
+      baseLabels: labels,
+      connectionStringConfigMapRef,
+      port: 4500,
+      image: nextImage,
+      imagePullPolicy,
+      nodeSelector: nextStateless.nodeSelector,
+      tolerations: nextStateless.tolerations,
+      resourceRequirements: nextStateless.resourceRequirements,
+      locality,
+      args: nextStateless.args,
+      topologySpreadConstraints: nextStateless.topologySpreadConstraints,
+    })
+    : undefined;
+
+  const currentStatelessDeployment = createFdbStatelessDeployment({
+    baseName: currentBaseName,
     processClass: "stateless",
-    replicas: (stateless.mode === "prod") ? stateless.resolverCount + stateless.standbyCount + 4 : stateless.count ?? 1,
+    replicas: (currentStateless.mode === "prod")
+      ? currentStateless.resolverCount + currentStateless.standbyCount + 4
+      : currentStateless.count ?? 1,
     baseLabels: labels,
     connectionStringConfigMapRef,
     port: 4500,
-    image,
+    image: currentImage,
     imagePullPolicy,
-    nodeSelector: stateless.nodeSelector,
-    tolerations: stateless.tolerations,
-    resourceRequirements: stateless.resourceRequirements,
+    nodeSelector: currentStateless.nodeSelector,
+    tolerations: currentStateless.tolerations,
+    resourceRequirements: currentStateless.resourceRequirements,
     locality,
-    args: stateless.args,
-    topologySpreadConstraints: stateless.topologySpreadConstraints,
+    args: currentStateless.args,
+    topologySpreadConstraints: currentStateless.topologySpreadConstraints,
   });
 
+  const nextStatelessDeployment = nextStateless
+    ? createFdbStatelessDeployment({
+      baseName: nextBaseName,
+      processClass: "stateless",
+      replicas: (nextStateless.mode === "prod")
+        ? nextStateless.resolverCount + nextStateless.standbyCount + 4
+        : nextStateless.count ?? 1,
+      baseLabels: labels,
+      connectionStringConfigMapRef,
+      port: 4500,
+      image: nextImage,
+      imagePullPolicy,
+      nodeSelector: nextStateless.nodeSelector,
+      tolerations: nextStateless.tolerations,
+      resourceRequirements: nextStateless.resourceRequirements,
+      locality,
+      args: nextStateless.args,
+      topologySpreadConstraints: nextStateless.topologySpreadConstraints,
+    })
+    : undefined;
+
   const coordinatorServiceNames = Object
-    .entries(stateful)
+    .entries(coordinators)
     .filter(([_, cfg]) =>
       cfg.processClass === "coordinator" &&
       cfg.servers.filter((s) => !s.excluded).length > 0
@@ -212,12 +319,11 @@ export function createFdbClusterResources(
     .map(([id, _]) => `${baseName}-${id}`);
 
   const excludedServiceEndpoints: FdbDatabaseConfig["excludedServiceEndpoints"] = Object
-    .entries(stateful)
-    .filter(([_, cfg]) => cfg.processClass !== "coordinator")
+    .entries(currentGeneration.stateful)
     .flatMap(([id, cfg]) =>
       cfg
         .servers
-        .filter((s) => s.excluded)
+        .filter((s) => nextGeneration !== undefined || s.excluded)
         .map((s) => ({
           name: `${baseName}-${id}`,
           port: s.port,
@@ -225,7 +331,7 @@ export function createFdbClusterResources(
     );
 
   const logCount = Object
-    .entries(stateful)
+    .entries((nextGeneration ?? currentGeneration).stateful)
     .map(([_, r]) => r.processClass === "log" ? r.servers.filter((s) => !s.excluded).length : 0)
     .reduce((s, c) => s + c, 0);
 
@@ -241,9 +347,23 @@ export function createFdbClusterResources(
     tolerations: helpersTolerations,
   });
 
-  const grvProxyCount = stateless.mode === "prod" ? stateless.grvProxyCount : stateless.count ?? 1;
-  const commitProxyCount = stateless.mode === "prod" ? stateless.commitProxyCount : stateless.count ?? 1;
-  const resolverCount = stateless.mode === "prod" ? stateless.resolverCount : 1;
+  const currentGrvProxyCount = currentStateless.mode === "prod"
+    ? currentStateless.grvProxyCount
+    : currentStateless.count ?? 1;
+  const currentCommitProxyCount = currentStateless.mode === "prod"
+    ? currentStateless.commitProxyCount
+    : currentStateless.count ?? 1;
+  const currentResolverCount = currentStateless.mode === "prod" ? currentStateless.resolverCount : 1;
+
+  const nextGrvProxyCount = nextStateless
+    ? (nextStateless.mode === "prod" ? nextStateless.grvProxyCount : nextStateless.count ?? 1)
+    : undefined;
+  const nextCommitProxyCount = nextStateless
+    ? (nextStateless.mode === "prod" ? nextStateless.commitProxyCount : nextStateless.count ?? 1)
+    : undefined;
+  const nextResolverCount = nextStateless
+    ? (nextStateless.mode === "prod" ? nextStateless.resolverCount : 1)
+    : undefined;
 
   const databaseConfig: FdbDatabaseConfig = {
     storageEngine,
@@ -253,9 +373,9 @@ export function createFdbClusterResources(
     storageMigrationType,
     tenantMode,
     logCount,
-    grvProxyCount,
-    commitProxyCount,
-    resolverCount,
+    grvProxyCount: nextGrvProxyCount ?? currentGrvProxyCount,
+    commitProxyCount: nextCommitProxyCount ?? currentCommitProxyCount,
+    resolverCount: nextResolverCount ?? currentResolverCount,
     coordinatorServiceNames,
     excludedServiceEndpoints,
   };
@@ -298,11 +418,18 @@ export function createFdbClusterResources(
 
   return {
     backupDeployment,
-    statefulServices,
-    statefulSets,
-    grvProxyDeployment,
-    commitProxyDeployment,
-    statelessDeployment,
+    coordinatorServices,
+    coordinatorStatefulSets,
+    currentStatefulServices,
+    nextStatefulServices,
+    currentStatefulSets,
+    nextStatefulSets,
+    currentGrvProxyDeployment,
+    nextGrvProxyDeployment,
+    currentCommitProxyDeployment,
+    nextCommitProxyDeployment,
+    currentStatelessDeployment,
+    nextStatelessDeployment,
     createConnectionString,
     configure,
     syncConnectionString,

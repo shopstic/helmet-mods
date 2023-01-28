@@ -18,7 +18,7 @@ Deno.test("fdb_cluster should work", () => {
     effect: "NoExecute",
   }];
 
-  const fdbStatefulConfigs: Record<string, FdbStatefulConfig> = {
+  const fdbCoordinatorStatefulConfigs: Record<string, FdbStatefulConfig> = {
     "coordinator": {
       processClass: "coordinator",
       servers: [{ port: 4500 }],
@@ -27,6 +27,9 @@ Deno.test("fdb_cluster should work", () => {
       volumeSize: "1Gi",
       storageClassName: "local-path",
     },
+  };
+
+  const fdbStatefulConfigs: Record<string, FdbStatefulConfig> = {
     "log": {
       processClass: "log",
       servers: [{ port: 4500 }],
@@ -55,16 +58,20 @@ Deno.test("fdb_cluster should work", () => {
     namespace,
     storageEngine: "ssd-2",
     redundancyMode: "single",
-    stateless: {
-      mode: "prod",
-      grvProxyCount: 1,
-      commitProxyCount: 1,
-      resolverCount: 1,
-      standbyCount: 0,
-      nodeSelector,
-      tolerations,
+    coordinators: fdbCoordinatorStatefulConfigs,
+    currentGeneration: {
+      id: "",
+      stateless: {
+        mode: "prod",
+        grvProxyCount: 1,
+        commitProxyCount: 1,
+        resolverCount: 1,
+        standbyCount: 0,
+        nodeSelector,
+        tolerations,
+      },
+      stateful: fdbStatefulConfigs,
     },
-    stateful: fdbStatefulConfigs,
     helpersNodeSelector: nodeSelector,
     helpersTolerations: tolerations,
     labels: {
@@ -73,24 +80,26 @@ Deno.test("fdb_cluster should work", () => {
     locality: "data_hall",
   });
 
-  assertEquals(cluster.statefulSets.length, 3);
+  assertEquals(cluster.currentStatefulSets.length, 2);
   assertEquals(cluster.backupDeployment, undefined);
-  assertNotEquals(cluster.grvProxyDeployment, undefined);
-  assertNotEquals(cluster.commitProxyDeployment, undefined);
-  assertEquals(cluster.statelessDeployment.spec?.replicas, 5);
-  assertEquals(cluster.statelessDeployment.metadata.labels?.foo, "bar");
+  assertEquals(cluster.coordinatorStatefulSets.length, 1);
+  assertEquals(cluster.coordinatorServices.length, 1);
+  assertNotEquals(cluster.currentGrvProxyDeployment, undefined);
+  assertNotEquals(cluster.currentCommitProxyDeployment, undefined);
+  assertEquals(cluster.currentStatelessDeployment.spec?.replicas, 5);
+  assertEquals(cluster.currentStatelessDeployment.metadata.labels?.foo, "bar");
 
   assertEquals(
-    cluster.statefulSets.find((s) => s.metadata.name.includes("storage")!)?.spec
+    cluster.currentStatefulSets.find((s) => s.metadata.name.includes("storage")!)?.spec
       ?.template.spec?.containers.filter((c) => c.resources?.requests !== undefined).length,
     1,
   );
 
   const allWorkloadPodTemplates: Array<NonNullable<K8s["core.v1.PodTemplate"]["template"]>> = [
-    cluster.statelessDeployment.spec!.template,
-    cluster.grvProxyDeployment!.spec!.template,
-    cluster.commitProxyDeployment!.spec!.template,
-    ...(cluster.statefulSets.map((s) => s.spec!.template)),
+    cluster.currentStatelessDeployment.spec!.template,
+    cluster.currentGrvProxyDeployment!.spec!.template,
+    cluster.currentCommitProxyDeployment!.spec!.template,
+    ...(cluster.currentStatefulSets.map((s) => s.spec!.template)),
   ];
 
   const allPodTemplates: Array<NonNullable<K8s["core.v1.PodTemplate"]["template"]>> = [
