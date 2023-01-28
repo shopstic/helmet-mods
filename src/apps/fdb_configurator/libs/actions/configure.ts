@@ -228,12 +228,16 @@ export default createCliAction(
           const { processByAddressMap, toBeIncludedAddresses } = ret;
 
           if (toBeIncludedAddresses.length > 0) {
+            const toBeIncludedProcesses = toBeIncludedAddresses.map((a) => processByAddressMap[a]);
+
             logger.info({
               msg: `The following ${toBeIncludedAddresses.length} addresses will be included back`,
-              addresses: toBeIncludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
+              addresses: toBeIncludedProcesses.map((p) => prettyPrintProcessInfo(p)),
             });
 
-            await fdbcliInheritExec(`include ${toBeIncludedAddresses.join(" ")}`);
+            await fdbcliInheritExec(
+              `include ${toBeIncludedProcesses.map((p) => `locality_processid:${p.id}`).join(" ")}`,
+            );
           }
 
           return true;
@@ -273,9 +277,11 @@ export default createCliAction(
           if (toBeExcludedAddresses.length === 0) {
             logger.info({ msg: "No new address to be excluded" });
           } else {
+            const toBeExcludedProcesses = toBeExcludedAddresses.map((a) => processByAddressMap[a]);
+
             logger.info({
               msg: "Going to exclude",
-              addresses: toBeExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
+              addresses: toBeExcludedProcesses.map((p) => prettyPrintProcessInfo(p)),
             });
 
             if (!status.client.database_status.available) {
@@ -283,7 +289,7 @@ export default createCliAction(
               return false;
             } else {
               await fdbcliInheritExec(
-                `exclude ${toBeExcludedAddresses.join(" ")}`,
+                `exclude ${toBeExcludedProcesses.map((p) => `locality_processid:${p.id}`).join(" ")}`,
                 Infinity,
               );
             }
