@@ -289,7 +289,7 @@ export default createCliAction(
               return false;
             } else {
               await fdbcliInheritExec(
-                `exclude ${toBeExcludedProcesses.map((p) => `locality_processid:${p.id}`).join(" ")}`,
+                `exclude FORCE ${toBeExcludedProcesses.map((p) => `locality_processid:${p.id}`).join(" ")}`,
                 Infinity,
               );
             }
