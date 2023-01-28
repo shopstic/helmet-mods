@@ -161,12 +161,12 @@ export function createFdbClusterResources(
 
   const currentLabels = {
     ...labels,
-    "app.kubernetes.io/generation": currentBaseName,
+    "app.kubernetes.io/generation": currentGeneration.id,
   };
 
   const nextLabels = {
     ...labels,
-    "app.kubernetes.io/generation": nextBaseName,
+    "app.kubernetes.io/generation": nextGeneration?.id ?? "",
   };
 
   const { services: coordinatorServices, statefulSets: coordinatorStatefulSets } = createFdbStatefulResources({
