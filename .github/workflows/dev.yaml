@@ -23,12 +23,12 @@ jobs:
           - arch: x86_64-linux
             runner: amd64-linux
             size: medium
-          # - arch: aarch64-linux
-          #   runner: arm64-linux
-          #   size: medium
-          # - arch: aarch64-darwin
-          #   runner: arm64-darwin
-          #   size: small
+          - arch: aarch64-linux
+            runner: arm64-linux
+            size: medium
+          - arch: aarch64-darwin
+            runner: arm64-darwin
+            size: small
     steps:
       - uses: actions/checkout@v3
 
