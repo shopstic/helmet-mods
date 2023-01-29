@@ -32,6 +32,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Debug
+        run: sleep 1000000
+
       - name: Build all packages
         run: nix build -L -v '.#defaultPackage.${{ matrix.runner.arch }}'
 
