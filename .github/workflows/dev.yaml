@@ -14,7 +14,7 @@ defaults:
 jobs:
   build-x86_64:
     name: Build x86_64
-    runs-on: [self-hosted, nix]
+    runs-on: [self-hosted, nix, general, amd64-linux, medium]
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
@@ -27,7 +27,7 @@ jobs:
 
   build-aarch64:
     name: Build aarch64
-    runs-on: [self-hosted, nix]
+    runs-on: [self-hosted, nix, general, arm64-linux, medium]
     outputs:
       digests: ${{ steps.build.outputs.digests }}
     steps:
@@ -40,17 +40,12 @@ jobs:
 
   push:
     name: Push
-    runs-on: [self-hosted, nix]
+    runs-on: [self-hosted, nix, general, arm64-linux, small]
     needs: [build-x86_64, build-aarch64]
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579   
-
-      - name: Login to Amazon ECR
-        uses: ./.github/actions/login-to-public-ecr
-        with:
-          imageRepo: ${{ env.IMAGE_REPOSITORY }}
 
       - name: Push multi-arch manifests
         shell: nix develop -v -c bash {0}

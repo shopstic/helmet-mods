@@ -18,11 +18,6 @@ runs:
       shell: bash
       run: |-
         nix build -L -v '.#defaultPackage.${{ inputs.arch }}-linux'
-        
-    - name: Login to Amazon ECR
-      uses: ./.github/actions/login-to-public-ecr
-      with:
-        imageRepo: ${{ inputs.imageRepo }}
 
     - name: Push
       shell: nix develop -v -c bash {0}
