@@ -66,6 +66,11 @@ export function createFdbClusterResources(
     createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
     labels: extraLabels = {},
+    connectionStringConfigMapRef = {
+      name: `${baseName}-connection-string`,
+      key: "connectionString",
+    },
+    extraExcludedServiceEndpoints = [],
   }: {
     baseName: string;
     namespace: string;
@@ -106,17 +111,14 @@ export function createFdbClusterResources(
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
     labels?: Record<string, string>;
+    connectionStringConfigMapRef?: IoK8sApiCoreV1ConfigMapKeySelector;
+    extraExcludedServiceEndpoints?: FdbDatabaseConfig["excludedServiceEndpoints"];
   },
 ): FdbClusterResources {
   const labels = {
     "app.kubernetes.io/name": baseName,
     "app.kubernetes.io/instance": baseName,
     ...extraLabels,
-  };
-
-  const connectionStringConfigMapRef: IoK8sApiCoreV1ConfigMapKeySelector = {
-    name: `${baseName}-connection-string`,
-    key: "connectionString",
   };
 
   const backupDeployment = backup
@@ -211,7 +213,8 @@ export function createFdbClusterResources(
           name: `${baseName}-${id}`,
           port: s.port,
         }))
-    );
+    )
+    .concat(extraExcludedServiceEndpoints);
 
   const logCount = Object
     .entries(stateful)
