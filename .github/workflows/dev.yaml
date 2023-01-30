@@ -68,7 +68,7 @@ jobs:
           ./cli.sh build_all_images ${{ matrix.imageArch }}
 
       - name: Push all images
-        if: github.ref == 'refs/heads/main'
+        # if: github.ref == 'refs/heads/main'
         shell: nix develop -v -c bash {0}
         run: |
           ./cli.sh push_all_single_arch_images ${{ matrix.imageArch }}
@@ -78,7 +78,7 @@ jobs:
     timeout-minutes: 20
     runs-on: [self-hosted, nix, general, arm64-linux, small]
     needs: [build-push-images]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:

@@ -1,3 +1,4 @@
+import { memoizePromise } from "../../../../deps/async_utils.ts";
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { Type } from "../../../../deps/typebox.ts";
 import { Logger } from "../../../../libs/logger.ts";
@@ -127,13 +128,13 @@ function prettyPrintProcessInfo(
   } id=${id} class=${processClass} address=${address}`;
 }
 
-async function excludeAndIncludeProcesses(
+async function determineProcessInclusionExclusion(
   status: FdbStatus,
   config: FdbDatabaseConfig,
-): Promise<boolean> {
+) {
   if (!status.client.coordinators.quorum_reachable) {
     logger.error({ msg: "Quorum not reachable, going to skip" });
-    return false;
+    return null;
   }
 
   const { excludedServiceEndpoints } = config;
@@ -188,48 +189,13 @@ async function excludeAndIncludeProcesses(
   );
   const toBeIncludedAddresses = currentlyExcludedAddresses.filter((a) => !desiredExcludedAddressSet.has(a));
 
-  if (nonexistentExcludedAddresses.length > 0) {
-    logger.warn({
-      message:
-        `There are ${nonexistentExcludedAddresses.length} addresses to be excluded but they don't exist in FDB status`,
-      addresses: nonexistentExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
-    });
-  }
-
-  if (alreadyExcludedAddresses.length > 0) {
-    logger.info({
-      msg: `The following ${alreadyExcludedAddresses.length} addresses have already been previously excluded`,
-      addresses: alreadyExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
-    });
-  }
-
-  if (toBeIncludedAddresses.length > 0) {
-    logger.info({
-      msg: `The following ${toBeIncludedAddresses.length} addresses will be included back`,
-      addresses: toBeIncludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
-    });
-
-    await fdbcliInheritExec(`include ${toBeIncludedAddresses.join(" ")}`);
-  }
-
-  if (toBeExcludedAddresses.length === 0) {
-    logger.info({ msg: "No new address to be excluded" });
-  } else {
-    logger.info({
-      msg: "Going to exclude",
-      addresses: toBeExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
-    });
-
-    if (!status.client.database_status.available) {
-      logger.error({ msg: "Database is not available, going to skip excluding" });
-    } else {
-      await fdbcliInheritExec(
-        `exclude no_wait ${toBeExcludedAddresses.join(" ")}`,
-      );
-    }
-  }
-
-  return true;
+  return {
+    processByAddressMap,
+    nonexistentExcludedAddresses,
+    alreadyExcludedAddresses,
+    toBeExcludedAddresses,
+    toBeIncludedAddresses,
+  };
 }
 
 export default createCliAction(
@@ -243,18 +209,94 @@ export default createCliAction(
   ) => {
     const config = await readClusterConfig(configFile);
     const status = await fetchStatus();
+    const memoizedProcessInclusionExclusion = memoizePromise(() => determineProcessInclusionExclusion(status, config));
+
     const steps = [
       {
         name: "Configure coordinators",
         fn: configureCoordinators,
       },
       {
-        name: "Exclude and include processes",
-        fn: excludeAndIncludeProcesses,
+        name: "Include processes",
+        fn: async () => {
+          const ret = await memoizedProcessInclusionExclusion();
+
+          if (ret === null) {
+            return false;
+          }
+
+          const { processByAddressMap, toBeIncludedAddresses } = ret;
+
+          if (toBeIncludedAddresses.length > 0) {
+            const toBeIncludedProcesses = toBeIncludedAddresses.map((a) => processByAddressMap[a]);
+
+            logger.info({
+              msg: `The following ${toBeIncludedAddresses.length} addresses will be included back`,
+              addresses: toBeIncludedProcesses.map((p) => prettyPrintProcessInfo(p)),
+            });
+
+            await fdbcliInheritExec(
+              `include ${toBeIncludedAddresses.join(" ")}`,
+            );
+          }
+
+          return true;
+        },
       },
       {
         name: "Configure database",
         fn: configureDatabase,
+      },
+      {
+        name: "Exclude processes",
+        fn: async () => {
+          const ret = await memoizedProcessInclusionExclusion();
+
+          if (ret === null) {
+            return false;
+          }
+
+          const { processByAddressMap, nonexistentExcludedAddresses, alreadyExcludedAddresses, toBeExcludedAddresses } =
+            ret;
+
+          if (nonexistentExcludedAddresses.length > 0) {
+            logger.warn({
+              message:
+                `There are ${nonexistentExcludedAddresses.length} addresses to be excluded but they don't exist in FDB status`,
+              addresses: nonexistentExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
+            });
+          }
+
+          if (alreadyExcludedAddresses.length > 0) {
+            logger.info({
+              msg: `The following ${alreadyExcludedAddresses.length} addresses have already been previously excluded`,
+              addresses: alreadyExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
+            });
+          }
+
+          if (toBeExcludedAddresses.length === 0) {
+            logger.info({ msg: "No new address to be excluded" });
+          } else {
+            const toBeExcludedProcesses = toBeExcludedAddresses.map((a) => processByAddressMap[a]);
+
+            logger.info({
+              msg: "Going to exclude",
+              addresses: toBeExcludedProcesses.map((p) => prettyPrintProcessInfo(p)),
+            });
+
+            if (!status.client.database_status.available) {
+              logger.error({ msg: "Database is not available, going to skip excluding" });
+              return false;
+            } else {
+              await fdbcliInheritExec(
+                `exclude FORCE ${toBeExcludedAddresses.join(" ")}`,
+                Infinity,
+              );
+            }
+          }
+
+          return true;
+        },
       },
     ];
 

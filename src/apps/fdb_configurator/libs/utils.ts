@@ -60,8 +60,9 @@ export async function fdbcliInheritExec(
   timeoutSeconds = 30,
 ): Promise<void> {
   try {
+    const fdbcliCmd = toFdbcliCommand(command);
     await inheritExec({
-      cmd: commandWithTimeout(toFdbcliCommand(command), timeoutSeconds),
+      cmd: isFinite(timeoutSeconds) ? commandWithTimeout(fdbcliCmd, timeoutSeconds) : fdbcliCmd,
     });
   } catch (e) {
     if (e.message.indexOf("Command return non-zero status of: 124") !== -1) {
