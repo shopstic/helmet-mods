@@ -1,1 +1,1 @@
-export { default as stableHash } from "https://cdn.shopstic.com/stable-hash@0.0.2?dts";
+export { default as stableHash } from "https://cdn.skypack.dev/pin/stable-hash@v0.0.2-XHaIHOWTStBJGZNTcdEA/mode=imports/optimized/stable-hash.js";

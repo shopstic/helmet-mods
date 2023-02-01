@@ -18,7 +18,7 @@ Deno.test("fdb_cluster should work", () => {
     effect: "NoExecute",
   }];
 
-  const fdbCoordinatorStatefulConfigs: Record<string, FdbStatefulConfig> = {
+  const fdbStatefulConfigs: Record<string, FdbStatefulConfig> = {
     "coordinator": {
       processClass: "coordinator",
       servers: [{ port: 4500 }],
@@ -27,9 +27,6 @@ Deno.test("fdb_cluster should work", () => {
       volumeSize: "1Gi",
       storageClassName: "local-path",
     },
-  };
-
-  const fdbStatefulConfigs: Record<string, FdbStatefulConfig> = {
     "log": {
       processClass: "log",
       servers: [{ port: 4500 }],
@@ -58,7 +55,6 @@ Deno.test("fdb_cluster should work", () => {
     namespace,
     storageEngine: "ssd-2",
     redundancyMode: "single",
-    coordinators: fdbCoordinatorStatefulConfigs,
     currentGeneration: {
       id: "",
       stateless: {
@@ -80,10 +76,8 @@ Deno.test("fdb_cluster should work", () => {
     locality: "data_hall",
   });
 
-  assertEquals(cluster.currentStatefulSets.length, 2);
+  assertEquals(cluster.currentStatefulSets.length, 3);
   assertEquals(cluster.backupDeployment, undefined);
-  assertEquals(cluster.coordinatorStatefulSets.length, 1);
-  assertEquals(cluster.coordinatorServices.length, 1);
   assertNotEquals(cluster.currentGrvProxyDeployment, undefined);
   assertNotEquals(cluster.currentCommitProxyDeployment, undefined);
   assertEquals(cluster.currentStatelessDeployment.spec?.replicas, 5);

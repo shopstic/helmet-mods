@@ -28,8 +28,6 @@ export const defaultDedupProxyImage =
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;
-  coordinatorServices: K8sService[];
-  coordinatorStatefulSets: K8sStatefulSet[];
   currentGrvProxyDeployment?: K8sDeployment;
   nextGrvProxyDeployment?: K8sDeployment;
   currentCommitProxyDeployment?: K8sDeployment;
@@ -84,7 +82,6 @@ export function createFdbClusterResources(
     perpetualStorageWiggleLocality = "0",
     tenantMode = "disabled",
     storageMigrationType = "disabled",
-    coordinators,
     currentGeneration,
     nextGeneration,
     locality = "none",
@@ -105,7 +102,6 @@ export function createFdbClusterResources(
     perpetualStorageWiggleLocality?: FdbDatabaseConfig["perpetualStorageWiggleLocality"];
     tenantMode?: FdbDatabaseConfig["tenantMode"];
     storageMigrationType?: FdbDatabaseConfig["storageMigrationType"];
-    coordinators: Record<string, FdbStatefulConfig>;
     currentGeneration: FdbClusterGeneration;
     nextGeneration?: FdbClusterGeneration;
     backup?: {
@@ -168,16 +164,6 @@ export function createFdbClusterResources(
     ...labels,
     "app.kubernetes.io/generation": nextGeneration?.id ?? "",
   };
-
-  const { services: coordinatorServices, statefulSets: coordinatorStatefulSets } = createFdbStatefulResources({
-    baseName,
-    baseLabels: labels,
-    configs: coordinators,
-    connectionStringConfigMapRef,
-    image: currentImage,
-    imagePullPolicy,
-    locality,
-  });
 
   const { services: currentStatefulServices, statefulSets: currentStatefulSets } = createFdbStatefulResources({
     baseName: currentBaseName,
@@ -320,16 +306,18 @@ export function createFdbClusterResources(
     })
     : undefined;
 
+  const coordinatorBaseName = nextGeneration?.stateful !== undefined ? nextBaseName : currentBaseName;
   const coordinatorServiceNames = Object
-    .entries(coordinators)
+    .entries(nextGeneration?.stateful ?? currentGeneration.stateful)
     .filter(([_, cfg]) =>
       cfg.processClass === "coordinator" &&
       cfg.servers.filter((s) => !s.excluded).length > 0
     )
-    .map(([id, _]) => `${baseName}-${id}`);
+    .map(([id, _]) => `${coordinatorBaseName}-${id}`);
 
   const excludedServiceEndpoints: FdbDatabaseConfig["excludedServiceEndpoints"] = Object
     .entries(currentGeneration.stateful)
+    .filter(([_, cfg]) => cfg.processClass !== "coordinator")
     .flatMap(([id, cfg]) =>
       cfg
         .servers
@@ -350,7 +338,7 @@ export function createFdbClusterResources(
     baseName,
     namespace,
     connectionStringConfigMapRef,
-    coordinatorServiceNames: coordinatorServiceNames,
+    coordinatorServiceNames,
     image: configuratorImage,
     imagePullPolicy,
     nodeSelector: helpersNodeSelector,
@@ -428,8 +416,6 @@ export function createFdbClusterResources(
 
   return {
     backupDeployment,
-    coordinatorServices,
-    coordinatorStatefulSets,
     currentStatefulServices,
     nextStatefulServices,
     currentStatefulSets,

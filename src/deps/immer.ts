@@ -1,1 +1,2 @@
-export { default as immerProduce } from "https://cdn.shopstic.com/immer@v9.0.15?dts";
+export { default as immerProduce } from "https://esm.sh/immer@9.0.19?pin=v106";
+``;
