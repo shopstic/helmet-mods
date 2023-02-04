@@ -164,7 +164,7 @@ export function createFdbContainer(
       ...localityEnv,
     ],
     volumeMounts,
-    args,
+    args: ["fdb_server.sh"].concat(args ?? []),
     resources: resourceRequirements,
   };
 }

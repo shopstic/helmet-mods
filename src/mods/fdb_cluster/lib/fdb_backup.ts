@@ -33,7 +33,7 @@ export function createFdbBackupAgentContainer(
       },
     ],
     volumeMounts,
-    command: ["/usr/bin/backup_agent.sh"],
+    args: ["fdb_backup_agent.sh"],
   };
 }
 

@@ -1,4 +1,5 @@
 import {
+  createK8sContainer,
   createK8sPvc,
   createK8sService,
   createK8sStatefulSet,
@@ -30,6 +31,7 @@ export interface FdbStatefulConfig {
 
 export const STATEFUL_ID_LABEL = "helmet.run/fdb-stateful-id";
 export const FDB_COMPONENT_LABEL = "helmet.run/fdb-component";
+export const FDB_PROCESS_PORT_LABEL = "helmet.run/fdb-process-port";
 
 function createStatefulLabels(
   { id, baseLabels, processClass }: {
@@ -61,31 +63,36 @@ export function createFdbStatefulPersistentVolumeClaims({
       (
         [
           id,
-          { processClass, volumeSize, storageClassName },
+          { servers, processClass, volumeSize, storageClassName },
         ],
       ) => {
-        const resourceName = `${baseName}-${id}`;
-        const statefulLabels = createStatefulLabels({
-          id,
-          baseLabels,
-          processClass,
-        });
+        return servers.map(({ port }) => {
+          const resourceName = `${baseName}-${id}-${port}`;
+          const statefulLabels = {
+            ...createStatefulLabels({
+              id,
+              baseLabels,
+              processClass,
+            }),
+            [FDB_PROCESS_PORT_LABEL]: String(port),
+          };
 
-        return createK8sPvc({
-          metadata: {
-            name: resourceName,
-            labels: statefulLabels,
-          },
-          spec: {
-            accessModes: ["ReadWriteOnce"],
-            volumeMode: "Filesystem",
-            resources: {
-              requests: {
-                storage: volumeSize,
-              },
+          return createK8sPvc({
+            metadata: {
+              name: resourceName,
+              labels: statefulLabels,
             },
-            storageClassName,
-          },
+            spec: {
+              accessModes: ["ReadWriteOnce"],
+              volumeMode: "Filesystem",
+              resources: {
+                requests: {
+                  storage: volumeSize,
+                },
+              },
+              storageClassName,
+            },
+          });
         });
       },
     );
@@ -156,17 +163,25 @@ export function createFdbStatefulResources(
             port,
           })),
           selector: statefulLabels,
+          publishNotReadyAddresses: true,
         },
       });
 
-      const containers = servers.map(({ port }) =>
+      const dataVolumes: K8s["core.v1.Volume"][] = servers.map(({ port }) => ({
+        name: `${dataVolumeName}-${port}`,
+        persistentVolumeClaim: {
+          claimName: `${resourceName}-${port}`,
+        },
+      }));
+
+      const serverContainers = servers.map(({ port }) =>
         createFdbContainer({
           processClass,
           image,
           imagePullPolicy,
           volumeMounts: [
             {
-              name: dataVolumeName,
+              name: `${dataVolumeName}-${port}`,
               mountPath: dataVolumeMountPath,
             },
             {
@@ -182,6 +197,34 @@ export function createFdbStatefulResources(
           locality,
         })
       );
+
+      const readinessContainer = createK8sContainer({
+        name: "readiness",
+        image,
+        imagePullPolicy,
+        env: [
+          {
+            name: "FDB_CLUSTER_FILE",
+            value: "/home/app/fdb.cluster",
+          },
+          {
+            name: "FDB_CONNECTION_STRING",
+            valueFrom: {
+              configMapKeyRef: connectionStringConfigMapRef,
+            },
+          },
+        ],
+        readinessProbe: {
+          exec: {
+            command: ["fdb_readiness_probe.sh"],
+          },
+          failureThreshold: 1,
+          successThreshold: 1,
+          periodSeconds: 10,
+          timeoutSeconds: 8,
+        },
+        args: ["fdb_sleep.sh"],
+      });
 
       const statefulSet = createK8sStatefulSet({
         metadata: {
@@ -199,7 +242,10 @@ export function createFdbStatefulResources(
               labels: statefulLabels,
             },
             spec: {
-              containers,
+              containers: [
+                ...serverContainers,
+                readinessContainer,
+              ],
               affinity,
               topologySpreadConstraints,
               securityContext: {
@@ -211,12 +257,7 @@ export function createFdbStatefulResources(
               nodeSelector,
               tolerations,
               volumes: [
-                {
-                  name: dataVolumeName,
-                  persistentVolumeClaim: {
-                    claimName: resourceName,
-                  },
-                },
+                ...dataVolumes,
                 {
                   name: logVolumeName,
                   emptyDir: {},
