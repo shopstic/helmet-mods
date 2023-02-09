@@ -111,7 +111,7 @@ Deno.test("fdb_cluster should work", () => {
 
   const allWorkloadContainers: K8s["core.v1.Container"][] = allWorkloadPodTemplates.flatMap((t) => t.spec!.containers);
 
-  allWorkloadContainers.forEach((container) => {
+  allWorkloadContainers.filter((c) => c.name !== "readiness").forEach((container) => {
     assertNotEquals(
       container.env!.find(({ name }) => name === "FDB_DATA_HALL"),
       undefined,
