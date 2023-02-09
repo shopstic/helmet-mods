@@ -2,7 +2,6 @@ import { equal } from "../../deps/std_testing.ts";
 import { immerProduce } from "../../deps/immer.ts";
 import { getJobs, jobReplicaIndexLabel, watchJobGroups, watchJobs, watchMetric } from "./libs/autoscaled_job.ts";
 import { delay } from "../../deps/async_utils.ts";
-import { ulid } from "../../deps/ulid.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { AutoscaledJob, AutoscaledJobAutoscaling, K8sJobAutoscalerParamsSchema, Paths } from "./libs/types.ts";
 import { Logger } from "../../libs/logger.ts";
@@ -139,7 +138,7 @@ await new CliProgram()
 
                   metadata.labels[jobReplicaIndexLabel] = String(index);
                   metadata.name = (draft.metadata.name ?? autoscaledJob.metadata.name) +
-                    `-${index}-${ulid().toLowerCase()}`;
+                    `-${index}-${Date.now()}`;
                   metadata.namespace = autoscaledJob.metadata.namespace;
 
                   if (!metadata.ownerReferences) {
