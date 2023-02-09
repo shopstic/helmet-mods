@@ -9,6 +9,7 @@
 , fdb
 , coreutils
 , bash
+, jq
 }:
 let
   name = "fdb-server";
@@ -23,19 +24,20 @@ let
       bash
       dumb-init
       fdb
+      jq
     ];
   };
-  scripts = ./scripts;
-  entrypoint = writeShellScript "entrypoint" ''
-    set -euo pipefail
-    SCRIPT_NAME=''${1:?"Script name is required (either fdb_server.sh or backup_agent.sh"}
-    exec "${scripts}/$SCRIPT_NAME" "''${@:2}"
+  scripts-src = ./scripts;
+  fdb-scripts = runCommand "fdb-scripts" { } ''
+    mkdir -p $out/fdb-scripts
+    cp ${scripts-src}/* $out/fdb-scripts/
+    chmod +x $out/fdb-scripts/*
   '';
   image = nix2container.buildImage
     {
       inherit name;
       tag = fdb.version;
-      copyToRoot = [ nix-bin shadow home-dir ];
+      copyToRoot = [ nix-bin shadow home-dir fdb-scripts ];
       maxLayers = 80;
       perms = [
         {
@@ -46,11 +48,12 @@ let
       ];
       config = {
         env = [
-          "PATH=/bin"
+          "PATH=/bin:/fdb-scripts"
         ];
         user = "${user}:${user}";
         workingdir = "/home/${user}";
-        entrypoint = [ "dumb-init" "--" entrypoint "fdb_server.sh" ];
+        entrypoint = [ "dumb-init" "--" ];
+        cmd = [ "fdb_server.sh" ];
       };
     };
 in

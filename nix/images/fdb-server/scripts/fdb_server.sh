@@ -75,7 +75,7 @@ fi
 ARGS+=("$@")
 
 SCRIPTS_DIR=$(dirname "$0")
-${SCRIPTS_DIR}/taillog.sh &
+${SCRIPTS_DIR}/fdb_taillog.sh &
 TAILLOG_PID=$(echo $!)
 trap "kill -15 ${TAILLOG_PID}" EXIT
 
