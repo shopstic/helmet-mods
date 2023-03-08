@@ -1,8 +1,6 @@
 {
   "version": "2",
   "remote": {
-    "https://cdn.shopstic.com/-/@octokit/webhooks-types@v6.3.5-RJQue4RaVn41BlDahcM2/dist=es2019,mode=types/schema.d.ts": "f7c535ceddf3236ef3a2f047320aecb58a4d2bf0aa4971635f345dace2404462",
-    "https://cdn.shopstic.com/-/@octokit/webhooks-types@v6.3.5-RJQue4RaVn41BlDahcM2/dist=es2020,mode=imports/optimized/@octokit/webhooks-types.js": "5d71afac9a0636b438aff7daa03026bc53a42b37fb59459792dee56119b9ae05",
     "https://cdn.shopstic.com/-/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/dist=es2020,mode=imports/optimized/common/AsyncScheduler-83c6e752.js": "c79c1686a9503451b4a1948ba6e3d084069e11c573b04e1cc7fac7f14a532bb3",
     "https://cdn.shopstic.com/-/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/dist=es2020,mode=imports/optimized/common/EmptyError-757768b6.js": "7f99a3eb93ca834e56d710fdbf855b2ea193be3d0e045d99f485e186ba4c12b8",
     "https://cdn.shopstic.com/-/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/dist=es2020,mode=imports/optimized/common/Notification-6ea6fb97.js": "2e8df54debf0253193892b248c8bfdd219f6a64646ee59afed282cda6bf7b14d",
@@ -216,8 +214,6 @@
     "https://cdn.shopstic.com/-/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/dist=es2020,mode=types/dist/types/operators/index.d.ts": "f5a2d86d37dbee2d470b038cb5f8725fcdc655be375233a8b64b96ce8e152903",
     "https://cdn.shopstic.com/-/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/dist=es2020,mode=types/dist/types/testing/index.d.ts": "5777e8bce6437df8f51e80e973d69b01a36ef65ba94396b9dda2653d8101ff72",
     "https://cdn.shopstic.com/-/tslib@v2.3.1-oagOtGnmjZ2E5Gt5m3zI/dist=es2020,mode=imports/optimized/tslib.js": "6a8aec215e19801a0cc9dfae2d87b3d5e774115c0684d3bd173ea7950c3a3e9e",
-    "https://cdn.shopstic.com/pin/@octokit/webhooks-types@v6.3.5-RJQue4RaVn41BlDahcM2/dist=es2019,mode=types/schema.d.ts": "23e25a8c563a812f990a2d4754c27d0dd6d502c301bd7fe49d7f3198a3fb51d4",
-    "https://cdn.shopstic.com/pin/@octokit/webhooks-types@v6.3.5-RJQue4RaVn41BlDahcM2/mode=imports/optimized/@octokit/webhooks-types.js": "87ed866244cd183c11503b390d5c5fabd2450d77248f43855ef916eded03d4f1",
     "https://cdn.shopstic.com/pin/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/dist=es2020,mode=types/dist/types/index.d.ts": "00d7c8c297a11346542243c5f0f2fdc8ad40d953ad025ccaf049ff57cd584ab4",
     "https://cdn.shopstic.com/pin/rxjs-deno@v7.5.4-3-L5btEPY2G8iaU5X12DWE/mode=imports/optimized/rxjs-deno.js": "2de4aab902980439908dbf3c96fcd430515a253662493f3d3b65832ff229120e",
     "https://deno.land/std@0.132.0/fmt/colors.ts": "30455035d6d728394781c10755351742dd731e3db6771b1843f9b9e490104d37",
@@ -556,6 +552,7 @@
     "https://esm.sh/v106/uri-js@4.4.1/deno/uri-js.js": "cb0fe68d76c29d62c7b79baf964e1b1c6623039faae892514776f0680711fc3e",
     "https://esm.sh/v106/uri-js@4.4.1/dist/es5/uri.all.d.ts": "9f3c5498245c38c9016a369795ec5ef1768d09db63643c8dba9656e5ab294825",
     "https://esm.sh/v106/urijs@1.19.11/deno/urijs.js": "457236f16ce90cab003fb7cd68e3c2d240f7c1075beee65f8e7501f90e86e598",
+    "https://raw.githubusercontent.com/octokit/webhooks/v6.10.0/payload-types/schema.d.ts": "b307815423c8d2fb9e88623cbe78c5c4abbd55163444101b467e50535c1ef5da",
     "https://raw.githubusercontent.com/shopstic/typebox/0.23.3/src/typebox.ts": "262a7c504d57e11e9462a7a46b867ae6a726641083eadceab7c31fc68d4c113a"
   }
 }
