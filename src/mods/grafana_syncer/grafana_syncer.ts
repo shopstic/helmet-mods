@@ -148,6 +148,7 @@ export function createGrafanaSyncerResources({
               }],
               args: Object
                 .entries(args)
+                .filter(([, v]) => v !== undefined)
                 .map(([k, v]) => `--${k}=${v}`)
                 .concat(
                   "--grafanaBearerToken=$(GRAFANA_BEARER_TOKEN)",
