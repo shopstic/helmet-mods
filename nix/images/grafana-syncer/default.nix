@@ -8,10 +8,10 @@
 , writeTextDir
 , runCommand
 , bash
-, k8s-job-autoscaler
+, grafana-syncer
 }:
 let
-  name = "k8s-job-autoscaler";
+  name = "grafana-syncer";
   user = "app";
   shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "/bin/false"; };
   home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}'';
@@ -25,7 +25,7 @@ let
   };
   image = nix2container.buildImage {
     inherit name;
-    tag = k8s-job-autoscaler.version;
+    tag = grafana-syncer.version;
     copyToRoot = [ nix-bin shadow home-dir ];
     maxLayers = 80;
     perms = [
@@ -39,7 +39,7 @@ let
       env = [
         "PATH=/bin"
       ];
-      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" k8s-job-autoscaler "run" ];
+      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" grafana-syncer "run" ];
       user = "${user}:${user}";
     };
   };

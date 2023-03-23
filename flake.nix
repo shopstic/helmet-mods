@@ -43,6 +43,7 @@
         registry-authenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
         registry-syncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
         k8s-job-autoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
+        grafana-syncer = denoBundle "src/apps/grafana_syncer/grafana_syncer.ts";
         github-actions-registry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
         gitlab-cicd-registry = denoBundle "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
         openapi-merger = denoBundle "src/apps/openapi_merger/openapi_merger.ts";
@@ -118,6 +119,7 @@
             registry-authenticator
             registry-syncer
             k8s-job-autoscaler
+            grafana-syncer
             openapi-merger;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
@@ -139,6 +141,9 @@
               };
               image-k8s-job-autoscaler = pkgs.callPackage ./nix/images/k8s-job-autoscaler {
                 inherit nonRootShadowSetup nix2container k8s-job-autoscaler deno;
+              };
+              image-grafana-syncer = pkgs.callPackage ./nix/images/grafana-syncer {
+                inherit nonRootShadowSetup nix2container grafana-syncer deno;
               };
               image-github-actions-registry = pkgs.callPackage ./nix/images/github-actions-registry {
                 inherit nonRootShadowSetup nix2container github-actions-registry deno;
