@@ -76,7 +76,7 @@ export function createGrafanaSyncerResources({
       {
         apiGroups: [crd.spec.group],
         resources: [crd.spec.names.plural],
-        verbs: ["watch", "patch"],
+        verbs: ["list", "watch", "patch"],
       },
     ],
   });
