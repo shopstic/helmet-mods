@@ -1,5 +1,6 @@
 import { delay } from "../../../deps/async_utils.ts";
-import { K8s, k8sApiWatch, OpenapiClient } from "../../../deps/k8s_openapi.ts";
+import { K8s, OpenapiClient } from "../../../deps/k8s_openapi.ts";
+import { k8sControllerStream } from "../../../libs/k8s_controller.ts";
 import { Logger } from "../../../libs/logger.ts";
 import { createPromApiClient } from "../../../libs/prom_api_client.ts";
 import { exhaustiveMatchingGuard } from "../../../libs/utils.ts";
@@ -80,41 +81,35 @@ export async function* watchJobs(
     namespace: string;
   },
 ) {
-  try {
-    const events = k8sApiWatch(
-      client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get"),
-    )({
-      path: {
-        namespace,
-      },
-      query: {
-        watch: true,
-        labelSelector: jobReplicaIndexLabel,
-      },
-    }, {
-      signal,
-    });
+  const events = k8sControllerStream(
+    client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get"),
+  )({
+    path: {
+      namespace,
+    },
+    query: {
+      timeoutSeconds: 30,
+      labelSelector: jobReplicaIndexLabel,
+    },
+  }, {
+    signal,
+  });
 
-    for await (const event of events) {
-      if (event.type === "ADDED") {
-        // Ignore
-      } else if (event.type === "MODIFIED") {
-        if (
-          event.object.status?.conditions?.find((c) =>
-            (c.type === "Complete" && c.status === "True") || (c.type === "Failed" && c.status === "True")
-          )
-        ) {
-          yield event;
-        }
-      } else if (event.type === "DELETED") {
+  for await (const event of events) {
+    if (event.type === "ADDED" || event.type === "BOOKMARK") {
+      // Ignore
+    } else if (event.type === "MODIFIED") {
+      if (
+        event.object.status?.conditions?.find((c) =>
+          (c.type === "Complete" && c.status === "True") || (c.type === "Failed" && c.status === "True")
+        )
+      ) {
         yield event;
-      } else {
-        exhaustiveMatchingGuard(event.type);
       }
-    }
-  } catch (e) {
-    if (!(e instanceof DOMException) || e.name !== "AbortError") {
-      throw e;
+    } else if (event.type === "DELETED") {
+      yield event;
+    } else {
+      exhaustiveMatchingGuard(event.type);
     }
   }
 }
@@ -122,36 +117,32 @@ export async function* watchJobs(
 export async function* watchJobGroups(
   { client, signal, namespace }: { client: OpenapiClient<Paths>; signal: AbortSignal; namespace: string },
 ): AsyncGenerator<Map<string, AutoscaledJob>> {
-  try {
-    const map: Map<string, AutoscaledJob> = new Map();
+  const map: Map<string, AutoscaledJob> = new Map();
 
-    const events = k8sApiWatch(
-      client.endpoint("/apis/shopstic.com/v1/namespaces/{namespace}/autoscaledjobs").method("get"),
-    )({
-      path: {
-        namespace,
-      },
-      query: {
-        watch: true,
-      },
-    }, {
-      signal,
-    });
+  const events = k8sControllerStream(
+    client.endpoint("/apis/shopstic.com/v1/namespaces/{namespace}/autoscaledjobs").method("get"),
+  )({
+    path: {
+      namespace,
+    },
+    query: {
+      timeoutSeconds: 30,
+    },
+  }, {
+    signal,
+  });
 
-    for await (const event of events) {
-      if (event.type === "ADDED" || event.type === "MODIFIED") {
-        map.set(event.object.metadata!.uid!, event.object);
-      } else if (event.type === "DELETED") {
-        map.delete(event.object.metadata!.uid!);
-      } else {
-        exhaustiveMatchingGuard(event.type);
-      }
-
-      yield map;
+  for await (const event of events) {
+    if (event.type === "ADDED" || event.type === "MODIFIED") {
+      map.set(event.object.metadata!.uid!, event.object);
+    } else if (event.type === "DELETED") {
+      map.delete(event.object.metadata!.uid!);
+    } else if (event.type === "BOOKMARK") {
+      // Ignore
+    } else {
+      exhaustiveMatchingGuard(event.type);
     }
-  } catch (e) {
-    if (!(e instanceof DOMException) || e.name !== "AbortError") {
-      throw e;
-    }
+
+    yield map;
   }
 }

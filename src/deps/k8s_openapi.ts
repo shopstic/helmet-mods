@@ -1,3 +1,13 @@
-export * from "https://deno.land/x/k8s@1.25.8/index.ts";
-export type { OpenapiClient } from "https://deno.land/x/k8s@1.25.8/deps.ts";
-export { createOpenapiClient, OpenapiOperationError } from "https://deno.land/x/k8s@1.25.8/deps.ts";
+export * from "https://deno.land/x/k8s@1.26.4/index.ts";
+export type {
+  OpenapiClient,
+  OpenapiOperationApi,
+  OpenapiOperationApiArgType,
+  OpenapiOperationApiReturnType,
+} from "https://deno.land/x/k8s@1.26.4/deps.ts";
+export {
+  createOpenapiClient,
+  OpenapiOperationError,
+  readerFromStreamReader,
+  readLines,
+} from "https://deno.land/x/k8s@1.26.4/deps.ts";

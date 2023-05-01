@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+deno_which_depends_on() {
+  local dir_path=${1:?"Directory path is required"}
+  local grep_pattern=${2:?"Grep pattern is required"}
+
+  process_file() {
+    local file_path="$1"
+    local output=$(deno info "$file_path" 2>/dev/null | grep -e "$grep_pattern")
+
+    if [ -n "$output" ]; then
+        echo "$file_path"
+    fi
+  }
+
+  # Walk the directory and process each file
+  while IFS= read -r -d '' file; do
+      process_file "$file"
+  done < <(find "$dir_path" -type f -name "*.ts" -print0)
+}
+
 code_quality() {
   echo "Checking formatting..."
   deno fmt --check ./src
@@ -17,6 +36,7 @@ update_cache() {
 }
 
 update_lock() {
+  rm -f ./deno.lock
   deno cache --reload --lock ./deno.lock --lock-write ./src/deps/*
 }
 

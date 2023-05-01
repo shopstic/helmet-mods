@@ -4,7 +4,8 @@ export type Coalesce<T, D> = [T] extends [never] ? D : T;
 
 export type ToStatusCode<T extends string | number> = T extends string
   ? T extends `${infer N extends number}` ? N : never
-  : T;
+  : T extends number ? T
+  : never;
 
 export type OpenapiRouteConfig<P extends string = string> =
   & Pick<RouteConfig, "method" | "summary" | "tags" | "description" | "request">
@@ -181,13 +182,15 @@ export type OpenapiJsonRouteConfigToRouteConfig<P extends string, C extends Open
         };
     };
     responses: {
-      200: Omit<C["response"], "body"> & {
-        content: {
-          "application/json": {
-            schema: C["response"]["body"];
+      200:
+        & Omit<C["response"], "body">
+        & (C["response"]["body"] extends undefined ? undefined : {
+          content: {
+            "application/json": {
+              schema: NonNullable<C["response"]["body"]>;
+            };
           };
-        };
-      };
+        });
     };
   };
 
