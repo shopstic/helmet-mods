@@ -22,7 +22,7 @@ import {
   tap,
   throwError,
 } from "../../deps/rxjs.ts";
-import { equal } from "../../deps/std_testing.ts";
+import { deepEqual } from "../../deps/std_testing.ts";
 import { dirname, resolvePath } from "../../deps/std_path.ts";
 import { Logger } from "../../libs/logger.ts";
 
@@ -124,7 +124,7 @@ await new CliProgram()
             startWith(-1),
             concatMap(() => loadConfig(configFile)),
             switchScan((previous, next) => {
-              if (equal(previous, next)) {
+              if (deepEqual(previous, next)) {
                 logger.info({ msg: "Config hasn't changed" });
                 return EMPTY;
               }

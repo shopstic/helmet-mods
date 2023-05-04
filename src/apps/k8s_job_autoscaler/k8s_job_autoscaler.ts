@@ -1,4 +1,4 @@
-import { equal } from "../../deps/std_testing.ts";
+import { deepEqual } from "../../deps/std_testing.ts";
 import { immerProduce } from "../../deps/immer.ts";
 import { getJobs, jobReplicaIndexLabel, watchJobGroups, watchJobs, watchMetric } from "./libs/autoscaled_job.ts";
 import { delay } from "../../deps/async_utils.ts";
@@ -212,7 +212,7 @@ await new CliProgram()
             if (metricWatchMap.has(uid)) {
               const currentMetricWatch = metricWatchMap.get(uid)!;
 
-              if (!equal(currentMetricWatch.autoscaling, autoscaling)) {
+              if (!deepEqual(currentMetricWatch.autoscaling, autoscaling)) {
                 logger.info({
                   msg: "Autoscaling config changed",
                   uid,
