@@ -45,22 +45,23 @@ export default createCliAction(
         "-n",
         namespace,
       ];
-      const child = Deno.run({
-        cmd: commandWithTimeout(cmd, 5),
+
+      const withTimeout = commandWithTimeout(cmd, 5);
+      const output = await new Deno.Command(withTimeout[0], {
+        args: withTimeout.slice(1),
         stdout: "null",
         stderr: "piped",
-      });
+      }).output();
 
-      const stderr = new TextDecoder().decode(await child.stderrOutput());
-      const { code } = await child.status();
+      const stderr = new TextDecoder().decode(output.stderr);
 
-      if (code === 0) {
+      if (output.code === 0) {
         return true;
       } else if (stderr.indexOf("not found") !== -1) {
         return false;
       }
 
-      logger.error({ msg: "Command failed", cmd, code, stderr });
+      logger.error({ msg: "Command failed", cmd, output });
       throw new Error("Command failed");
     })();
 

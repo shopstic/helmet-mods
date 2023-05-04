@@ -56,12 +56,14 @@ export default createCliAction(
         const storageBindMountTargetPath = joinPath(rootMountPath, "storage", deviceId);
         const logBindMountTargetPath = joinPath(rootMountPath, "log", deviceId);
 
-        const mountpointCheck = Deno.run({
-          cmd: toRootElevatedCommand(["mountpoint", deviceMountTargetPath]),
+        const cmd = toRootElevatedCommand(["mountpoint", deviceMountTargetPath]);
+        const mountpointCheck = await new Deno.Command(cmd[0], {
+          args: cmd.slice(1),
           stdout: "null",
           stderr: "null",
-        });
-        const isMounted = (await mountpointCheck.status()).code === 0;
+        }).output();
+
+        const isMounted = mountpointCheck.code === 0;
 
         if (!isMounted) {
           logger.info({ msg: `${deviceMountTargetPath} is not mounted` });
