@@ -5,7 +5,7 @@ globalThis.fetch = async (input, init) => {
   if (signal && !signal.aborted) {
     const abortController = new AbortController();
     const onAbort = (event) => {
-      abortController.abort(event);
+      abortController.abort(event.target && "reason" in event.target ? event.target.reason : undefined);
     };
     signal.addEventListener("abort", onAbort);
     try {
