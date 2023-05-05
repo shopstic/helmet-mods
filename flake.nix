@@ -35,9 +35,19 @@
         deno-deps = pkgs.callPackage ./nix/lib/deno-deps.nix {
           inherit src deno;
         };
-        denoBundle = tsPath: pkgs.callPackage ./nix/lib/deno-bundle.nix {
-          inherit src tsPath deno deno-deps;
-        };
+        denoBundle = tsPath:
+          let
+            patch = ./src/patched_fetch.js;
+            bundled = pkgs.callPackage ./nix/lib/deno-bundle.nix {
+              inherit src tsPath deno deno-deps;
+            };
+            out = pkgs.runCommand "patched-${bundled.name}" {} ''
+              cat "${patch}" > $out
+              echo "" >> $out
+              cat "${bundled}" >> $out
+            '';
+          in
+          out;
         fdb-configurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
         iac-version-bumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
         registry-authenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
