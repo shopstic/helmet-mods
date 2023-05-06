@@ -5,7 +5,6 @@
 , buildEnv
 , nonRootShadowSetup
 , nix2container
-, deno
 , dumb-init
 , fdb
 , kubectl
@@ -26,7 +25,6 @@ let
       bash
       dumb-init
       fdb
-      deno
       kubectl
     ];
   };
@@ -43,7 +41,7 @@ let
       echo "''${FDB_CONNECTION_STRING}" > "''${FDB_CLUSTER_FILE}"
     fi
 
-    exec deno run --no-remote --cached-only -A "${fdb-configurator}" "$@"
+    exec "${fdb-configurator}/bin/${fdb-configurator.name}" "$@"
   '';
   image = nix2container.buildImage
     {

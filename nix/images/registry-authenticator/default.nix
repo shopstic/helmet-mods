@@ -4,7 +4,6 @@
 , nonRootShadowSetup
 , nix2container
 , runCommand
-, deno
 , dumb-init
 , coreutils
 , bash
@@ -23,7 +22,6 @@ let
       dumb-init
       coreutils
       bash
-      deno
       awscli2
     ];
   };
@@ -43,7 +41,7 @@ let
       env = [
         "PATH=/bin"
       ];
-      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" registry-authenticator "run" ];
+      entrypoint = [ "dumb-init" "--" "${registry-authenticator}/bin/${registry-authenticator.name}" "run" ];
       user = "${user}:${user}";
     };
   };

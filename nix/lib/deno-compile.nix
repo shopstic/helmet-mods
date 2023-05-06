@@ -5,13 +5,13 @@
 , deno
 , src
 , tsPath
+, denoRunFlags ? "--cached-only --unstable -A"
 }:
 let
   name = lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-  jsBundle = stdenv.mkDerivation
+  compiled = stdenv.mkDerivation
     {
-      inherit src;
-      name = "${name}.js";
+      inherit src name;
       nativeBuildInputs = [ deno ];
 
       phases = [ "unpackPhase" "installPhase" ];
@@ -23,10 +23,10 @@ let
           ln -s ${deno-deps}/deps "$DENO_DIR/"
           cp -R ${deno-deps}/gen "$DENO_DIR/"
           chmod -R +w "$DENO_DIR/gen"
-          patchShebangs ./cli.sh
-          ./cli.sh bundle_app ${tsPath} $out
+          mkdir -p $out/bin
+          deno compile --check --lock=lock.json ${denoRunFlags} --output=$out/bin/${name} "${tsPath}" 
         '';
     };
 in
-jsBundle
+compiled
 

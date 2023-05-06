@@ -4,7 +4,6 @@
 , nonRootShadowSetup
 , nix2container
 , runCommand
-, deno
 , dumb-init
 , coreutils
 , regclient
@@ -22,7 +21,6 @@ let
     paths = [
       dumb-init
       coreutils
-      deno
       regclient.regctl
     ];
   };
@@ -43,7 +41,7 @@ let
         "PATH=/bin"
         "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
       ];
-      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" registry-syncer "run" ];
+      entrypoint = [ "dumb-init" "--" "${registry-syncer}/bin/${registry-syncer.name}" "run" ];
       user = "${user}:${user}";
     };
   };
