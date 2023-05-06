@@ -39,11 +39,13 @@
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
             patch = ./src/patched_fetch.ts;
-            patchedSrc = pkgs.runCommand "patched-${name}-src" {} ''
-              cp -R "${src}" $out
-              chmod -R +w $out
+            patchedSrc = pkgs.runCommand "patched-${name}-src"
+              {
+                buildInputs = [ hotPotPkgs.symlink-mirror ];
+              } ''
+              mkdir -p $out
+              symlink-mirror --absolute "${src}" $out
               cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
-              ls -la "$out/${tsPath}.temp"
               rm -f "$out/${tsPath}"
               mv "$out/${tsPath}.temp" "$out/${tsPath}"
             '';
