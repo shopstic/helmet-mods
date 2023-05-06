@@ -143,31 +143,31 @@
                 inherit nix2container nonRootShadowSetup fdb;
               };
               image-fdb-configurator = pkgs.callPackage ./nix/images/fdb-configurator {
-                inherit nonRootShadowSetup nix2container fdb deno fdb-configurator;
+                inherit nonRootShadowSetup nix2container fdb fdb-configurator;
               };
               image-iac-version-bumper = pkgs.callPackage ./nix/images/iac-version-bumper {
-                inherit nonRootShadowSetup nix2container iac-version-bumper deno;
+                inherit nonRootShadowSetup nix2container iac-version-bumper;
               };
               image-registry-authenticator = pkgs.callPackage ./nix/images/registry-authenticator {
-                inherit nonRootShadowSetup nix2container registry-authenticator deno;
+                inherit nonRootShadowSetup nix2container registry-authenticator;
               };
               image-registry-syncer = pkgs.callPackage ./nix/images/registry-syncer {
-                inherit nonRootShadowSetup nix2container registry-syncer deno;
+                inherit nonRootShadowSetup nix2container registry-syncer;
               };
               image-k8s-job-autoscaler = pkgs.callPackage ./nix/images/k8s-job-autoscaler {
-                inherit nonRootShadowSetup nix2container k8s-job-autoscaler deno;
+                inherit nonRootShadowSetup nix2container k8s-job-autoscaler;
               };
               image-grafana-syncer = pkgs.callPackage ./nix/images/grafana-syncer {
-                inherit nonRootShadowSetup nix2container grafana-syncer deno;
+                inherit nonRootShadowSetup nix2container grafana-syncer;
               };
               image-github-actions-registry = pkgs.callPackage ./nix/images/github-actions-registry {
-                inherit nonRootShadowSetup nix2container github-actions-registry deno;
+                inherit nonRootShadowSetup nix2container github-actions-registry;
               };
               image-gitlab-cicd-registry = pkgs.callPackage ./nix/images/gitlab-cicd-registry {
-                inherit nonRootShadowSetup nix2container gitlab-cicd-registry deno;
+                inherit nonRootShadowSetup nix2container gitlab-cicd-registry;
               };
               image-openapi-merger = pkgs.callPackage ./nix/images/openapi-merger {
-                inherit nonRootShadowSetup nix2container openapi-merger deno;
+                inherit nonRootShadowSetup nix2container openapi-merger;
               };
             };
           in

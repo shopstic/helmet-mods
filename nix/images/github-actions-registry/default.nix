@@ -4,7 +4,6 @@
 , buildEnv
 , nonRootShadowSetup
 , nix2container
-, deno
 , dumb-init
 , kubectl
 , github-actions-registry
@@ -19,7 +18,6 @@ let
     pathsToLink = [ "/bin" ];
     paths = [
       dumb-init
-      deno
       kubectl
     ];
   };
@@ -39,7 +37,7 @@ let
       env = [
         "PATH=/bin"
       ];
-      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" github-actions-registry "run" ];
+      entrypoint = [ "dumb-init" "--" "${github-actions-registry}/bin/${github-actions-registry.name}" "run" ];
       user = "${user}:${user}";
     };
   };

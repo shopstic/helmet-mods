@@ -4,7 +4,6 @@
 , nonRootShadowSetup
 , nix2container
 , runCommand
-, deno
 , dumb-init
 , coreutils
 , fetchzip
@@ -22,7 +21,6 @@ let
     paths = [
       dumb-init
       coreutils
-      deno
     ];
   };
   swaggerUiVersion = "4.15.2";
@@ -53,7 +51,7 @@ let
         "PATH=/bin"
         "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
       ];
-      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" openapi-merger "run" ];
+      entrypoint = [ "dumb-init" "--" "${openapi-merger}/bin/${openapi-merger.name}" "run" ];
       user = "${user}:${user}";
     };
   };

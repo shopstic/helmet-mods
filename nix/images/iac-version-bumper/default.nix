@@ -5,7 +5,6 @@
 , writeShellScript
 , runCommand
 , nix2container
-, deno
 , dumb-init
 , cacert
 , gitMinimal
@@ -29,7 +28,7 @@ let
         email = ''${COMMITTER_EMAIL}
     EOF
 
-    exec deno run --cached-only -A ${iac-version-bumper} auto-bump-versions "$@"
+    exec "${iac-version-bumper}/bin/${iac-version-bumper.name}" auto-bump-versions "$@"
   '';
   user = "app";
   shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
@@ -44,7 +43,6 @@ let
       bash
       coreutils
       dumb-init
-      deno
       gitMinimal
       regclient.regctl
       openssh

@@ -3,7 +3,6 @@
 , buildEnv
 , nonRootShadowSetup
 , nix2container
-, deno
 , dumb-init
 , writeTextDir
 , runCommand
@@ -20,7 +19,6 @@ let
     pathsToLink = [ "/bin" ];
     paths = [
       dumb-init
-      deno
     ];
   };
   image = nix2container.buildImage {
@@ -39,7 +37,7 @@ let
       env = [
         "PATH=/bin"
       ];
-      entrypoint = [ "dumb-init" "--" "deno" "run" "--cached-only" "-A" grafana-syncer "run" ];
+      entrypoint = [ "dumb-init" "--" "${grafana-syncer}/bin/${grafana-syncer.name}" "run" ];
       user = "${user}:${user}";
     };
   };
