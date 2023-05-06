@@ -35,28 +35,33 @@
         deno-deps = pkgs.callPackage ./nix/lib/deno-deps.nix {
           inherit src deno;
         };
-        denoBundle = tsPath:
+        denoCompile = tsPath:
           let
-            patch = ./src/patched_fetch.js;
-            bundled = pkgs.callPackage ./nix/lib/deno-bundle.nix {
-              inherit src tsPath deno deno-deps;
-            };
-            out = pkgs.runCommand "patched-${bundled.name}" {} ''
-              cat "${patch}" > $out
-              echo "" >> $out
-              cat "${bundled}" >> $out
+            name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
+            patch = ./src/patched_fetch.ts;
+            patchedSrc = pkgs.runCommand "patched-${name}-src" {} ''
+              cp -R "${src}" $out
+              chmod -R +w $out
+              cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
+              ls -la "$out/${tsPath}.temp"
+              rm -f "$out/${tsPath}"
+              mv "$out/${tsPath}.temp" "$out/${tsPath}"
             '';
+            compiled = pkgs.callPackage ./nix/lib/deno-compile.nix {
+              src = patchedSrc;
+              inherit tsPath deno deno-deps;
+            };
           in
-          out;
-        fdb-configurator = denoBundle "src/apps/fdb_configurator/fdb_configurator.ts";
-        iac-version-bumper = denoBundle "src/apps/iac_version_bumper/iac_version_bumper.ts";
-        registry-authenticator = denoBundle "src/apps/registry_authenticator/registry_authenticator.ts";
-        registry-syncer = denoBundle "src/apps/registry_syncer/registry_syncer.ts";
-        k8s-job-autoscaler = denoBundle "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
-        grafana-syncer = denoBundle "src/apps/grafana_syncer/grafana_syncer.ts";
-        github-actions-registry = denoBundle "src/apps/github_actions_registry/github_actions_registry.ts";
-        gitlab-cicd-registry = denoBundle "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
-        openapi-merger = denoBundle "src/apps/openapi_merger/openapi_merger.ts";
+          compiled;
+        fdb-configurator = denoCompile "src/apps/fdb_configurator/fdb_configurator.ts";
+        iac-version-bumper = denoCompile "src/apps/iac_version_bumper/iac_version_bumper.ts";
+        registry-authenticator = denoCompile "src/apps/registry_authenticator/registry_authenticator.ts";
+        registry-syncer = denoCompile "src/apps/registry_syncer/registry_syncer.ts";
+        k8s-job-autoscaler = denoCompile "src/apps/k8s_job_autoscaler/k8s_job_autoscaler.ts";
+        grafana-syncer = denoCompile "src/apps/grafana_syncer/grafana_syncer.ts";
+        github-actions-registry = denoCompile "src/apps/github_actions_registry/github_actions_registry.ts";
+        gitlab-cicd-registry = denoCompile "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
+        openapi-merger = denoCompile "src/apps/openapi_merger/openapi_merger.ts";
         vscode-settings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {

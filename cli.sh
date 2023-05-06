@@ -44,6 +44,10 @@ bundle_app() {
   deno bundle --lock=deno.lock "$@"
 }
 
+compile_app() {
+  deno compile --check --lock=deno.lock --cached-only --unstable -A "$@"
+}
+
 smoke_test() {
   code_quality
   test_app ./src/apps/fdb_configurator/fdb_configurator.ts
@@ -60,15 +64,15 @@ smoke_test() {
 
 test_app() {
   local APP=${1:?"App path is required"}
-  local OUT="$(mktemp -d)/out.js"
+  local OUT="$(mktemp -d)/$(basename "${APP}" .ts)"
   trap "rm -Rf ${OUT}" EXIT
-  bundle_app "${APP}" "${OUT}"
+  compile_app --output="${OUT}" "${APP}" 
   test_run_app "${OUT}"
 }
 
 test_run_app() {
   local OUT
-  if ! OUT=$(deno run -A "$@" 2>&1); then
+  if ! OUT=$("$@" 2>&1); then
     if ! echo "$OUT" | grep -q "No command provided"; then
       echo "App run failed, output:"
       echo "${OUT}"

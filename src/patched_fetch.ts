@@ -1,12 +1,13 @@
 // https://github.com/denoland/deno/issues/16487
 globalThis.fetch = (() => {
   const oldFetch = globalThis.fetch;
-  return async (input, init) => {
+  return async (input: URL | Request | string, init?: RequestInit): Promise<Response> => {
     const signal = init?.signal;
     if (signal && !signal.aborted) {
       const abortController = new AbortController();
-      const onAbort = (event) => {
-        abortController.abort(event.target && "reason" in event.target ? event.target.reason : undefined);
+      const onAbort = (event: Event) => {
+        const target = event.target;
+        abortController.abort(target && "reason" in target ? target.reason : undefined);
       };
       signal.addEventListener("abort", onAbort);
       try {
@@ -20,4 +21,4 @@ globalThis.fetch = (() => {
     }
     return await oldFetch(input, init);
   };
-})()
+})();
