@@ -146,7 +146,7 @@ push_single_arch() {
 
   skopeo --insecure-policy copy --dest-tls-verify=false \
     nix:"./result/${FILE_NAME}" \
-    "docker:${TARGET_IMAGE}"
+    "docker://${TARGET_IMAGE}"
 }
 
 push_manifest() {
