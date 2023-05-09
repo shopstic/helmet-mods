@@ -11,6 +11,8 @@ export type K8sJobAutoscalerParams = Static<typeof K8sJobAutoscalerParamsSchema>
 
 export type AutoscaledJobAutoscaling = {
   query: string;
+  pendingMetric?: unknown;
+  inProgressMetric?: unknown;
   intervalSeconds: number;
   metricServerUrl: string;
   maxReplicas: number;

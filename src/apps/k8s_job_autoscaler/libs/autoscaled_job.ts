@@ -1,5 +1,6 @@
 import { delay } from "../../../deps/async_utils.ts";
 import { K8s, OpenapiClient } from "../../../deps/k8s_openapi.ts";
+import { deepEqual } from "../../../deps/std_testing.ts";
 import { k8sControllerStream } from "../../../libs/k8s_controller.ts";
 import { Logger } from "../../../libs/logger.ts";
 import { createPromApiClient } from "../../../libs/prom_api_client.ts";
@@ -8,13 +9,18 @@ import { AutoscaledJob, AutoscaledJobAutoscaling, Paths } from "./types.ts";
 
 export const jobReplicaIndexLabel = "autoscaledjob.shopstic.com/index";
 
+export interface MetricSnapshot {
+  pending: number;
+  inProgress: number | null;
+}
+
 export async function* watchMetric(
-  { autoscaling: { query, intervalSeconds, metricServerUrl }, signal, logger }: {
+  { autoscaling: { query, pendingMetric = {}, inProgressMetric, intervalSeconds, metricServerUrl }, signal, logger }: {
     autoscaling: AutoscaledJobAutoscaling;
     signal: AbortSignal;
     logger: Logger;
   },
-) {
+): AsyncGenerator<MetricSnapshot> {
   const promClient = createPromApiClient(metricServerUrl);
   let last = performance.now();
   const maxDelayMs = intervalSeconds * 1000;
@@ -29,14 +35,18 @@ export async function* watchMetric(
 
       if (metrics.length === 0) {
         logger.error({ error: "Query resulted in no metrics" });
-      } else if (metrics.length !== 1) {
-        logger.error({ error: "Query resulted in more than 1 metrics", metrics });
       } else {
-        const metric = metrics[0];
-        logger.info({ metric, query });
+        const pendingValue = metrics.find((m) => deepEqual(m.metric, pendingMetric))?.value[1];
+        const inProgressValue = inProgressMetric
+          ? metrics.find((m) => deepEqual(m.metric, inProgressMetric))?.value[1]
+          : null;
 
-        const value = Number(metric.value[1]);
-        yield value;
+        logger.info({ pendingValue, inProgressValue, query });
+
+        yield {
+          pending: pendingValue ? Number(pendingValue) : 0,
+          inProgress: inProgressMetric ? (inProgressValue ? Number(inProgressValue) : 0) : null,
+        };
       }
 
       const now = performance.now();

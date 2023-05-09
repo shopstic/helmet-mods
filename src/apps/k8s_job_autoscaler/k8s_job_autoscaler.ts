@@ -1,6 +1,13 @@
 import { deepEqual } from "../../deps/std_testing.ts";
 import { immerProduce } from "../../deps/immer.ts";
-import { getJobs, jobReplicaIndexLabel, watchJobGroups, watchJobs, watchMetric } from "./libs/autoscaled_job.ts";
+import {
+  getJobs,
+  jobReplicaIndexLabel,
+  MetricSnapshot,
+  watchJobGroups,
+  watchJobs,
+  watchMetric,
+} from "./libs/autoscaled_job.ts";
 import { delay } from "../../deps/async_utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { AutoscaledJob, AutoscaledJobAutoscaling, K8sJobAutoscalerParamsSchema, Paths } from "./libs/types.ts";
@@ -50,7 +57,7 @@ await new CliProgram()
           autoscaling: AutoscaledJobAutoscaling;
         }> = new Map();
         const logger = new Logger();
-        const autoscalingValues: Map<string, number> = new Map();
+        const autoscalingValues: Map<string, MetricSnapshot> = new Map();
         const reconcileLoop = createReconciliationLoop();
 
         async function reconcile() {
@@ -88,7 +95,7 @@ await new CliProgram()
 
           for (const [uid, autoscaledJob] of jobGroupMap) {
             const { maxReplicas, busyAnnotation } = autoscaledJob.spec.autoscaling;
-            const desiredFreeJobCount = autoscalingValues.get(uid) || 0;
+            const metricSnapshot = autoscalingValues.get(uid) || { pending: 0, inProgress: null };
             const currentAllJobs = activeJobsByGroupUid.get(uid) || [];
             const currentBusyJobs = busyAnnotation
               ? currentAllJobs.filter((j) =>
@@ -96,6 +103,19 @@ await new CliProgram()
                 j.metadata.annotations[busyAnnotation.name] === busyAnnotation.value
               )
               : [];
+
+            if (metricSnapshot.inProgress !== null && metricSnapshot.inProgress < currentBusyJobs.length) {
+              logger.info({
+                msg: "Metric snapshot is stale, skipping",
+                uid,
+                name: autoscaledJob.metadata.name,
+                currentBusyJobs: currentBusyJobs.length,
+                metricInProgress: metricSnapshot.inProgress,
+              });
+              return;
+            }
+
+            const desiredFreeJobCount = metricSnapshot.pending;
             const currentFreeJobCount = currentAllJobs.length - currentBusyJobs.length;
             const totalDesiredJobCount = currentBusyJobs.length + desiredFreeJobCount;
 
@@ -235,7 +255,7 @@ await new CliProgram()
                     signal: abortController.signal,
                   })
                 ) {
-                  if (autoscalingValues.get(uid) !== autoscalingValue) {
+                  if (!deepEqual(autoscalingValues.get(uid), autoscalingValue)) {
                     autoscalingValues.set(uid, autoscalingValue);
                     reconcileLoop.request();
                   }
