@@ -87,9 +87,11 @@ const crd = {
                       },
                       pendingMetric: {
                         type: "object",
+                        "x-kubernetes-preserve-unknown-fields": true,
                       },
                       inProgressMetric: {
                         type: "object",
+                        "x-kubernetes-preserve-unknown-fields": true,
                       },
                       intervalSeconds: {
                         type: "number",
