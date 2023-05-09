@@ -33,9 +33,7 @@ export async function* watchMetric(
         signal,
       });
 
-      if (metrics.length === 0) {
-        logger.error({ error: "Query resulted in no metrics" });
-      } else {
+      if (metrics.length > 0) {
         const pendingValue = metrics.find((m) => deepEqual(m.metric, pendingMetric))?.value[1];
         const inProgressValue = inProgressMetric
           ? metrics.find((m) => deepEqual(m.metric, inProgressMetric))?.value[1]
