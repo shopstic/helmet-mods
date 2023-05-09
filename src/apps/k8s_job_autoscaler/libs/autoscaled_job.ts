@@ -33,19 +33,17 @@ export async function* watchMetric(
         signal,
       });
 
-      if (metrics.length > 0) {
-        const pendingValue = metrics.find((m) => deepEqual(m.metric, pendingMetric))?.value[1];
-        const inProgressValue = inProgressMetric
-          ? metrics.find((m) => deepEqual(m.metric, inProgressMetric))?.value[1]
-          : null;
+      const pendingValue = metrics.find((m) => deepEqual(m.metric, pendingMetric))?.value[1];
+      const inProgressValue = inProgressMetric
+        ? metrics.find((m) => deepEqual(m.metric, inProgressMetric))?.value[1]
+        : null;
 
-        logger.info({ pendingValue, inProgressValue, query });
+      logger.info({ pendingValue, inProgressValue, query });
 
-        yield {
-          pending: pendingValue ? Number(pendingValue) : 0,
-          inProgress: inProgressMetric ? (inProgressValue ? Number(inProgressValue) : 0) : null,
-        };
-      }
+      yield {
+        pending: pendingValue ? Number(pendingValue) : 0,
+        inProgress: inProgressMetric ? (inProgressValue ? Number(inProgressValue) : 0) : null,
+      };
 
       const now = performance.now();
       const elapseMs = now - last;
