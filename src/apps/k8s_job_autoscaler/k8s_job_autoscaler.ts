@@ -112,107 +112,106 @@ await new CliProgram()
                 currentBusyJobs: currentBusyJobs.length,
                 metricInProgress: metricSnapshot.inProgress,
               });
-              return;
-            }
+            } else {
+              const desiredFreeJobCount = metricSnapshot.pending;
+              const currentFreeJobCount = currentAllJobs.length - currentBusyJobs.length;
+              const totalDesiredJobCount = currentBusyJobs.length + desiredFreeJobCount;
 
-            const desiredFreeJobCount = metricSnapshot.pending;
-            const currentFreeJobCount = currentAllJobs.length - currentBusyJobs.length;
-            const totalDesiredJobCount = currentBusyJobs.length + desiredFreeJobCount;
+              if (totalDesiredJobCount > maxReplicas) {
+                logger.warn({
+                  msg: `Desired count (${totalDesiredJobCount}) is greater than max allowed ${maxReplicas}`,
+                  name: autoscaledJob.metadata.name,
+                  desired: totalDesiredJobCount,
+                  maxAllowed: maxReplicas,
+                });
+              }
 
-            if (totalDesiredJobCount > maxReplicas) {
-              logger.warn({
-                msg: `Desired count (${totalDesiredJobCount}) is greater than max allowed ${maxReplicas}`,
-                name: autoscaledJob.metadata.name,
-                desired: totalDesiredJobCount,
-                maxAllowed: maxReplicas,
-              });
-            }
+              const targetFreeJobCount = Math.min(desiredFreeJobCount, maxReplicas - currentBusyJobs.length);
 
-            const targetFreeJobCount = Math.min(desiredFreeJobCount, maxReplicas - currentBusyJobs.length);
+              if (targetFreeJobCount > currentFreeJobCount) {
+                const currentIndexes = currentAllJobs.map((j) => Number(j.metadata!.labels![jobReplicaIndexLabel]));
+                const toCreateCount = targetFreeJobCount - currentFreeJobCount;
+                const toCreateIndexes = findNextAvailableIndices(toCreateCount, currentIndexes);
 
-            if (targetFreeJobCount > currentFreeJobCount) {
-              const currentIndexes = currentAllJobs.map((j) => Number(j.metadata!.labels![jobReplicaIndexLabel]));
-              const toCreateCount = targetFreeJobCount - currentFreeJobCount;
-              const toCreateIndexes = findNextAvailableIndices(toCreateCount, currentIndexes);
+                logger.info({
+                  msg: `Creating ${toCreateCount} extra jobs`,
+                  targetFreeJobCount,
+                  currentFreeJobCount,
+                  uid,
+                  name: autoscaledJob.metadata.name,
+                  toCreateIndexes,
+                });
 
-              logger.info({
-                msg: `Creating ${toCreateCount} extra jobs`,
-                targetFreeJobCount,
-                currentFreeJobCount,
-                uid,
-                name: autoscaledJob.metadata.name,
-                toCreateIndexes,
-              });
+                const createJobPromises = toCreateIndexes.map(async (index) => {
+                  const newJob = immerProduce(autoscaledJob.spec.jobTemplate, (draft) => {
+                    if (!draft.metadata) {
+                      draft.metadata = {};
+                    }
 
-              const createJobPromises = toCreateIndexes.map(async (index) => {
-                const newJob = immerProduce(autoscaledJob.spec.jobTemplate, (draft) => {
-                  if (!draft.metadata) {
-                    draft.metadata = {};
-                  }
+                    const metadata = draft.metadata;
 
-                  const metadata = draft.metadata;
+                    if (!metadata.labels) {
+                      metadata.labels = {};
+                    }
 
-                  if (!metadata.labels) {
-                    metadata.labels = {};
-                  }
+                    metadata.labels[jobReplicaIndexLabel] = String(index);
+                    metadata.name = (draft.metadata.name ?? autoscaledJob.metadata.name) +
+                      `-${index}-${Date.now()}`;
+                    metadata.namespace = autoscaledJob.metadata.namespace;
 
-                  metadata.labels[jobReplicaIndexLabel] = String(index);
-                  metadata.name = (draft.metadata.name ?? autoscaledJob.metadata.name) +
-                    `-${index}-${Date.now()}`;
-                  metadata.namespace = autoscaledJob.metadata.namespace;
+                    if (!metadata.ownerReferences) {
+                      metadata.ownerReferences = [];
+                    }
 
-                  if (!metadata.ownerReferences) {
-                    metadata.ownerReferences = [];
-                  }
+                    metadata.ownerReferences.push({
+                      apiVersion: autoscaledJob.apiVersion,
+                      kind: autoscaledJob.kind,
+                      name: autoscaledJob.metadata.name,
+                      uid: autoscaledJob.metadata.uid!,
+                      controller: true,
+                    });
 
-                  metadata.ownerReferences.push({
-                    apiVersion: autoscaledJob.apiVersion,
-                    kind: autoscaledJob.kind,
-                    name: autoscaledJob.metadata.name,
-                    uid: autoscaledJob.metadata.uid!,
-                    controller: true,
+                    if (autoscaledJob.spec.persistentVolumes) {
+                      const templateSpec = draft.spec!.template!.spec!;
+                      if (!templateSpec.volumes) {
+                        templateSpec.volumes = [];
+                      }
+                      autoscaledJob.spec.persistentVolumes.forEach((pv) => {
+                        templateSpec.volumes!.push({
+                          name: pv.volumeName,
+                          persistentVolumeClaim: {
+                            claimName: `${pv.claimPrefix}${index}`,
+                          },
+                        });
+                      });
+                    }
                   });
 
-                  if (autoscaledJob.spec.persistentVolumes) {
-                    const templateSpec = draft.spec!.template!.spec!;
-                    if (!templateSpec.volumes) {
-                      templateSpec.volumes = [];
-                    }
-                    autoscaledJob.spec.persistentVolumes.forEach((pv) => {
-                      templateSpec.volumes!.push({
-                        name: pv.volumeName,
-                        persistentVolumeClaim: {
-                          claimName: `${pv.claimPrefix}${index}`,
-                        },
-                      });
+                  try {
+                    const created = await client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("post")({
+                      path: {
+                        namespace,
+                      },
+                      query: {},
+                      body: newJob,
                     });
+                    logger.info({ msg: "Created job", name: created.data.metadata?.name });
+                  } catch (exception) {
+                    logger.error({ error: "Failed creating job", exception });
+                    throw exception;
                   }
                 });
 
-                try {
-                  const created = await client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("post")({
-                    path: {
-                      namespace,
-                    },
-                    query: {},
-                    body: newJob,
-                  });
-                  logger.info({ msg: "Created job", name: created.data.metadata?.name });
-                } catch (exception) {
-                  logger.error({ error: "Failed creating job", exception });
-                  throw exception;
-                }
-              });
-
-              await Promise.all(createJobPromises);
-            } else {
-              logger.info({
-                msg: `Nothing to do`,
-                targetFreeJobCount,
-                currentFreeJobCount,
-                name: autoscaledJob.metadata.name,
-                uid,
-              });
+                await Promise.all(createJobPromises);
+              } else {
+                logger.info({
+                  msg: `Nothing to do`,
+                  targetFreeJobCount,
+                  currentFreeJobCount,
+                  name: autoscaledJob.metadata.name,
+                  uid,
+                });
+              }
             }
           }
         }
