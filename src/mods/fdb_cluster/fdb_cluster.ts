@@ -327,9 +327,11 @@ export function createFdbClusterResources(
     .map(([_, r]) => r.processClass === "log" ? r.servers.filter((s) => !s.excluded).length : 0)
     .reduce((s, c) => s + c, 0);
 
+  const helperLabels = nextGeneration ? nextLabels : currentLabels;
+
   const createConnectionString = createFdbCreateConnectionStringResources({
-    baseLabels: nextGeneration ? nextLabels : currentLabels,
-    baseName,
+    baseLabels: helperLabels,
+    baseName: nextBaseName,
     namespace,
     connectionStringConfigMapRef,
     coordinatorServiceNames,
@@ -373,8 +375,8 @@ export function createFdbClusterResources(
   };
 
   const configure = createFdbConfigureResources({
-    baseLabels: nextGeneration ? nextLabels : currentLabels,
-    baseName,
+    baseLabels: helperLabels,
+    baseName: nextBaseName,
     namespace,
     connectionStringConfigMapRef,
     databaseConfig,
@@ -385,8 +387,8 @@ export function createFdbClusterResources(
   });
 
   const syncConnectionString = createFdbSyncConnectionStringResources({
-    baseLabels: nextGeneration ? nextLabels : currentLabels,
-    releaseName: baseName,
+    baseLabels: helperLabels,
+    releaseName: nextBaseName,
     namespace,
     connectionStringConfigMapRef,
     image: configuratorImage,
@@ -396,9 +398,9 @@ export function createFdbClusterResources(
   });
 
   const exporter = createFdbExporterResources({
-    name: `${baseName}-exporter`,
+    name: `${nextBaseName}-exporter`,
     namespace,
-    baseLabels: nextGeneration ? nextLabels : currentLabels,
+    baseLabels: helperLabels,
     dedupProxyImage: dedupProxyImage,
     connectionStringConfigMapRef,
     image: exporterImage,
