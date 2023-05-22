@@ -327,11 +327,14 @@ export function createFdbClusterResources(
     .map(([_, r]) => r.processClass === "log" ? r.servers.filter((s) => !s.excluded).length : 0)
     .reduce((s, c) => s + c, 0);
 
-  const helperLabels = nextGeneration ? nextLabels : currentLabels;
+  const helperLabels = {
+    "app.kubernetes.io/name": baseName,
+    "app.kubernetes.io/instance": baseName,
+  };
 
   const createConnectionString = createFdbCreateConnectionStringResources({
     baseLabels: helperLabels,
-    baseName: nextBaseName,
+    baseName,
     namespace,
     connectionStringConfigMapRef,
     coordinatorServiceNames,
@@ -376,7 +379,7 @@ export function createFdbClusterResources(
 
   const configure = createFdbConfigureResources({
     baseLabels: helperLabels,
-    baseName: nextBaseName,
+    baseName,
     namespace,
     connectionStringConfigMapRef,
     databaseConfig,
@@ -388,7 +391,7 @@ export function createFdbClusterResources(
 
   const syncConnectionString = createFdbSyncConnectionStringResources({
     baseLabels: helperLabels,
-    releaseName: nextBaseName,
+    releaseName: baseName,
     namespace,
     connectionStringConfigMapRef,
     image: configuratorImage,
@@ -398,7 +401,7 @@ export function createFdbClusterResources(
   });
 
   const exporter = createFdbExporterResources({
-    name: `${nextBaseName}-exporter`,
+    name: `${baseName}-exporter`,
     namespace,
     baseLabels: helperLabels,
     dedupProxyImage: dedupProxyImage,
