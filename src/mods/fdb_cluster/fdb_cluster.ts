@@ -92,6 +92,7 @@ export function createFdbClusterResources(
     imagePullPolicy = "IfNotPresent",
     helpersNodeSelector,
     helpersTolerations,
+    helpersLabels: helpersExtraLabels = {},
   }: {
     baseName: string;
     namespace: string;
@@ -117,6 +118,7 @@ export function createFdbClusterResources(
     imagePullPolicy?: K8sImagePullPolicy;
     helpersNodeSelector?: Record<string, string>;
     helpersTolerations?: K8s["core.v1.Toleration"][];
+    helpersLabels?: Record<string, string>;
   },
 ): FdbClusterResources {
   const currentBaseName = `${baseName}${currentGeneration.id.length > 0 ? `-${currentGeneration.id}` : ""}`;
@@ -327,13 +329,14 @@ export function createFdbClusterResources(
     .map(([_, r]) => r.processClass === "log" ? r.servers.filter((s) => !s.excluded).length : 0)
     .reduce((s, c) => s + c, 0);
 
-  const helperLabels = {
+  const helpersLabels = {
     "app.kubernetes.io/name": baseName,
     "app.kubernetes.io/instance": baseName,
+    ...helpersExtraLabels,
   };
 
   const createConnectionString = createFdbCreateConnectionStringResources({
-    baseLabels: helperLabels,
+    baseLabels: helpersLabels,
     baseName,
     namespace,
     connectionStringConfigMapRef,
@@ -378,7 +381,7 @@ export function createFdbClusterResources(
   };
 
   const configure = createFdbConfigureResources({
-    baseLabels: helperLabels,
+    baseLabels: helpersLabels,
     baseName,
     namespace,
     connectionStringConfigMapRef,
@@ -390,7 +393,7 @@ export function createFdbClusterResources(
   });
 
   const syncConnectionString = createFdbSyncConnectionStringResources({
-    baseLabels: helperLabels,
+    baseLabels: helpersLabels,
     releaseName: baseName,
     namespace,
     connectionStringConfigMapRef,
@@ -403,7 +406,7 @@ export function createFdbClusterResources(
   const exporter = createFdbExporterResources({
     name: `${baseName}-exporter`,
     namespace,
-    baseLabels: helperLabels,
+    baseLabels: helpersLabels,
     dedupProxyImage: dedupProxyImage,
     connectionStringConfigMapRef,
     image: exporterImage,
