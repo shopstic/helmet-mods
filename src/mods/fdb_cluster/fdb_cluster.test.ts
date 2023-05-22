@@ -67,12 +67,12 @@ Deno.test("fdb_cluster should work", () => {
         tolerations,
       },
       stateful: fdbStatefulConfigs,
+      labels: {
+        foo: "bar",
+      },
     },
     helpersNodeSelector: nodeSelector,
     helpersTolerations: tolerations,
-    labels: {
-      foo: "bar",
-    },
     locality: "data_hall",
   });
 

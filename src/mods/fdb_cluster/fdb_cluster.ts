@@ -90,7 +90,6 @@ export function createFdbClusterResources(
     dedupProxyImage = defaultDedupProxyImage,
     createServiceMonitor = true,
     imagePullPolicy = "IfNotPresent",
-    labels: extraLabels = {},
     helpersNodeSelector,
     helpersTolerations,
   }: {
@@ -116,15 +115,23 @@ export function createFdbClusterResources(
     dedupProxyImage?: string;
     createServiceMonitor?: boolean;
     imagePullPolicy?: K8sImagePullPolicy;
-    labels?: Record<string, string>;
     helpersNodeSelector?: Record<string, string>;
     helpersTolerations?: K8s["core.v1.Toleration"][];
   },
 ): FdbClusterResources {
-  const labels = {
-    "app.kubernetes.io/name": baseName,
-    "app.kubernetes.io/instance": baseName,
-    ...extraLabels,
+  const currentBaseName = `${baseName}${currentGeneration.id.length > 0 ? `-${currentGeneration.id}` : ""}`;
+  const nextBaseName = `${baseName}${nextGeneration ? `-${nextGeneration.id}` : ""}`;
+
+  const currentLabels = {
+    "app.kubernetes.io/name": currentBaseName,
+    "app.kubernetes.io/instance": currentBaseName,
+    ...currentGeneration.labels,
+  };
+
+  const nextLabels = {
+    "app.kubernetes.io/name": nextBaseName,
+    "app.kubernetes.io/instance": nextBaseName,
+    ...nextGeneration?.labels,
   };
 
   const connectionStringConfigMapRef: K8s["core.v1.ConfigMapKeySelector"] = {
@@ -140,7 +147,7 @@ export function createFdbClusterResources(
       replicas: backup.podCount,
       baseName,
       processCountPerPod: backup.agentCountPerPod,
-      baseLabels: labels,
+      baseLabels: nextGeneration ? nextLabels : currentLabels,
       connectionStringConfigMapRef,
       volumeMounts: backup.volumeMounts,
       volumes: backup.volumes,
@@ -151,19 +158,6 @@ export function createFdbClusterResources(
       tolerations: helpersTolerations,
     })
     : undefined;
-
-  const currentBaseName = `${baseName}${currentGeneration.id.length > 0 ? `-${currentGeneration.id}` : ""}`;
-  const nextBaseName = `${baseName}${nextGeneration ? `-${nextGeneration.id}` : ""}`;
-
-  const currentLabels = {
-    ...labels,
-    "app.kubernetes.io/generation": currentGeneration.id,
-  };
-
-  const nextLabels = {
-    ...labels,
-    "app.kubernetes.io/generation": nextGeneration?.id ?? "",
-  };
 
   const { services: currentStatefulServices, statefulSets: currentStatefulSets } = createFdbStatefulResources({
     baseName: currentBaseName,
@@ -178,7 +172,7 @@ export function createFdbClusterResources(
   const { services: nextStatefulServices, statefulSets: nextStatefulSets } = nextGeneration
     ? createFdbStatefulResources({
       baseName: nextBaseName,
-      baseLabels: nextLabels,
+      baseLabels: nextLabels!,
       configs: nextGeneration.stateful,
       connectionStringConfigMapRef,
       image: nextImage,
@@ -334,7 +328,7 @@ export function createFdbClusterResources(
     .reduce((s, c) => s + c, 0);
 
   const createConnectionString = createFdbCreateConnectionStringResources({
-    baseLabels: labels,
+    baseLabels: nextGeneration ? nextLabels : currentLabels,
     baseName,
     namespace,
     connectionStringConfigMapRef,
@@ -379,7 +373,7 @@ export function createFdbClusterResources(
   };
 
   const configure = createFdbConfigureResources({
-    baseLabels: labels,
+    baseLabels: nextGeneration ? nextLabels : currentLabels,
     baseName,
     namespace,
     connectionStringConfigMapRef,
@@ -391,7 +385,7 @@ export function createFdbClusterResources(
   });
 
   const syncConnectionString = createFdbSyncConnectionStringResources({
-    baseLabels: labels,
+    baseLabels: nextGeneration ? nextLabels : currentLabels,
     releaseName: baseName,
     namespace,
     connectionStringConfigMapRef,
@@ -404,7 +398,7 @@ export function createFdbClusterResources(
   const exporter = createFdbExporterResources({
     name: `${baseName}-exporter`,
     namespace,
-    baseLabels: labels,
+    baseLabels: nextGeneration ? nextLabels : currentLabels,
     dedupProxyImage: dedupProxyImage,
     connectionStringConfigMapRef,
     image: exporterImage,
