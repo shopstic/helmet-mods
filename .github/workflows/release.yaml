@@ -23,6 +23,8 @@ jobs:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.sha }}
 
       - name: Release
         env:
