@@ -271,7 +271,7 @@ export async function fetchServiceEndpointsByLabels(
     schema: ListOfServiceSpecSchema,
   });
 
-  return items.items.map((item) => `${item.spec.clusterIP}:${item.spec.ports[0]!.port}`);
+  return items.items.flatMap((item) => item.spec.ports.map((port) => `${item.spec.clusterIP}:${port}`));
 }
 
 export async function fetchPodIpsByLabels(
