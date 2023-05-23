@@ -7,6 +7,8 @@ import { FdbDatabaseConfig, FdbStatus, FdbStatusProcess, NonEmptyString } from "
 import {
   fdbcliInheritExec,
   fetchCoordinatorEndpointsFromServiceNames,
+  fetchPodIpsByLabels,
+  fetchServiceEndpointsByLabels,
   fetchServiceSpecs,
   fetchStatus,
   readClusterConfig,
@@ -119,15 +121,6 @@ interface FdbProcessInfo {
   address: string;
 }
 
-function prettyPrintProcessInfo(
-  { id, machineId, processClass, address }: FdbProcessInfo,
-): string {
-  return `   - machine=${
-    machineId ||
-    "unknown"
-  } id=${id} class=${processClass} address=${address}`;
-}
-
 async function determineProcessInclusionExclusion(
   status: FdbStatus,
   config: FdbDatabaseConfig,
@@ -137,12 +130,12 @@ async function determineProcessInclusionExclusion(
     return null;
   }
 
-  const { excludedServiceEndpoints } = config;
+  const { excludedServiceEndpoints, excludedPodLabels, excludedServiceLabels } = config;
 
   const desiredExcludedAddresses = await (async () => {
-    if (excludedServiceEndpoints.length === 0) {
-      return [];
-    } else {
+    const excludedAddresses: string[] = [];
+
+    if (excludedServiceEndpoints.length !== 0) {
       logger.info({
         msg: `There are ${excludedServiceEndpoints.length} desired excluded service endpoints`,
         excludedServiceEndpoints,
@@ -152,8 +145,37 @@ async function determineProcessInclusionExclusion(
         excludedServiceEndpoints.map((e) => e.name),
       );
 
-      return serviceSpecs.map((s, i) => `${s.clusterIP}:${excludedServiceEndpoints[i].port}`);
+      excludedAddresses.push.apply(
+        excludedAddresses,
+        serviceSpecs.map((s, i) => `${s.clusterIP}:${excludedServiceEndpoints[i].port}`),
+      );
     }
+
+    if (excludedServiceLabels.length !== 0) {
+      for (const labels of excludedServiceLabels) {
+        logger.info({
+          msg: "Fetching excluded services by labels",
+          labels,
+        });
+
+        const serviceEndpoints = await fetchServiceEndpointsByLabels(labels);
+        excludedAddresses.push.apply(excludedAddresses, serviceEndpoints);
+      }
+    }
+
+    if (excludedPodLabels.length !== 0) {
+      for (const labels of excludedPodLabels) {
+        logger.info({
+          msg: "Fetching excluded pods by labels",
+          labels,
+        });
+
+        const podIps = await fetchPodIpsByLabels(labels);
+        excludedAddresses.push.apply(excludedAddresses, podIps.map((podIp) => `${podIp}:4500`));
+      }
+    }
+
+    return excludedAddresses;
   })();
 
   const desiredExcludedAddressSet = new Set(desiredExcludedAddresses);
@@ -232,7 +254,7 @@ export default createCliAction(
 
             logger.info({
               msg: `The following ${toBeIncludedAddresses.length} addresses will be included back`,
-              addresses: toBeIncludedProcesses.map((p) => prettyPrintProcessInfo(p)),
+              addresses: toBeIncludedProcesses,
             });
 
             await fdbcliInheritExec(
@@ -263,14 +285,14 @@ export default createCliAction(
             logger.warn({
               message:
                 `There are ${nonexistentExcludedAddresses.length} addresses to be excluded but they don't exist in FDB status`,
-              addresses: nonexistentExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
+              addresses: nonexistentExcludedAddresses.map((a) => processByAddressMap[a]),
             });
           }
 
           if (alreadyExcludedAddresses.length > 0) {
             logger.info({
               msg: `The following ${alreadyExcludedAddresses.length} addresses have already been previously excluded`,
-              addresses: alreadyExcludedAddresses.map((a) => prettyPrintProcessInfo(processByAddressMap[a])),
+              addresses: alreadyExcludedAddresses.map((a) => processByAddressMap[a]),
             });
           }
 
@@ -281,7 +303,7 @@ export default createCliAction(
 
             logger.info({
               msg: "Going to exclude",
-              addresses: toBeExcludedProcesses.map((p) => prettyPrintProcessInfo(p)),
+              addresses: toBeExcludedProcesses,
             });
 
             if (!status.client.database_status.available) {

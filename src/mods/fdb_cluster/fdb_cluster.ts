@@ -8,7 +8,7 @@ import {
   createFdbSyncConnectionStringResources,
   FdbSyncConnectionStringResources,
 } from "./lib/configurator/fdb_sync_connection_string.ts";
-import { createFdbStatefulResources, FdbStatefulConfig } from "./lib/fdb_stateful.ts";
+import { createFdbStatefulResources, FDB_COMPONENT_LABEL, FdbStatefulConfig } from "./lib/fdb_stateful.ts";
 import { createFdbStatelessDeployment } from "./lib/fdb_stateless.ts";
 import { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.ts";
 import { createFdbExporterResources, FdbExporterResources } from "./lib/fdb_exporter.ts";
@@ -317,12 +317,26 @@ export function createFdbClusterResources(
     .flatMap(([id, cfg]) =>
       cfg
         .servers
-        .filter((s) => nextGeneration !== undefined || s.excluded)
+        .filter((s) => s.excluded)
         .map((s) => ({
           name: `${currentBaseName}-${id}`,
           port: s.port,
         }))
     );
+
+  const excludedServiceLabels: FdbDatabaseConfig["excludedServiceLabels"] = nextGeneration
+    ? ["log", "storage"].map((processClass) => ({
+      ...currentLabels,
+      [FDB_COMPONENT_LABEL]: processClass,
+    }))
+    : [];
+
+  const excludedPodLabels: FdbDatabaseConfig["excludedPodLabels"] = nextGeneration
+    ? ["commit_proxy", "grv_proxy", "stateless"].map((processClass) => ({
+      ...currentLabels,
+      [FDB_COMPONENT_LABEL]: processClass,
+    }))
+    : [];
 
   const logCount = Object
     .entries((nextGeneration ?? currentGeneration).stateful)
@@ -378,6 +392,8 @@ export function createFdbClusterResources(
     resolverCount: nextResolverCount ?? currentResolverCount,
     coordinatorServiceNames,
     excludedServiceEndpoints,
+    excludedServiceLabels,
+    excludedPodLabels,
   };
 
   const configure = createFdbConfigureResources({

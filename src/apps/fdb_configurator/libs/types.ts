@@ -33,6 +33,8 @@ export const FdbDatabaseConfigSchema = Type.PartialObject({
     name: Type.String(),
     port: Type.Number({ minimum: 1, maximum: 65535 }),
   })),
+  excludedServiceLabels: Type.Array(Type.Record(Type.String(), Type.String())),
+  excludedPodLabels: Type.Array(Type.Record(Type.String(), Type.String())),
   perpetualStorageWiggle: Type.Number(),
   perpetualStorageWiggleLocality: Type.String(),
   storageMigrationType: Type.Union([

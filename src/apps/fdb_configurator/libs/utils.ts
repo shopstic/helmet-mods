@@ -156,6 +156,20 @@ export const ServiceSpecSchema = Type.PartialObject({
   ),
 });
 
+export const ListOfServiceSpecSchema = Type.PartialObject({
+  items: Type.Array(Type.PartialObject({
+    spec: ServiceSpecSchema,
+  })),
+});
+
+export const ListOfPodStatusSchema = Type.PartialObject({
+  items: Type.Array(Type.PartialObject({
+    status: Type.PartialObject({
+      podIP: Type.String(),
+    }),
+  })),
+});
+
 export type ServiceSpec = Static<typeof ServiceSpecSchema>;
 
 export async function kubectlInherit({
@@ -239,6 +253,44 @@ export async function fetchServiceSpecs(
   });
 
   return await Promise.all(promises);
+}
+
+export async function fetchServiceEndpointsByLabels(
+  labels: Record<string, string>,
+): Promise<string[]> {
+  const namespace = await readCurrentNamespace();
+  const labelsParam = Object.entries(labels).map(([key, value]) => `${key}=${value}`).join(",");
+  const items = await kubectlGetJson({
+    args: [
+      `service`,
+      "-n",
+      namespace,
+      `-l=${labelsParam}`,
+      "-o=json",
+    ],
+    schema: ListOfServiceSpecSchema,
+  });
+
+  return items.items.map((item) => `${item.spec.clusterIP}:${item.spec.ports[0]!.port}`);
+}
+
+export async function fetchPodIpsByLabels(
+  labels: Record<string, string>,
+): Promise<string[]> {
+  const namespace = await readCurrentNamespace();
+  const labelsParam = Object.entries(labels).map(([key, value]) => `${key}=${value}`).join(",");
+  const items = await kubectlGetJson({
+    args: [
+      `pod`,
+      "-n",
+      namespace,
+      `-l=${labelsParam}`,
+      "-o=json",
+    ],
+    schema: ListOfPodStatusSchema,
+  });
+
+  return items.items.map((item) => item.status.podIP);
 }
 
 export async function fetchCoordinatorEndpointsFromServiceNames(
