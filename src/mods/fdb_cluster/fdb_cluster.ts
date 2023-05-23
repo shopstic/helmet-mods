@@ -325,7 +325,7 @@ export function createFdbClusterResources(
     );
 
   const excludedServiceLabels: FdbDatabaseConfig["excludedServiceLabels"] = nextGeneration
-    ? ["log", "storage"].map((processClass) => ({
+    ? ["coordinator", "log", "storage"].map((processClass) => ({
       ...currentLabels,
       [FDB_COMPONENT_LABEL]: processClass,
     }))
