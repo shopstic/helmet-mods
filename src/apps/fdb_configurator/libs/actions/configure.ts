@@ -285,7 +285,7 @@ export default createCliAction(
             logger.warn({
               message:
                 `There are ${nonexistentExcludedAddresses.length} addresses to be excluded but they don't exist in FDB status`,
-              addresses: nonexistentExcludedAddresses.map((a) => processByAddressMap[a]),
+              addresses: nonexistentExcludedAddresses,
             });
           }
 
