@@ -20,7 +20,8 @@ let
         ''
           export DENO_DIR=$(mktemp -d)
           echo "DENO_DIR=$DENO_DIR"
-          ln -s ${deno-deps}/deps "$DENO_DIR/"
+          ln -s ${deno-deps}/* "$DENO_DIR/"
+          rm -f "$DENO_DIR/gen"
           cp -R ${deno-deps}/gen "$DENO_DIR/"
           chmod -R +w "$DENO_DIR/gen"
           mkdir -p $out/bin
