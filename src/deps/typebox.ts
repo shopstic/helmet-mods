@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/helmet@1.23.3/deps/typebox.ts";
+export * from "https://deno.land/x/helmet@1.24.0/deps/typebox.ts";

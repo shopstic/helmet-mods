@@ -1,6 +1,5 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { createOpenapiClient, OpenapiClient } from "../../deps/k8s_openapi.ts";
-import { ConnInfo, serveHttp } from "../../deps/std_http.ts";
 import { constantTimeCompare, createWebhookSigner } from "../../libs/crypto_utils.ts";
 import { Logger } from "../../libs/logger.ts";
 import { agInterval, agThrottle, createReconciliationLoop, ReconciliationLoop } from "../../libs/utils.ts";
@@ -189,7 +188,7 @@ const program = new CliProgram()
           reconciliationLoopByIdMap.get(request.id)!.request(request);
         }
 
-        async function webhookHandler(request: Request, connInfo: ConnInfo): Promise<Response> {
+        async function webhookHandler(request: Request, connInfo: Deno.ServeHandlerInfo): Promise<Response> {
           if (request.method === "GET" && new URL(request.url).pathname === "/healthz") {
             return new Response("OK", { status: 200 });
           }
@@ -259,7 +258,13 @@ const program = new CliProgram()
 
         const registryServerPromise = (async () => {
           logger.info({ msg: `Starting registry server on port ${registryServerPort}` });
-          await serveHttp(async (request: Request) => {
+          await Deno.serve({
+            port: registryServerPort,
+            signal,
+            onListen({ hostname, port }) {
+              logger.info({ msg: `Registry server is up at http://${hostname}:${port}` });
+            },
+          }, async (request: Request) => {
             if (request.method === "GET") {
               const url = new URL(request.url);
 
@@ -320,24 +325,18 @@ const program = new CliProgram()
             }
 
             return new Response("Not found", { status: 404 });
-          }, {
-            port: registryServerPort,
-            signal,
-            onListen({ hostname, port }) {
-              logger.info({ msg: `Registry server is up at http://${hostname}:${port}` });
-            },
-          });
+          }).finished;
         })();
 
         const webhookServerPromise = (async () => {
           logger.info({ msg: `Starting webhook server on port ${webhookServerPort}` });
-          await serveHttp(webhookHandler, {
+          await Deno.serve({
             port: webhookServerPort,
             signal,
             onListen({ hostname, port }) {
               logger.info({ msg: `Webhook server is up at http://${hostname}:${port}` });
             },
-          });
+          }, webhookHandler).finished;
         })();
 
         await Promise.race([registryServerPromise, webhookServerPromise]);

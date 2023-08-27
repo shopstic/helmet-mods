@@ -1,7 +1,7 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { OpenapiMergerConfigSchema, OpenapiMergerParamsSchema } from "./libs/types.ts";
 import { Logger } from "../../libs/logger.ts";
-import { serveDir, serveHttp } from "../../deps/std_http.ts";
+import { serveDir } from "../../deps/std_http.ts";
 import { stripMargin } from "../../libs/utils.ts";
 import { openapiMerge, OpenapiMergeInput, openapiMergeIsErrorResult } from "../../deps/openapi_merge.ts";
 import { yamlParse, yamlStringify } from "../../deps/std_yaml.ts";
@@ -125,7 +125,13 @@ await new CliProgram()
         const docsFileRegex = new RegExp(`^${docsPath}/docs\.(yaml|yml|json)$`);
         const docsPathWithSlash = `${docsPath}/`;
 
-        await serveHttp(async (request) => {
+        await Deno.serve({
+          port: serverPort,
+          signal: abortSignal,
+          onListen({ hostname, port }) {
+            logger.info({ msg: `Server is up at http://${hostname}:${port}`, hostname, port });
+          },
+        }, async (request) => {
           const url = new URL(request.url);
           const { pathname } = url;
 
@@ -187,13 +193,7 @@ await new CliProgram()
           }
 
           return new Response("Not Found", { status: 404 });
-        }, {
-          port: serverPort,
-          signal: abortSignal,
-          onListen({ hostname, port }) {
-            logger.info({ msg: `Server is up at http://${hostname}:${port}`, hostname, port });
-          },
-        });
+        }).finished;
 
         return ExitCode.Zero;
       },

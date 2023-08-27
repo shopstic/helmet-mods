@@ -1,7 +1,6 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { captureExec } from "../../deps/exec_utils.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
-import { ConnInfo, serveHttp } from "../../deps/std_http.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import { constantTimeCompare } from "../../libs/crypto_utils.ts";
 import { Logger } from "../../libs/logger.ts";
@@ -157,7 +156,7 @@ const program = new CliProgram()
           }
         })();
 
-        async function webhookHandler(request: Request, connInfo: ConnInfo): Promise<Response> {
+        async function webhookHandler(request: Request, connInfo: Deno.ServeHandlerInfo): Promise<Response> {
           if (request.method === "GET" && new URL(request.url).pathname === "/healthz") {
             return new Response("OK", { status: 200 });
           }
@@ -224,18 +223,25 @@ const program = new CliProgram()
 
         const webhookServerPromise = (async () => {
           logger.info({ msg: `Starting webhook server on port ${webhookServerPort}` });
-          await serveHttp(webhookHandler, {
+          await Deno.serve({
             port: webhookServerPort,
             signal,
             onListen({ hostname, port }) {
               logger.info({ msg: `Webhook server is up at http://${hostname}:${port}` });
             },
-          });
+          }, webhookHandler).finished;
         })();
 
         const registryServerPromise = (async () => {
           logger.info({ msg: `Starting registry server on port ${registryServerPort}` });
-          await serveHttp(async (request: Request) => {
+
+          await Deno.serve({
+            port: registryServerPort,
+            signal,
+            onListen({ hostname, port }) {
+              logger.info({ msg: `Registry server is up at http://${hostname}:${port}` });
+            },
+          }, async (request: Request) => {
             if (request.method === "GET") {
               const url = new URL(request.url);
 
@@ -285,13 +291,7 @@ const program = new CliProgram()
             }
 
             return new Response("Not found", { status: 404 });
-          }, {
-            port: registryServerPort,
-            signal,
-            onListen({ hostname, port }) {
-              logger.info({ msg: `Registry server is up at http://${hostname}:${port}` });
-            },
-          });
+          }).finished;
         })();
 
         await Promise.race([webhookServerPromise, registryServerPromise]);

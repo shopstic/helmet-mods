@@ -1,2 +1,2 @@
-export { encode as encodeToHex } from "https://deno.land/std@0.186.0/encoding/hex.ts";
-export { decode as base64Decode } from "https://deno.land/std@0.186.0/encoding/base64.ts";
+export { encode as encodeToHex } from "https://deno.land/std@0.200.0/encoding/hex.ts";
+export { decode as base64Decode } from "https://deno.land/std@0.200.0/encoding/base64.ts";
