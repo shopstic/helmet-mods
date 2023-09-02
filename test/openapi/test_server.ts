@@ -1,4 +1,3 @@
-import { serveHttp } from "../../src/deps/std_http.ts";
 import { z } from "../../src/deps/zod.ts";
 import { OpenapiRouter } from "../../src/libs/openapi_server.ts";
 import { endpoints, registry, UserSchema } from "./test_endpoints.ts";
@@ -39,7 +38,7 @@ const router = new OpenapiRouter({ registry, endpoints })
     });
   })
   .put("/users/{id}", ({ params, query, headers, body, connInfo }, respond) => {
-    console.log("connInfo", connInfo);
+    console.log("remoteAddr", connInfo.remoteAddr);
     console.log("param: id", params.id);
     console.log("query: dryRun", query.dryRun);
     console.log("header: X-Some-UUID", headers["x-some-uuid"]);
@@ -51,7 +50,7 @@ const router = new OpenapiRouter({ registry, endpoints })
     });
   })
   .post("/users/{id}", ({ params, query, headers, body, connInfo }, respond) => {
-    console.log("connInfo", connInfo);
+    console.log("remoteAddr", connInfo.remoteAddr);
     console.log("param: id", params.id);
     console.log("query: dryRun", query.dryRun);
     console.log("headers", headers);
@@ -69,12 +68,14 @@ const router = new OpenapiRouter({ registry, endpoints })
     });
   });
 
-await serveHttp((request, connInfo) => {
-  console.log(request.method, request.url, request.headers);
-  return router.handle(request, connInfo);
-}, {
-  port: 9876,
-  onListen({ hostname, port }) {
-    console.log(`OpenAPI server is up at http://${hostname}:${port}`);
-  },
-});
+await Deno
+  .serve({
+    port: 9876,
+    onListen({ hostname, port }) {
+      console.log(`OpenAPI server is up at http://${hostname}:${port}`);
+    },
+  }, (request, connInfo) => {
+    console.log(request.method, request.url, request.headers);
+    return router.handle(request, connInfo);
+  })
+  .finished;

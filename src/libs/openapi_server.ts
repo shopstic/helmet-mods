@@ -1,4 +1,3 @@
-import { ConnInfo } from "../deps/std_http.ts";
 import { OpenAPIGenerator, OpenAPIRegistry, RouteConfig, z, ZodError, ZodType } from "../deps/zod.ts";
 import {
   ExtractEndpointPaths,
@@ -19,7 +18,7 @@ export interface OpenapiServerRequestContext<P, Q, H, B> {
   headers: H;
   body: B;
   request: Request;
-  connInfo: ConnInfo;
+  connInfo: Deno.ServeHandlerInfo;
 }
 
 export class RawResponse extends Response {
@@ -292,7 +291,7 @@ export class OpenapiRouter<R> {
     return this;
   }
 
-  async handle(request: Request, connInfo: ConnInfo): Promise<Response> {
+  async handle(request: Request, connInfo: Deno.ServeHandlerInfo): Promise<Response> {
     const url = new URL(request.url);
     const pathname = url.pathname;
     const routes = this.routesByUppercasedMethodMap.get(request.method);
@@ -302,7 +301,7 @@ export class OpenapiRouter<R> {
     }
 
     let matchedRoute: OpenapiRoute<OpenapiEndpoint> | undefined;
-    let params: Record<string, string> | undefined;
+    let params: Record<string, string | undefined> | undefined;
 
     matchedRoute = routes.byPathMap.get(pathname);
 
