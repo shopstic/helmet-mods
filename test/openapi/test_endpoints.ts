@@ -1,5 +1,5 @@
 import { OpenAPIRegistry, z, ZodBoolean, ZodDate, ZodNumber } from "../../src/deps/zod.ts";
-import { OpenapiEndpoints } from "../../src/libs/openapi_shared.ts";
+import { OpenapiEndpoints } from "../../src/libs/openapi/openapi_endpoint.ts";
 
 export function zsNumber(updater: (s: ZodNumber) => ZodNumber = (s) => s) {
   return z.preprocess((arg) => {
@@ -102,6 +102,11 @@ export const endpoints = new OpenapiEndpoints()
         content: {
           "text/plain": {
             schema: z.literal("OK"),
+          },
+          "application/json": {
+            schema: z.object({
+              isOk: z.boolean(),
+            }),
           },
         },
       },

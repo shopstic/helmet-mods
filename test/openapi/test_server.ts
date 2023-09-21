@@ -1,5 +1,5 @@
 import { z } from "../../src/deps/zod.ts";
-import { OpenapiRouter } from "../../src/libs/openapi_server.ts";
+import { OpenapiRouter, ServerResponse } from "../../src/libs/openapi/openapi_server.ts";
 import { endpoints, registry, UserSchema } from "./test_endpoints.ts";
 
 const router = new OpenapiRouter({ registry, endpoints })
@@ -9,7 +9,10 @@ const router = new OpenapiRouter({ registry, endpoints })
     return respond(200, "text/plain", null);
   })
   .get("/alivez", (_, respond) => {
-    return respond(200, "text/plain", "OK");
+    // return new ServerResponse(200, "application/json", {
+    //   isOk: true
+    // });
+    return new ServerResponse(200, "text/plain", "OK" as const);
   })
   .get("/download/{fileName}.pdf", async ({ params }, respond) => {
     console.log("fileName", params.fileName);

@@ -1,15 +1,12 @@
-import { OpenAPIGenerator, OpenAPIRegistry, RouteConfig, z, ZodError, ZodType } from "../deps/zod.ts";
+import { OpenAPIGenerator, OpenAPIRegistry, RouteConfig, z, ZodError, ZodType } from "../../deps/zod.ts";
+import { OpenapiEndpoint, OpenapiEndpoints } from "./openapi_endpoint.ts";
 import {
-  ExtractEndpointPaths,
   extractRequestBodySchema,
   extractRequestHeadersSchema,
   extractRequestParamsSchema,
   extractRequestQuerySchema,
-  OpenapiEndpoint,
-  OpenapiEndpoints,
-  OpenapiRouteConfig,
-  TypedResponse,
-} from "./openapi_shared.ts";
+} from "./runtime/request.ts";
+import { ExtractEndpointPaths, OpenapiRouteConfig, TypedResponse } from "./types/shared.ts";
 
 export interface OpenapiServerRequestContext<P, Q, H, B> {
   url: URL;
@@ -45,16 +42,16 @@ type ExtractServerRequestContext<C> = C extends {
 
 type MaybePromise<T> = Promise<T> | T;
 
-type ExtractResponseType<C> = C extends {
+type RequestHanderResponseType<C> = C extends {
   response: {
-    body: infer R;
+    type: infer R;
   };
 } ? R
   : ServerResponse<number, string, unknown>;
 
-type ExtractResponseTypeMap<C> = C extends {
+type ResponseBodyTypeByStatusAndMediaMap<C> = C extends {
   response: {
-    bodyMap: infer R;
+    bodyByStatusAndMediaMap: infer R;
   };
 } ? R
   : {
@@ -73,8 +70,8 @@ type OpenapiRoute<C> = {
   validationErrorHandler?: (source: OpenapiRequestValidationErrorSource, error: ZodError<unknown>) => Response;
   handler: (
     request: ExtractServerRequestContext<C>,
-    respond: ServerResponder<ExtractResponseTypeMap<C>>,
-  ) => MaybePromise<ExtractResponseType<C>>;
+    respond: ServerResponder<ResponseBodyTypeByStatusAndMediaMap<C>>,
+  ) => MaybePromise<RequestHanderResponseType<C>>;
 };
 
 export class OpenapiRouter<R> {

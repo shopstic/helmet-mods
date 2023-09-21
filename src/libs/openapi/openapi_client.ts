@@ -1,17 +1,6 @@
-import { RouteConfig, ZodError, ZodType } from "../deps/zod.ts";
-import { ExtractEndpointPaths, OpenapiEndpoint, OpenapiEndpoints, TypedResponse } from "./openapi_shared.ts";
-
-export interface OpenapiRouteSchemas {
-  request: {
-    query?: ZodType<unknown>;
-    params?: ZodType<unknown>;
-    headers?: ZodType<unknown>;
-    body?: ZodType<unknown>;
-  };
-  response: {
-    body?: ZodType<unknown>;
-  };
-}
+import { RouteConfig, ZodError, ZodType } from "../../deps/zod.ts";
+import { OpenapiEndpoint, OpenapiEndpoints } from "./openapi_endpoint.ts";
+import { ExcludeUndefinedValue, ExtractEndpointPaths, StripEmptyObjectType, TypedResponse } from "./types/shared.ts";
 
 interface OpenapiClientRequestContext<P, Q, H, B> {
   params: P;
@@ -51,12 +40,6 @@ export class OpenapiClientResponseValidationError extends Error {
     });
   }
 }
-
-type ExcludeUndefinedValue<O> = {
-  [K in keyof O as (O[K] extends undefined ? never : K)]: O[K];
-};
-
-type StripEmptyObjectType<T> = keyof T extends never ? Record<never, never> : T;
 
 type ExtractClientRequestArg<T> = T extends {
   request: {
