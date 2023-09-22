@@ -98,7 +98,15 @@ export interface OpenapiEndpoint {
   };
 }
 
-export type OpenapiEndpointTypeBag<QP, QQ, QH, QB, RT, RB, RH> = {
+export type OpenapiEndpointTypeBag<
+  QP = unknown,
+  QQ = unknown,
+  QH = unknown,
+  QB = unknown,
+  RT = unknown,
+  RB = unknown,
+  RH = unknown,
+> = {
   request: {
     params: QP;
     query: QQ;
@@ -112,11 +120,45 @@ export type OpenapiEndpointTypeBag<QP, QQ, QH, QB, RT, RB, RH> = {
   };
 };
 
-export class OpenapiEndpoints<R> {
-  private endpointByPathByMethodMap: Map<string, Map<string, OpenapiEndpoint>>;
+export type OpenapiExtractEndpointTypeBag<E, M extends string, P extends string> = E extends OpenapiEndpoints<infer R>
+  ? M extends keyof R ? (P extends keyof R[M] ? (R[M][P] extends OpenapiEndpointTypeBag ? R[M][P] : never) : never)
+  : never
+  : never;
 
-  constructor() {
-    this.endpointByPathByMethodMap = new Map();
+export class OpenapiEndpoints<R> {
+  static merge<A, B>(left: OpenapiEndpoints<A>, right: OpenapiEndpoints<B>): OpenapiEndpoints<A & B> {
+    const leftMap = left.endpointByPathByMethodMap;
+    const rightMap = right.endpointByPathByMethodMap;
+    const mergedMap = new Map<string, Map<string, OpenapiEndpoint>>();
+
+    for (const [path, methodMap] of leftMap) {
+      if (!mergedMap.has(path)) {
+        mergedMap.set(path, new Map());
+      }
+
+      for (const [method, endpoint] of methodMap) {
+        mergedMap.get(path)!.set(method, endpoint);
+      }
+    }
+
+    for (const [path, methodMap] of rightMap) {
+      if (!mergedMap.has(path)) {
+        mergedMap.set(path, new Map());
+      }
+
+      for (const [method, endpoint] of methodMap) {
+        mergedMap.get(path)!.set(method, endpoint);
+      }
+    }
+
+    return new OpenapiEndpoints(mergedMap);
+  }
+
+  merge<E>(other: OpenapiEndpoints<E>): OpenapiEndpoints<R & E> {
+    return OpenapiEndpoints.merge(this, other);
+  }
+
+  constructor(public readonly endpointByPathByMethodMap: Map<string, Map<string, OpenapiEndpoint>> = new Map()) {
   }
 
   get(path: string, method: string): OpenapiEndpoint | undefined {

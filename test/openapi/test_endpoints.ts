@@ -78,24 +78,7 @@ export const getHealthz = {
   summary: "Health check",
 };
 
-export const endpoints = new OpenapiEndpoints()
-  .jsonEndpoint({
-    method: "get",
-    path: "/users/{id}",
-    summary: "Get a single user",
-    request: {
-      params: z.object({ id: zsNumber((s) => s.max(999)) }),
-    },
-    response: {
-      description: "Object with user data.",
-      body: UserSchema,
-    },
-  })
-  .endpoint({
-    method: "get",
-    path: "/healthz",
-    summary: "Health check",
-  })
+const healthEndpoints = new OpenapiEndpoints()
   .endpoint({
     method: "get",
     path: "/alivez",
@@ -128,6 +111,25 @@ export const endpoints = new OpenapiEndpoints()
           },
         },
       },
+    },
+  })
+  .endpoint({
+    method: "get",
+    path: "/healthz",
+    summary: "Health check",
+  });
+
+const userEndpoints = new OpenapiEndpoints()
+  .jsonEndpoint({
+    method: "get",
+    path: "/users/{id}",
+    summary: "Get a single user",
+    request: {
+      params: z.object({ id: zsNumber((s) => s.max(999)) }),
+    },
+    response: {
+      description: "Object with user data.",
+      body: UserSchema,
     },
   })
   .jsonEndpoint({
@@ -225,3 +227,5 @@ export const endpoints = new OpenapiEndpoints()
       },
     },
   });
+
+export const endpoints = healthEndpoints.merge(userEndpoints);
