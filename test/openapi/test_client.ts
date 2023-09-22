@@ -1,5 +1,5 @@
 import { z } from "../../src/deps/zod.ts";
-import { ClientResponse, OpenapiClient } from "../../src/libs/openapi_client.ts";
+import { ClientResponse, OpenapiClient } from "../../src/libs/openapi/openapi_client.ts";
 import { endpoints, UserSchema } from "./test_endpoints.ts";
 
 const testClient = new OpenapiClient({
@@ -24,8 +24,8 @@ async function testFetch<R extends ClientResponse>(name: string, doIt: () => Pro
     const response = await doIt();
 
     console.log(
+      response.headers,
       response.status,
-      response.response.headers,
       response.data,
     );
   } catch (e) {
@@ -38,6 +38,8 @@ await testFetch("GET /alivez", async () => {
   const response = await testClient.get("/alivez", {});
 
   console.log("OK", response.data === "OK");
+
+  console.log("X-RateLimit-Limit", response.headers["X-RateLimit-Limit"]);
 
   return response;
 });

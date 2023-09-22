@@ -1,15 +1,12 @@
-import { OpenAPIGenerator, OpenAPIRegistry, RouteConfig, z, ZodError, ZodType } from "../deps/zod.ts";
+import { OpenapiGenerator, OpenapiRegistry, RouteConfig, z, ZodError, ZodType } from "../../deps/zod.ts";
+import { OpenapiEndpoints, OpenapiEndpointTypeBag } from "./openapi_endpoint.ts";
 import {
-  ExtractEndpointPaths,
   extractRequestBodySchema,
   extractRequestHeadersSchema,
   extractRequestParamsSchema,
   extractRequestQuerySchema,
-  OpenapiEndpoint,
-  OpenapiEndpoints,
-  OpenapiRouteConfig,
-  TypedResponse,
-} from "./openapi_shared.ts";
+} from "./runtime/request.ts";
+import { ExtractEndpointPaths, OpenapiRouteConfig, Simplify, TypedResponse } from "./types/shared.ts";
 
 export interface OpenapiServerRequestContext<P, Q, H, B> {
   url: URL;
@@ -33,37 +30,50 @@ export class RawResponse extends Response {
 
 type OpenapiRequestValidationErrorSource = "params" | "query" | "headers" | "body";
 
-type ExtractServerRequestContext<C> = C extends {
-  request: {
-    params: infer P;
-    query: infer Q;
-    headers: infer H;
-    body: infer B;
-  };
-} ? OpenapiServerRequestContext<P, Q, H, B>
+type RequestContextType<Bag> = Bag extends
+  OpenapiEndpointTypeBag<infer P, infer Q, infer H, infer B, unknown, unknown, unknown>
+  ? OpenapiServerRequestContext<P, Q, H, B>
   : OpenapiServerRequestContext<unknown, unknown, unknown, unknown>;
 
 type MaybePromise<T> = Promise<T> | T;
 
-type ExtractResponseType<C> = C extends {
-  response: {
-    body: infer R;
-  };
-} ? R
-  : ServerResponse<number, string, unknown>;
+type RequestHanderResponseType<Bag> = Bag extends
+  OpenapiEndpointTypeBag<unknown, unknown, unknown, unknown, infer R, unknown, unknown> ? R
+  : ServerResponse<number, string, unknown, unknown>;
 
-type ExtractResponseTypeMap<C> = C extends {
-  response: {
-    bodyMap: infer R;
-  };
-} ? R
-  : {
-    200: {
-      "text/plain": unknown;
-    };
-  };
+type ResponseBodyByStatusAndMediaMap<Bag> = Bag extends
+  OpenapiEndpointTypeBag<unknown, unknown, unknown, unknown, unknown, infer B, unknown> ? B : never;
 
-type OpenapiRoute<C> = {
+type ResponseHeadersByStatusMap<Bag> = Bag extends
+  OpenapiEndpointTypeBag<unknown, unknown, unknown, unknown, unknown, unknown, infer H> ? H : never;
+
+type ResponseHeadersByStatus<M, S> = S extends keyof M ? (
+    M[S] extends never ? unknown : Simplify<M[S]> & Record<string, unknown>
+  )
+  : unknown;
+
+type ServerResponder<S extends number, M extends string, B, H> = unknown extends H
+  ? (unknown extends B ? (body?: B, headers?: HeadersInit) => ServerResponse<S, M, B, HeadersInit>
+    : (body: B, headers?: HeadersInit) => ServerResponse<S, M, B, HeadersInit>)
+  : (
+    (body: B, headers: H) => ServerResponse<S, M, B, H>
+  );
+
+type ServerResponderFactory<Bag> = <
+  BM extends ResponseBodyByStatusAndMediaMap<Bag>,
+  S extends Extract<keyof BM, number>,
+  M extends Extract<keyof BM[S], string>,
+  B extends BM[S][M],
+  H extends ResponseHeadersByStatus<ResponseHeadersByStatusMap<Bag>, S>,
+>(
+  status: S,
+  mediaType: M,
+) => ServerResponder<S, M, B, H>;
+
+const genericResponderFactory = (status: number, mediaType: string) => (body: unknown, headers: unknown) =>
+  new ServerResponse(status, mediaType, body, headers);
+
+type OpenapiRoute<Bag> = {
   path: string;
   urlPattern?: URLPattern;
   paramsSchema?: ZodType<unknown>;
@@ -72,9 +82,14 @@ type OpenapiRoute<C> = {
   bodySchema?: ZodType<unknown>;
   validationErrorHandler?: (source: OpenapiRequestValidationErrorSource, error: ZodError<unknown>) => Response;
   handler: (
-    request: ExtractServerRequestContext<C>,
-    respond: ServerResponder<ExtractResponseTypeMap<C>>,
-  ) => MaybePromise<ExtractResponseType<C>>;
+    request: RequestContextType<Bag>,
+    respond: ServerResponderFactory<Bag>,
+  ) => MaybePromise<RequestHanderResponseType<Bag>>;
+};
+
+type EraseRoute<R, M extends RouteConfig["method"], P extends string> = {
+  [K in keyof R]: K extends M ? Omit<R[K], P>
+    : R[K];
 };
 
 export class OpenapiRouter<R> {
@@ -98,16 +113,16 @@ export class OpenapiRouter<R> {
       },
     );
   };
-  private registry: OpenAPIRegistry;
+  private registry: OpenapiRegistry;
   private routesByUppercasedMethodMap: Map<string, {
-    byPathTemplateMap: Map<string, OpenapiRoute<OpenapiEndpoint>>;
-    byPathMap: Map<string, OpenapiRoute<OpenapiEndpoint>>;
-    patternList: OpenapiRoute<OpenapiEndpoint>[];
+    byPathTemplateMap: Map<string, OpenapiRoute<unknown>>;
+    byPathMap: Map<string, OpenapiRoute<unknown>>;
+    patternList: OpenapiRoute<unknown>[];
   }>;
 
   constructor({ endpoints, registry, defaultValidationErrorHandler, openapiSpecPath = "/docs/openapi" }: {
     endpoints: OpenapiEndpoints<R>;
-    registry: OpenAPIRegistry;
+    registry: OpenapiRegistry;
     openapiSpecPath?: string;
     defaultValidationErrorHandler?: (source: OpenapiRequestValidationErrorSource, error: ZodError<unknown>) => Response;
   }) {
@@ -133,7 +148,7 @@ export class OpenapiRouter<R> {
       urlPattern: new URLPattern({ pathname: openapiSpecPath.replaceAll(/{([^}]+)}/g, ":$1") }),
       validationErrorHandler: defaultValidationErrorHandler,
       handler() {
-        const generator = new OpenAPIGenerator(registry.definitions);
+        const generator = new OpenapiGenerator(registry.definitions);
         const document = generator.generateDocument({
           openapi: "3.0.0",
           info: {
@@ -143,7 +158,7 @@ export class OpenapiRouter<R> {
         });
 
         return Promise.resolve(
-          new ServerResponse(200, "application/json", document),
+          new ServerResponse(200, "application/json", document, null),
         );
       },
     });
@@ -160,7 +175,7 @@ export class OpenapiRouter<R> {
     path: P,
     handler: OpenapiRoute<E[P]>["handler"],
     validationErrorHandler?: OpenapiRoute<E[P]>["validationErrorHandler"],
-  ) {
+  ): OpenapiRouter<EraseRoute<R, "get", P>> {
     return this.method("get", path, handler, validationErrorHandler);
   }
 
@@ -217,7 +232,7 @@ export class OpenapiRouter<R> {
     path: P,
     handler: OpenapiRoute<C>["handler"],
     validationErrorHandler?: OpenapiRoute<C>["validationErrorHandler"],
-  ) {
+  ): OpenapiRouter<EraseRoute<R, M, P>> {
     const upperCasedMethod = method.toUpperCase();
 
     if (
@@ -236,7 +251,7 @@ export class OpenapiRouter<R> {
     const config = endpoint.config;
     const patternPath = path.replaceAll(/{([^}]+)}/g, ":$1");
 
-    const route: OpenapiRoute<C> = {
+    const route: OpenapiRoute<unknown> = {
       path,
       urlPattern: path !== patternPath ? new URLPattern({ pathname: patternPath }) : undefined,
       querySchema: extractRequestQuerySchema(config),
@@ -244,7 +259,8 @@ export class OpenapiRouter<R> {
       headersSchema: extractRequestHeadersSchema(config),
       bodySchema: extractRequestBodySchema(config),
       validationErrorHandler,
-      handler,
+      // deno-lint-ignore no-explicit-any
+      handler: handler as any,
     };
 
     return this.addRoute(config, route);
@@ -300,7 +316,7 @@ export class OpenapiRouter<R> {
       return this.notFound();
     }
 
-    let matchedRoute: OpenapiRoute<OpenapiEndpoint> | undefined;
+    let matchedRoute: OpenapiRoute<unknown> | undefined;
     let params: Record<string, string | undefined> | undefined;
 
     matchedRoute = routes.byPathMap.get(pathname);
@@ -374,14 +390,14 @@ export class OpenapiRouter<R> {
       connInfo,
     };
 
-    const maybePromise = matchedRoute.handler(ctx, createResponder());
+    const maybePromise = matchedRoute.handler(ctx, genericResponderFactory as ServerResponderFactory<unknown>);
     const typedResponse = (maybePromise instanceof Promise) ? await maybePromise : maybePromise;
     return typedResponse.toResponse();
   }
 }
 
-export class ServerResponse<S extends number, M extends string, D> implements TypedResponse<S, M, D> {
-  constructor(readonly status: S, readonly mediaType: M, readonly data: D, private headersInit?: HeadersInit) {
+export class ServerResponse<S extends number, M extends string, D, H> implements TypedResponse<S, M, D, H> {
+  constructor(readonly status: S, readonly mediaType: M, readonly data: D, readonly headers: H) {
   }
 
   toResponse(): Response {
@@ -394,7 +410,9 @@ export class ServerResponse<S extends number, M extends string, D> implements Ty
       body = this.data as any;
     }
 
-    const headers = new Headers(this.headersInit);
+    const headersInit = this.headers ?? undefined as HeadersInit | undefined;
+    const headers = new Headers(headersInit);
+
     if (!headers.get("content-type")) {
       headers.set("content-type", this.mediaType);
     }
@@ -404,30 +422,6 @@ export class ServerResponse<S extends number, M extends string, D> implements Ty
       headers,
     });
   }
-}
-
-type ServerResponder<R> = <
-  S extends Extract<keyof R, number>,
-  M extends Extract<keyof R[S], string>,
-  B extends R[S][M],
->(
-  status: S,
-  mediaType: M,
-  body: B,
-  headers?: HeadersInit,
-) => ServerResponse<S, M, B>;
-
-function createResponder<R>(): ServerResponder<R> {
-  return <
-    S extends Extract<keyof R, number>,
-    M extends Extract<keyof R[S], string>,
-    B extends R[S][M],
-  >(
-    status: S,
-    mediaType: M,
-    body: B,
-    headers?: HeadersInit,
-  ) => new ServerResponse(status, mediaType, body, headers);
 }
 
 export function respondJson<S extends number, D>(status: S, data: D, headers?: HeadersInit) {

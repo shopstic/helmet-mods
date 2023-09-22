@@ -1,5 +1,5 @@
-import { OpenAPIRegistry, z, ZodBoolean, ZodDate, ZodNumber } from "../../src/deps/zod.ts";
-import { OpenapiEndpoints } from "../../src/libs/openapi_shared.ts";
+import { OpenapiRegistry, z, ZodBoolean, ZodDate, ZodNumber } from "../../src/deps/zod.ts";
+import { OpenapiEndpoints } from "../../src/libs/openapi/openapi_endpoint.ts";
 
 export function zsNumber(updater: (s: ZodNumber) => ZodNumber = (s) => s) {
   return z.preprocess((arg) => {
@@ -37,7 +37,11 @@ export function zsDate(updater: (s: ZodDate) => ZodDate = (s) => s) {
     }, updater(z.date()));
 }
 
-export const registry = new OpenAPIRegistry();
+export const registry = new OpenapiRegistry();
+export const DateTime = registry.register(
+  "DateTime",
+  zsDate().openapi({ type: "string", format: "date-time" }),
+);
 export const UserSchema = registry.register(
   "User",
   z.object({
@@ -99,9 +103,28 @@ export const endpoints = new OpenapiEndpoints()
     responses: {
       200: {
         description: "OK",
+        headers: {
+          "X-RateLimit-Limit": {
+            schema: zsNumber(),
+            description: "Request limit per hour.",
+          },
+          "X-RateLimit-Remaining": {
+            schema: zsNumber(),
+            description: "The number of requests left for the time window.",
+          },
+          "X-RateLimit-Reset": {
+            schema: DateTime,
+            description: "The UTC date/time at which the current rate limit window resets.",
+          },
+        },
         content: {
           "text/plain": {
             schema: z.literal("OK"),
+          },
+          "application/json": {
+            schema: z.object({
+              isOk: z.boolean(),
+            }),
           },
         },
       },
@@ -114,12 +137,10 @@ export const endpoints = new OpenapiEndpoints()
     request: {
       params: z.object({ id: zsNumber() }),
       query: z.object({ dryRun: zsBoolean() }),
-      headers: [
-        z.object({
-          "x-some-uuid": z.string().uuid().min(1),
-          "x-some-date": zsDate().openapi({ type: "string", format: "date-time" }),
-        }),
-      ],
+      headers: z.object({
+        "x-some-uuid": z.string().uuid().min(1),
+        "x-some-date": DateTime,
+      }),
       body: UserSchema,
     },
     response: {
@@ -134,12 +155,10 @@ export const endpoints = new OpenapiEndpoints()
     request: {
       params: z.object({ id: zsNumber() }),
       query: z.object({ dryRun: zsBoolean() }),
-      headers: [
-        z.object({
-          "x-some-uuid": z.string().uuid().min(1),
-          "x-some-date": zsDate().openapi({ type: "string", format: "date-time" }),
-        }),
-      ],
+      headers: z.object({
+        "x-some-uuid": z.string().uuid().min(1),
+        "x-some-date": DateTime,
+      }),
       body: {
         content: {
           "application/json": {
