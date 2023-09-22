@@ -17,7 +17,7 @@ export type ExtractRequestQueryType<C extends OpenapiRouteConfig> = C extends {
 
 export type ExtractRequestHeadersType<C extends OpenapiRouteConfig> = C extends {
   request: {
-    headers: Array<infer H>;
+    headers: infer H;
   };
 } ? H extends ZodType<unknown> ? z.infer<H> : undefined
   : undefined;

@@ -8,6 +8,7 @@ import type {
   ExtractRequestQueryType,
 } from "./types/request.ts";
 import { ResponseBodyByStatusAndMediaMap } from "./types/response_body.ts";
+import { ResponseHeaderMapByStatusMap } from "./types/response_headers.ts";
 import { OpenapiRouteConfig } from "./types/shared.ts";
 import { TypedResponseUnion } from "./types/typed_response.ts";
 
@@ -97,6 +98,20 @@ export interface OpenapiEndpoint {
   };
 }
 
+export type OpenapiEndpointTypeBag<QP, QQ, QH, QB, RT, RB, RH> = {
+  request: {
+    params: QP;
+    query: QQ;
+    headers: QH;
+    body: QB;
+  };
+  response: {
+    type: RT;
+    bodyByStatusAndMediaMap: RB;
+    headerMapByStatusMap: RH;
+  };
+};
+
 export class OpenapiEndpoints<R> {
   private endpointByPathByMethodMap: Map<string, Map<string, OpenapiEndpoint>>;
 
@@ -123,18 +138,15 @@ export class OpenapiEndpoints<R> {
     & R
     & {
       [m in C["method"]]: {
-        [p in C["path"]]: {
-          request: {
-            params: ExtractRequestParamsType<C>;
-            query: ExtractRequestQueryType<C>;
-            headers: ExtractRequestHeadersType<C>;
-            body: ExtractRequestBodyType<C>;
-          };
-          response: {
-            type: TypedResponseUnion<C>;
-            bodyByStatusAndMediaMap: ResponseBodyByStatusAndMediaMap<C>;
-          };
-        };
+        [p in C["path"]]: OpenapiEndpointTypeBag<
+          ExtractRequestParamsType<C>,
+          ExtractRequestQueryType<C>,
+          ExtractRequestHeadersType<C>,
+          ExtractRequestBodyType<C>,
+          TypedResponseUnion<C>,
+          ResponseBodyByStatusAndMediaMap<C>,
+          ResponseHeaderMapByStatusMap<C>
+        >;
       };
     }
   > {

@@ -1,25 +1,37 @@
 import { z } from "../../src/deps/zod.ts";
-import { OpenapiRouter, ServerResponse } from "../../src/libs/openapi/openapi_server.ts";
+import { OpenapiRouter } from "../../src/libs/openapi/openapi_server.ts";
 import { endpoints, registry, UserSchema } from "./test_endpoints.ts";
 
 const router = new OpenapiRouter({ registry, endpoints })
   .get("/healthz", ({ connInfo }, respond) => {
     console.log("connInfo", connInfo);
 
-    return respond(200, "text/plain", null);
+    return respond(200, "text/plain")();
   })
   .get("/alivez", (_, respond) => {
-    // return new ServerResponse(200, "application/json", {
-    //   isOk: true
-    // });
-    return new ServerResponse(200, "text/plain", "OK" as const);
+    /* return new ServerResponse(200, "application/json", {
+      isOk: true,
+    }, {
+      "X-RateLimit-Limit": 5000,
+      "X-RateLimit-Remaining": 4999,
+      "X-RateLimit-Reset": new Date(Date.now() + 3600000),
+      "some-extra-stuff": "here",
+    }); */
+    return respond(200, "text/plain")("OK", {
+      "X-RateLimit-Limit": 5000,
+      "X-RateLimit-Remaining": 4999,
+      "X-RateLimit-Reset": new Date(Date.now() + 3600000),
+      "some-extra-stuff": "here",
+    });
   })
   .get("/download/{fileName}.pdf", async ({ params }, respond) => {
     console.log("fileName", params.fileName);
 
     const file = await fetch("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
 
-    return respond(200, "application/pdf", file.body);
+    return respond(200, "application/pdf")(file.body, {
+      "some-extra-stuff": "here",
+    });
   })
   .get("/users/{id}", ({ params, connInfo }, respond) => {
     console.log("connInfo", connInfo);
@@ -36,9 +48,7 @@ const router = new OpenapiRouter({ registry, endpoints })
       },
     };
 
-    return respond(200, "application/json", responseBody, {
-      "some-extra-stuff": "here",
-    });
+    return respond(200, "application/json")(responseBody);
   })
   .put("/users/{id}", ({ params, query, headers, body, connInfo }, respond) => {
     console.log("remoteAddr", connInfo.remoteAddr);
@@ -48,7 +58,7 @@ const router = new OpenapiRouter({ registry, endpoints })
     console.log("header: X-Some-Date", headers["x-some-date"].toLocaleString());
     console.log("body", body.id, body.age, body.name, body.gender);
 
-    return respond(200, "application/json", body, {
+    return respond(200, "application/json")(body, {
       "some-extra-stuff": "here",
     });
   })
@@ -60,13 +70,13 @@ const router = new OpenapiRouter({ registry, endpoints })
     console.log("body", body.id, body.age, body.name, body.gender);
 
     if (params.id > 500) {
-      return respond(404, "application/json", {
+      return respond(404, "application/json")({
         error: true,
         message: `The user with id ${params.id} is not found`,
-      });
+      }, {});
     }
 
-    return respond(200, "application/json", body, {
+    return respond(200, "application/json")(body, {
       "some-extra-stuff": "here",
     });
   });
@@ -77,8 +87,10 @@ await Deno
     onListen({ hostname, port }) {
       console.log(`OpenAPI server is up at http://${hostname}:${port}`);
     },
-  }, (request, connInfo) => {
-    console.log(request.method, request.url, request.headers);
-    return router.handle(request, connInfo);
+  }, async (request, connInfo) => {
+    console.log("<<<", request.method, request.url, request.headers);
+    const response = await router.handle(request, connInfo);
+    console.log(">>>", response);
+    return response;
   })
   .finished;

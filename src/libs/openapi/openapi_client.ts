@@ -1,5 +1,5 @@
-import { RouteConfig, ZodError, ZodType } from "../../deps/zod.ts";
-import { OpenapiEndpoint, OpenapiEndpoints } from "./openapi_endpoint.ts";
+import { RouteConfig, ZodError } from "../../deps/zod.ts";
+import { OpenapiEndpoint, OpenapiEndpoints, OpenapiEndpointTypeBag } from "./openapi_endpoint.ts";
 import { ExcludeUndefinedValue, ExtractEndpointPaths, StripEmptyObjectType, TypedResponse } from "./types/shared.ts";
 
 interface OpenapiClientRequestContext<P, Q, H, B> {
@@ -9,11 +9,17 @@ interface OpenapiClientRequestContext<P, Q, H, B> {
   body: B;
 }
 
-export class ClientResponse<S extends number = number, M extends string = string, D = unknown>
-  implements TypedResponse<S, M, D> {
+export class ClientResponse<S extends number = number, M extends string = string, D = unknown, H = unknown>
+  implements TypedResponse<S, M, D, H> {
   readonly ok: boolean;
 
-  constructor(readonly status: S, readonly mediaType: M, readonly data: D, readonly response: Response) {
+  constructor(
+    readonly status: S,
+    readonly mediaType: M,
+    readonly data: D,
+    readonly response: Response,
+    readonly headers: H,
+  ) {
     this.ok = response.ok;
   }
 }
@@ -23,6 +29,21 @@ export class OpenapiClientUnexpectedResponseError extends Error {
   constructor(readonly body: unknown, readonly response: Response) {
     super(`Received an unexpected response with status=${response.status} ${response.statusText}`);
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class OpenapiClientResponseHeaderValidationError extends Error {
+  readonly name = OpenapiClientResponseHeaderValidationError.name;
+  constructor(readonly headerName: string, readonly headerValue: string | null, readonly error: ZodError<unknown>) {
+    super(`Header with name '${headerName}' and value '${headerValue}' failed schema validation`);
+    Object.setPrototypeOf(this, new.target.prototype);
+    Object.defineProperty(this, "message", {
+      get() {
+        return JSON.stringify(error.errors);
+      },
+      enumerable: false,
+      configurable: false,
+    });
   }
 }
 
@@ -41,25 +62,19 @@ export class OpenapiClientResponseValidationError extends Error {
   }
 }
 
-type ExtractClientRequestArg<T> = T extends {
-  request: {
-    params: infer P;
-    query: infer Q;
-    headers: infer H;
-    body: infer B;
-  };
-} ? StripEmptyObjectType<ExcludeUndefinedValue<OpenapiClientRequestContext<P, Q, H, B>>>
+type ExtractClientRequestArg<Bag> = Bag extends
+  OpenapiEndpointTypeBag<infer P, infer Q, infer H, infer B, unknown, unknown, unknown>
+  ? StripEmptyObjectType<ExcludeUndefinedValue<OpenapiClientRequestContext<P, Q, H, B>>>
   : undefined;
 
-type TypedResponseToClientResponse<R> = R extends TypedResponse<infer S, infer M, infer D> ? ClientResponse<S, M, D>
-  : never;
+type ExtractClientResponseArg<Bag> = Bag extends
+  OpenapiEndpointTypeBag<unknown, unknown, unknown, unknown, infer R, unknown, unknown>
+  ? TypedResponseToClientResponse<R>
+  : ClientResponse<number, string, unknown, HeadersInit>;
 
-type ExtractClientResponseArg<T> = T extends {
-  response: {
-    body: infer R;
-  };
-} ? TypedResponseToClientResponse<R>
-  : ClientResponse;
+type TypedResponseToClientResponse<R> = R extends TypedResponse<infer S, infer M, infer D, infer H>
+  ? ClientResponse<S, M, D, H>
+  : never;
 
 function renderPath(template: string, params?: Record<string, string>) {
   if (params) {
@@ -109,11 +124,11 @@ async function openapiFetch({ baseUrl, pathTemplate, method, request, endpoint }
     body: request?.body !== undefined ? JSON.stringify(request?.body) : undefined,
   });
 
-  const { status: responseStatus } = response;
+  const { status: responseStatus, headers: responseHeaders } = response;
   const responseContentType = response.headers.get("content-type");
 
   if (responseBodyMap === undefined) {
-    return new ClientResponse(responseStatus, "", response.body, response);
+    return new ClientResponse(responseStatus, "", response.body, response, responseHeaders);
   }
 
   let responseBody;
@@ -130,23 +145,46 @@ async function openapiFetch({ baseUrl, pathTemplate, method, request, endpoint }
     throw new OpenapiClientUnexpectedResponseError(responseBody, response);
   }
 
-  const responseSchema = responseBodyMap.get(responseStatus)?.get(responseContentType);
+  const schemas = responseBodyMap.get(responseStatus)?.get(responseContentType);
 
-  if (responseSchema === undefined) {
+  if (schemas === undefined) {
     throw new OpenapiClientUnexpectedResponseError(responseBody, response);
   }
 
-  if (responseSchema instanceof ZodType) {
-    const validation = responseSchema.safeParse(responseBody);
+  const { body: bodySchema, headers: headerSchemaMap } = schemas;
+
+  const validatedResponseHeaders = headerSchemaMap
+    ? Object.fromEntries(
+      Object.entries(headerSchemaMap).map(([headerName, headerSchema]) => {
+        const headerValue = responseHeaders.get(headerName);
+        const validation = headerSchema.safeParse(headerValue);
+
+        if (validation.success) {
+          return [headerName, validation.data];
+        } else {
+          throw new OpenapiClientResponseHeaderValidationError(headerName, headerValue, validation.error);
+        }
+      }),
+    )
+    : responseHeaders;
+
+  if (bodySchema) {
+    const validation = bodySchema.safeParse(responseBody);
 
     if (validation.success) {
-      return new ClientResponse(responseStatus, responseContentType, validation.data, response);
+      return new ClientResponse(
+        responseStatus,
+        responseContentType,
+        validation.data,
+        response,
+        validatedResponseHeaders,
+      );
     } else {
       throw new OpenapiClientResponseValidationError(response, responseBody, validation.error);
     }
   }
 
-  return new ClientResponse(responseStatus, responseContentType, responseBody, response);
+  return new ClientResponse(responseStatus, responseContentType, responseBody, response, responseHeaders);
 }
 
 export class OpenapiClient<R> {
