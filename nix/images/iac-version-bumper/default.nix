@@ -31,7 +31,8 @@ let
     exec "${iac-version-bumper}/bin/${iac-version-bumper.name}" auto-bump-versions "$@"
   '';
   user = "app";
-  shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
+  userUid = 1001;
+  shadow = nonRootShadowSetup { inherit user; uid = userUid; shellBin = "${bash}/bin/bash"; };
   dirs = runCommand "sdir" { } ''
     mkdir -p $out/home/${user}
     mkdir -p $out/tmp
@@ -57,12 +58,16 @@ let
       {
         path = dirs;
         regex = "/home/${user}$";
-        mode = "0777";
+        mode = "0755";
+        gid = userUid;
+        uid = userUid;
       }
       {
         path = dirs;
         regex = "/tmp$";
-        mode = "0777";
+        mode = "0755";
+        gid = userUid;
+        uid = userUid;
       }
     ];
     config = {
@@ -75,7 +80,5 @@ let
     };
   };
 in
-image // {
-  dir = runCommand "${name}-dir" { } "${image.copyTo}/bin/copy-to dir:$out";
-}
+image
 

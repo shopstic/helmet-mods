@@ -13,7 +13,8 @@
 let
   name = "registry-authenticator";
   user = "app";
-  shadow = nonRootShadowSetup { inherit user; uid = 1001; shellBin = "${bash}/bin/bash"; };
+  userUid = 1001;
+  shadow = nonRootShadowSetup { inherit user; uid = userUid; shellBin = "${bash}/bin/bash"; };
   home-dir = runCommand "home-dir" { } ''mkdir -p $out/home/${user}/.aws/cli/cache'';
   nix-bin = buildEnv {
     name = "nix-bin";
@@ -34,7 +35,9 @@ let
       {
         path = home-dir;
         regex = "/home/${user}";
-        mode = "0777";
+        mode = "0755";
+        gid = userUid;
+        uid = userUid;
       }
     ];
     config = {
@@ -46,7 +49,4 @@ let
     };
   };
 in
-image // {
-  dir = runCommand "${name}-dir" { } "${image.copyTo}/bin/copy-to dir:$out";
-}
-
+image
