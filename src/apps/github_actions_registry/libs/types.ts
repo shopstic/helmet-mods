@@ -2,7 +2,7 @@ import { Static, Type } from "../../../deps/typebox.ts";
 
 export const GithubActionsRegistryParamsSchema = Type.Object({
   org: Type.String({ minLength: 1 }),
-  appId: Type.String({ minLength: 1 }),
+  appId: Type.Integer(),
   installationId: Type.Number(),
   privateKeyPath: Type.String({ minLength: 1 }),
   clientRefreshIntervalSeconds: Type.Number({ minimum: 1 }),

@@ -86,7 +86,7 @@ export async function getRepoPendingJobs(
 
 export async function* generateAccessClient(
   { client, appId, installationId, privateKeyPath, refreshIntervalSeconds, signal }: {
-    appId: string;
+    appId: number;
     installationId: number;
     privateKeyPath: string;
     refreshIntervalSeconds: number;
@@ -117,7 +117,7 @@ export async function* generateAccessClient(
       // JWT expiration time (10 minute maximum)
       exp: nowSeconds + (10 * 60),
       // GitHub App's identifier
-      iss: appId,
+      iss: String(appId),
     }, key);
 
     const ret = await client
