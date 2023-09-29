@@ -1,1 +1,1 @@
-export { default as toSnakeCase } from "https://deno.land/x/case@2.1.1/snakeCase.ts";
+export { default as toSnakeCase } from "https://deno.land/x/case@2.2.0/snakeCase.ts";

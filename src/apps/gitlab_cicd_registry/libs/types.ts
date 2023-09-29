@@ -1,4 +1,4 @@
-import { Static, Type } from "../../../deps/typebox.ts";
+import { FlexObject, Static, Type } from "../../../deps/typebox.ts";
 
 export const GitlabCicdRegistryParamsSchema = Type.Object({
   groupId: Type.Number(),
@@ -15,13 +15,13 @@ export const GitlabCicdRegistryParamsSchema = Type.Object({
 
 export type GitlabCicdRegistryParams = Static<typeof GitlabCicdRegistryParamsSchema>;
 
-export const GitlabWebhookBuildSchema = Type.PartialObject({
+export const GitlabWebhookBuildSchema = FlexObject({
   object_kind: Type.Literal("build"),
   project_id: Type.Number(),
   project_name: Type.String({ minLength: 1 }),
 });
 
-export const GitlabProjectSchema = Type.PartialObject({
+export const GitlabProjectSchema = FlexObject({
   id: Type.Number(),
   name: Type.String({ minLength: 1 }),
   last_activity_at: Type.String({ format: "date-time" }),
@@ -31,7 +31,7 @@ export type GitlabProject = Static<typeof GitlabProjectSchema>;
 
 export const GitlabProjectListSchema = Type.Array(GitlabProjectSchema);
 
-export const GitlabJobSchema = Type.PartialObject({
+export const GitlabJobSchema = FlexObject({
   name: Type.String({ minLength: 1 }),
   stage: Type.String({ minLength: 1 }),
   status: Type.Union([

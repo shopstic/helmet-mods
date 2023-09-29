@@ -5,9 +5,8 @@ import {
   OpenapiOperationApi,
   OpenapiOperationApiArgType,
   OpenapiOperationApiReturnType,
-  readerFromStreamReader,
-  readLines,
 } from "../deps/k8s_openapi.ts";
+import { TextLineStream } from "../deps/std_stream.ts";
 
 export function k8sControllerStream<
   // deno-lint-ignore no-explicit-any
@@ -36,18 +35,16 @@ export function k8sControllerStream<
 
       while (!init.signal || !init.signal.aborted) {
         for await (
-          const line of readLines(readerFromStreamReader(
-            (await api.stream(
-              deepMerge(structuredClone(args), {
-                query: {
-                  allowWatchBookmarks: true,
-                  watch: true,
-                  ...(lastResourceVersion ? { resourceVersion: lastResourceVersion } : {}),
-                },
-              }),
-              init,
-            )).data!.getReader(),
-          ))
+          const line of (await api.stream(
+            deepMerge(structuredClone(args), {
+              query: {
+                allowWatchBookmarks: true,
+                watch: true,
+                ...(lastResourceVersion ? { resourceVersion: lastResourceVersion } : {}),
+              },
+            }),
+            init,
+          )).data!.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream())
         ) {
           const event: K8sApiWatchEvent<Item> = JSON.parse(line);
           yield event;

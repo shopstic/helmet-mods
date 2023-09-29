@@ -1,5 +1,5 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { OpenapiMergerConfigSchema, OpenapiMergerParamsSchema } from "./libs/types.ts";
+import { OpenapiMergerConfigCheck, OpenapiMergerParamsSchema } from "./libs/types.ts";
 import { Logger } from "../../libs/logger.ts";
 import { serveDir } from "../../deps/std_http.ts";
 import { stripMargin } from "../../libs/utils.ts";
@@ -52,14 +52,15 @@ await new CliProgram()
           }
         })();
 
-        const configValidation = OpenapiMergerConfigSchema.safeParse(configJson);
-
-        if (!configValidation.success) {
-          logger.error({ msg: "Failed validating config", errors: configValidation.error.errors });
+        if (!OpenapiMergerConfigCheck.Check(configJson)) {
+          logger.error({
+            msg: "Failed validating config",
+            errors: Array.from(OpenapiMergerConfigCheck.Errors(configJson)),
+          });
           return ExitCode.One;
         }
 
-        const config = configValidation.data;
+        const config = OpenapiMergerConfigCheck.Decode(configJson);
 
         async function mergeSpecs(abortSignal: AbortSignal) {
           const docs = await Promise.all(config.sources.map(async ({ url }) => {

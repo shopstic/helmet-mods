@@ -1,67 +1,67 @@
-import { z, ZodTypeDef } from "../deps/zod.ts";
+import { Static, TSchema, Type } from "../deps/typebox.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");
 }
 
-export const promQueryErrorResponseSchema = z.object({
-  status: z.literal("error"),
-  errorType: z.string(),
-  error: z.string(),
+export const promQueryErrorResponseSchema = Type.Object({
+  status: Type.Literal("error"),
+  errorType: Type.String(),
+  error: Type.String(),
 });
 
-export const promQuerySuccessResponseSchema = z.object({
-  status: z.literal("success"),
-  data: z.object({
-    resultType: z.literal("vector"),
-    result: z.any(),
+export const promQuerySuccessResponseSchema = Type.Object({
+  status: Type.Literal("success"),
+  data: Type.Object({
+    resultType: Type.Literal("vector"),
+    result: Type.Any(),
   }),
 });
 
-export const promLabelValuesSchema = z.discriminatedUnion("status", [
-  z.object({
-    status: z.literal("success"),
-    data: z.array(z.string()),
+export const promLabelValuesSchema = Type.Union([
+  Type.Object({
+    status: Type.Literal("success"),
+    data: Type.Array(Type.String()),
   }),
   promQueryErrorResponseSchema,
 ]);
 
-export const promQueryResponseSchema = z.discriminatedUnion("status", [
+export const promQueryResponseSchema = Type.Union([
   promQueryErrorResponseSchema,
   promQuerySuccessResponseSchema,
 ]);
 
-export const promVectorSchema = z.object({
-  metric: z.record(z.string()),
-  value: z.tuple([z.number(), z.string()]),
+export const promVectorSchema = Type.Object({
+  metric: Type.Record(Type.String(), Type.String()),
+  value: Type.Tuple([Type.Number(), Type.String()]),
 });
 
-export const promMatrixSchema = z.object({
-  metric: z.record(z.string()),
-  values: z.array(z.tuple([z.number(), z.string()])),
+export const promMatrixSchema = Type.Object({
+  metric: Type.Record(Type.String(), Type.String()),
+  values: Type.Array(Type.Tuple([Type.Number(), Type.String()])),
 });
 
-export type PromVector = z.infer<typeof promVectorSchema>;
-export type PromMatrix = z.infer<typeof promMatrixSchema>;
+export type PromVector = Static<typeof promVectorSchema>;
+export type PromMatrix = Static<typeof promMatrixSchema>;
 
-export const promQueryVectorResponseSchema = z.discriminatedUnion("status", [
+export const promQueryVectorResponseSchema = Type.Union([
   promQueryErrorResponseSchema,
-  z.object({
-    status: z.literal("success"),
-    data: z.object({
-      resultType: z.literal("vector"),
-      result: z.array(promVectorSchema),
+  Type.Object({
+    status: Type.Literal("success"),
+    data: Type.Object({
+      resultType: Type.Literal("vector"),
+      result: Type.Array(promVectorSchema),
     }),
   }),
 ]);
 
-export const promQueryMatrixResponseSchema = z.discriminatedUnion("status", [
+export const promQueryMatrixResponseSchema = Type.Union([
   promQueryErrorResponseSchema,
-  z.object({
-    status: z.literal("success"),
-    data: z.object({
-      resultType: z.literal("matrix"),
-      result: z.array(promMatrixSchema),
+  Type.Object({
+    status: Type.Literal("success"),
+    data: Type.Object({
+      resultType: Type.Literal("matrix"),
+      result: Type.Array(promMatrixSchema),
     }),
   }),
 ]);
@@ -94,11 +94,11 @@ export class PromApiError extends Error {
   }
 }
 
-async function promFetch<O, D extends ZodTypeDef, I>(
-  schema: z.ZodType<O, D, I>,
+async function promFetch<T extends TSchema>(
+  schema: T,
   url: string,
   init: RequestInit = {},
-): Promise<O> {
+): Promise<Static<T>> {
   const response = await fetch(
     url,
     {

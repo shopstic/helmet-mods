@@ -1,7 +1,7 @@
 import { captureExec, inheritExec, StdInputBehavior } from "../../../deps/exec_utils.ts";
 import { validate } from "../../../deps/validation_utils.ts";
 import { memoizePromise } from "../../../deps/async_utils.ts";
-import { Static, TSchema, Type } from "../../../deps/typebox.ts";
+import { FlexObject, Static, TSchema, Type } from "../../../deps/typebox.ts";
 import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
 import { commandWithTimeout } from "../../../libs/utils.ts";
@@ -146,10 +146,10 @@ export async function readClusterConfig(
   return configValidation.value;
 }
 
-export const ServiceSpecSchema = Type.PartialObject({
+export const ServiceSpecSchema = FlexObject({
   clusterIP: Type.String({ format: "ipv4" }),
   ports: Type.Array(
-    Type.PartialObject({
+    FlexObject({
       port: Type.Number(),
     }),
     { minItems: 1 },

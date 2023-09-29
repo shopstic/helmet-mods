@@ -1,35 +1,39 @@
-import { Type } from "../../../deps/typebox.ts";
+import { FlexObject, Type } from "../../../deps/typebox.ts";
 import type { Static } from "../../../deps/typebox.ts";
 
 export function NonEmptyString() {
   return Type.String({ minLength: 1 });
 }
 
-export const FdbDatabaseConfigSchema = Type.PartialObject({
-  storageEngine: Type.Union([
-    Type.Literal("memory-1"),
-    Type.Literal("memory-2"),
-    Type.Literal("memory-radixtree-beta"),
-    Type.Literal("ssd-1"),
-    Type.Literal("ssd-2"),
-    Type.Literal("ssd-redwood-1-experimental"),
-    Type.Literal("ssd-rocksdb-v1"),
-  ]),
-  redundancyMode: Type.Union([
-    Type.Literal("single"),
-    Type.Literal("double"),
-    Type.Literal("triple"),
-    Type.Literal("three_datacenter"),
-    Type.Literal("three_datacenter_fallback"),
-    Type.Literal("three_data_hall"),
-    Type.Literal("three_data_hall_fallback"),
-  ]),
+export const FdbRedundancyModeSchema = Type.Union([
+  Type.Literal("single"),
+  Type.Literal("double"),
+  Type.Literal("triple"),
+  Type.Literal("three_datacenter"),
+  Type.Literal("three_datacenter_fallback"),
+  Type.Literal("three_data_hall"),
+  Type.Literal("three_data_hall_fallback"),
+]);
+
+export const FdbStorageEngineSchema = Type.Union([
+  Type.Literal("memory-1"),
+  Type.Literal("memory-2"),
+  Type.Literal("memory-radixtree-beta"),
+  Type.Literal("ssd-1"),
+  Type.Literal("ssd-2"),
+  Type.Literal("ssd-redwood-1-experimental"),
+  Type.Literal("ssd-rocksdb-v1"),
+]);
+
+export const FdbDatabaseConfigSchema = FlexObject({
+  storageEngine: FdbStorageEngineSchema,
+  redundancyMode: FdbRedundancyModeSchema,
   logCount: Type.Number({ minimum: 1 }),
   grvProxyCount: Type.Number({ minimum: 1 }),
   commitProxyCount: Type.Number({ minimum: 1 }),
   resolverCount: Type.Number({ minimum: 1 }),
   coordinatorServiceNames: Type.Array(Type.String()),
-  excludedServiceEndpoints: Type.Array(Type.PartialObject({
+  excludedServiceEndpoints: Type.Array(FlexObject({
     name: Type.String(),
     port: Type.Number({ minimum: 1, maximum: 65535 }),
   })),
@@ -49,7 +53,7 @@ export const FdbDatabaseConfigSchema = Type.PartialObject({
 
 export type FdbDatabaseConfig = Static<typeof FdbDatabaseConfigSchema>;
 
-export const FdbStatusProcessSchema = Type.PartialObject({
+export const FdbStatusProcessSchema = FlexObject({
   address: Type.String(),
   excluded: Type.Optional(Type.Boolean()),
   machine_id: Type.Optional(Type.String()),
@@ -66,9 +70,9 @@ export const FdbStatusProcessSchema = Type.PartialObject({
   ]),
 });
 
-export const FdbStatusSchema = Type.PartialObject({
-  cluster: Type.PartialObject({
-    configuration: Type.Optional(Type.PartialObject({
+export const FdbStatusSchema = FlexObject({
+  cluster: FlexObject({
+    configuration: Type.Optional(FlexObject({
       resolvers: Type.Number(),
       proxies: Type.Optional(Type.Number()),
       grv_proxies: Type.Optional(Type.Number()),
@@ -78,10 +82,10 @@ export const FdbStatusSchema = Type.PartialObject({
       perpetual_storage_wiggle_locality: Type.String(),
       storage_migration_type: Type.String(),
       tenant_mode: Type.String(),
-      redundancy_mode: FdbDatabaseConfigSchema.properties.redundancyMode,
-      storage_engine: FdbDatabaseConfigSchema.properties.storageEngine,
+      redundancy_mode: FdbRedundancyModeSchema,
+      storage_engine: FdbStorageEngineSchema,
     })),
-    recovery_state: Type.Optional(Type.PartialObject({
+    recovery_state: Type.Optional(FlexObject({
       name: Type.String(),
       description: Type.String(),
     })),
@@ -89,13 +93,13 @@ export const FdbStatusSchema = Type.PartialObject({
       Type.Record(Type.String(), FdbStatusProcessSchema),
     ),
   }),
-  client: Type.PartialObject({
-    database_status: Type.PartialObject({
+  client: FlexObject({
+    database_status: FlexObject({
       available: Type.Boolean(),
     }),
-    coordinators: Type.PartialObject({
+    coordinators: FlexObject({
       quorum_reachable: Type.Boolean(),
-      coordinators: Type.Array(Type.PartialObject({
+      coordinators: Type.Array(FlexObject({
         address: Type.String(),
         reachable: Type.Boolean(),
       })),
