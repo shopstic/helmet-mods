@@ -4,7 +4,7 @@ import { Static, Type } from "../../../deps/typebox.ts";
 export const K8sJobAutoscalerParamsSchema = Type.Object({
   minReconcileIntervalMs: Type.Number({ minimum: 1 }),
   namespace: Type.Optional(Type.String({ minLength: 1 })),
-  apiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),
+  apiServerBaseUrl: Type.String({ minLength: 1, format: "url" }),
 });
 
 export type K8sJobAutoscalerParams = Static<typeof K8sJobAutoscalerParamsSchema>;

@@ -25,8 +25,8 @@ export type Paths = K8sApiPathsWithCrd<K8sApiPaths, GrafanaDashboard>;
 
 export const GrafanaSyncerParamsSchema = Type.Object({
   namespace: Type.Optional(Type.String({ minLength: 1 })),
-  k8sApiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),
-  grafanaApiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),
+  k8sApiServerBaseUrl: Type.String({ minLength: 1, format: "url" }),
+  grafanaApiServerBaseUrl: Type.String({ minLength: 1, format: "url" }),
   grafanaBearerToken: Type.String({ minLength: 1 }),
   labelSelector: Type.Optional(Type.String({ minLength: 1 })),
   fieldSelector: Type.Optional(Type.String({ minLength: 1 })),
