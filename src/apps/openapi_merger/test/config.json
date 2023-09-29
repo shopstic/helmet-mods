@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "url": "https://petstore3.swagger.io/api/v3/openapi.json"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/uspto.yaml"
+    }
+  ]
+}

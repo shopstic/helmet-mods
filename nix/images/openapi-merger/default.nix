@@ -23,11 +23,11 @@ let
       coreutils
     ];
   };
-  swaggerUiVersion = "4.15.2";
+  swaggerUiVersion = "5.7.2";
   swagger-ui = fetchzip {
     name = "swagger-ui-${swaggerUiVersion}";
     url = "https://github.com/swagger-api/swagger-ui/archive/refs/tags/v${swaggerUiVersion}.zip";
-    sha256 = "sha256-H2VRSil3h9faFTLZFvg0JbObWjlNspkA7jcbl4r4g/k=";
+    sha256 = "sha256-F1WY4IAeoVih2qKnTHyULviTLfzB+qfBqjgdLlGM0Y0=";
     postFetch = ''
       find $out -mindepth 1 -maxdepth 1 -not -name dist -exec rm -rf {} \;
       mv $out/dist $out/www
@@ -56,6 +56,4 @@ let
     };
   };
 in
-image // {
-  dir = runCommand "${name}-dir" { } "${image.copyTo}/bin/copy-to dir:$out";
-}
+image
