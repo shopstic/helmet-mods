@@ -1,4 +1,4 @@
-import { Static, TSchema, Type } from "../deps/typebox.ts";
+import { Static, TSchema, Type, TypeCheck, TypeCompiler } from "../deps/typebox.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");
@@ -94,6 +94,8 @@ export class PromApiError extends Error {
   }
 }
 
+const schemaCheckCache = new WeakMap<TSchema, TypeCheck<TSchema>>();
+
 async function promFetch<T extends TSchema>(
   schema: T,
   url: string,
@@ -113,13 +115,14 @@ async function promFetch<T extends TSchema>(
   if (response.ok) {
     const json = await response.json();
 
-    const validated = schema.safeParse(json);
+    let check = schemaCheckCache.get(schema);
 
-    if (validated.success) {
-      return validated.data;
+    if (!check) {
+      check = TypeCompiler.Compile(schema);
+      schemaCheckCache.set(schema, check);
     }
 
-    throw validated.error;
+    return check.Decode(json);
   } else {
     throw new PromApiError({
       ...response,
