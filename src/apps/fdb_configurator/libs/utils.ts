@@ -156,6 +156,20 @@ export const ServiceSpecSchema = FlexObject({
   ),
 });
 
+export const ListOfServiceSpecSchema = FlexObject({
+  items: Type.Array(FlexObject({
+    spec: ServiceSpecSchema,
+  })),
+});
+
+export const ListOfPodStatusSchema = FlexObject({
+  items: Type.Array(FlexObject({
+    status: FlexObject({
+      podIP: Type.String(),
+    }),
+  })),
+});
+
 export type ServiceSpec = Static<typeof ServiceSpecSchema>;
 
 export async function kubectlInherit({
@@ -239,6 +253,44 @@ export async function fetchServiceSpecs(
   });
 
   return await Promise.all(promises);
+}
+
+export async function fetchServiceEndpointsByLabels(
+  labels: Record<string, string>,
+): Promise<string[]> {
+  const namespace = await readCurrentNamespace();
+  const labelsParam = Object.entries(labels).map(([key, value]) => `${key}=${value}`).join(",");
+  const items = await kubectlGetJson({
+    args: [
+      `service`,
+      "-n",
+      namespace,
+      `-l=${labelsParam}`,
+      "-o=json",
+    ],
+    schema: ListOfServiceSpecSchema,
+  });
+
+  return items.items.flatMap((item) => item.spec.ports.map((port) => `${item.spec.clusterIP}:${port.port}`));
+}
+
+export async function fetchPodIpsByLabels(
+  labels: Record<string, string>,
+): Promise<string[]> {
+  const namespace = await readCurrentNamespace();
+  const labelsParam = Object.entries(labels).map(([key, value]) => `${key}=${value}`).join(",");
+  const items = await kubectlGetJson({
+    args: [
+      `pod`,
+      "-n",
+      namespace,
+      `-l=${labelsParam}`,
+      "-o=json",
+    ],
+    schema: ListOfPodStatusSchema,
+  });
+
+  return items.items.map((item) => item.status.podIP);
 }
 
 export async function fetchCoordinatorEndpointsFromServiceNames(
