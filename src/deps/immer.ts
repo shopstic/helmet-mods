@@ -1,1 +1,1 @@
-export { produce as immerProduce } from "https://esm.sh/immer@10.0.2/?pin=v131";
+export { produce as immerProduce } from "https://esm.sh/immer@10.0.3/?pin=v133";

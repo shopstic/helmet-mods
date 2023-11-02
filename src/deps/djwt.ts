@@ -1,1 +1,1 @@
-export { create as createJwt } from "https://deno.land/x/djwt@v2.9.1/mod.ts";
+export { create as createJwt } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
