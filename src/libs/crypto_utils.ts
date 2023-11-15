@@ -1,4 +1,4 @@
-import { encodeToHex } from "../deps/std_encoding.ts";
+import { encodeHex } from "../deps/std_encoding.ts";
 
 /**
  * Do a constant time string comparison. Always compare the complete strings
@@ -25,7 +25,6 @@ export function constantTimeCompare(a: string, b: string) {
 
 export async function createWebhookSigner(signingKey: string) {
   const textEncoder = new TextEncoder();
-  const textDecoder = new TextDecoder();
 
   const keyBuf = textEncoder.encode(signingKey);
 
@@ -42,6 +41,6 @@ export async function createWebhookSigner(signingKey: string) {
       await crypto.subtle.sign("HMAC", key, payload),
     );
 
-    return `sha256=${textDecoder.decode(encodeToHex(signature))}`;
+    return `sha256=${encodeHex(signature)}`;
   };
 }

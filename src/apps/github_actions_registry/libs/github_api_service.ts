@@ -1,7 +1,7 @@
 import { OpenapiClient } from "../../../deps/k8s_openapi.ts";
 import { delay } from "../../../deps/async_utils.ts";
 import { GhComponents, GhPaths } from "../../../deps/github_api.ts";
-import { base64Decode } from "../../../deps/std_encoding.ts";
+import { decodeBase64 } from "../../../deps/std_encoding.ts";
 import { createJwt } from "../../../deps/djwt.ts";
 
 export async function getLastActiveRepoNames(
@@ -100,7 +100,7 @@ export async function* generateAccessClient(
 
   const key = await crypto.subtle.importKey(
     "pkcs8",
-    base64Decode(keyBody),
+    decodeBase64(keyBody),
     {
       name: "RSASSA-PKCS1-v1_5",
       hash: { name: "SHA-256" },
