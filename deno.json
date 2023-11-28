@@ -1,4 +1,7 @@
 {
+  "tasks": {
+    "update_cache": "rm -f ./deno.lock && deno cache ./src/deps/*"
+  },
   "fmt": {
     "include": [
       "src/",
