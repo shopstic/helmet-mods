@@ -28,7 +28,7 @@ jobs:
             runner: arm64-darwin
             size: small
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build all packages
         run: nix build -L -v '.#defaultPackage.${{ matrix.runner.arch }}'
@@ -58,7 +58,7 @@ jobs:
         imageArch: [amd64, arm64]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build all images
         shell: nix develop -v -c bash {0}
@@ -80,7 +80,7 @@ jobs:
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build and push images
         shell: nix develop -v -c bash {0}
