@@ -24,11 +24,11 @@ let
       coreutils
     ];
   };
-  swaggerUiVersion = "5.7.2";
+  swaggerUiVersion = "5.11.0";
   swagger-ui = fetchzip {
     name = "swagger-ui-${swaggerUiVersion}";
     url = "https://github.com/swagger-api/swagger-ui/archive/refs/tags/v${swaggerUiVersion}.zip";
-    sha256 = "sha256-F1WY4IAeoVih2qKnTHyULviTLfzB+qfBqjgdLlGM0Y0=";
+    sha256 = "sha256-e20lv6OUYC+/Qjl9X0Nc4xhoxwlEOOX/6z4yRYwJDWc=";
     postFetch = ''
       find $out -mindepth 1 -maxdepth 1 -not -name dist -exec rm -rf {} \;
       mv $out/dist $out/www

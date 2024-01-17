@@ -13,6 +13,7 @@ export type OpenapiMergerParams = Static<typeof OpenapiMergerParamsSchema>;
 
 export const OpenapiMergerConfigSchema = Type.Object({
   overrides: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  stripAllOperationSecurity: Type.Optional(Type.Boolean()),
   sources: Type.Array(Type.Object({
     url: Type.String(),
     merge: Type.Optional(Type.Object({

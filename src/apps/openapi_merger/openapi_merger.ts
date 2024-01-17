@@ -6,6 +6,7 @@ import { stripMargin } from "../../libs/utils.ts";
 import { openapiMerge, OpenapiMergeInput, openapiMergeIsErrorResult } from "../../deps/openapi_merge.ts";
 import { yamlParse, yamlStringify } from "../../deps/std_yaml.ts";
 import { deepMerge } from "../../deps/helmet.ts";
+import { immerProduce } from "../../deps/immer.ts";
 
 export class BackendRequestError extends Error {
   readonly name = BackendRequestError.name;
@@ -13,6 +14,19 @@ export class BackendRequestError extends Error {
     super(`A request to a backend at url=${url} failed with status=${response.status} ${response.statusText}`);
     Object.setPrototypeOf(this, new.target.prototype);
   }
+}
+
+function stripAllOperationSecurity<T>(swagger: T): T {
+  // deno-lint-ignore no-explicit-any
+  return immerProduce(swagger, (draft: any) => {
+    for (const path of Object.values(draft.paths)) {
+      // deno-lint-ignore no-explicit-any
+      for (const operation of Object.values(path as any)) {
+        // deno-lint-ignore no-explicit-any
+        delete (operation as any).security;
+      }
+    }
+  });
 }
 
 await new CliProgram()
@@ -149,10 +163,16 @@ await new CliProgram()
                 return new Response("Internal Server Error", { status: 500 });
               }
 
-              const mergeOutput = (typeof config.overrides === "object")
+              let mergeOutput = mergeResult.output;
+
+              if (config.stripAllOperationSecurity) {
+                mergeOutput = stripAllOperationSecurity(mergeOutput);
+              }
+
+              if (typeof config.overrides === "object") {
                 // deno-lint-ignore no-explicit-any
-                ? deepMerge(mergeResult.output as unknown as any, config.overrides)
-                : mergeResult.output;
+                mergeOutput = deepMerge(mergeResult.output as unknown as any, config.overrides);
+              }
 
               if (pathname.endsWith(".json")) {
                 return Response.json(mergeOutput);
