@@ -171,7 +171,7 @@ await new CliProgram()
 
               if (typeof config.overrides === "object") {
                 // deno-lint-ignore no-explicit-any
-                mergeOutput = deepMerge(mergeResult.output as unknown as any, config.overrides);
+                mergeOutput = deepMerge(structuredClone(mergeOutput) as unknown as any, config.overrides);
               }
 
               if (pathname.endsWith(".json")) {
