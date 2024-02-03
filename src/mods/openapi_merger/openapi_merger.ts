@@ -11,6 +11,7 @@ import {
 } from "../../deps/helmet.ts";
 import { image as defaultOpenapiMergerImage } from "../../apps/openapi_merger/meta.ts";
 import { OpenapiMergerConfig, OpenapiMergerParams } from "../../apps/openapi_merger/libs/types.ts";
+import { stableHash } from "../../deps/stable_hash.ts";
 
 export const defaultName = "gitlab-cicd-registry";
 
@@ -168,6 +169,10 @@ export function createOpenapiMergerResources({
               volumeMounts: [{
                 mountPath: configMountPath,
                 name: "config",
+              }],
+              env: [{
+                name: "__CONFIG_HASH__",
+                value: stableHash(secret),
               }],
               args: Object
                 .entries(args)
