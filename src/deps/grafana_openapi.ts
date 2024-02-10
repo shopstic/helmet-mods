@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/grafana_api@10.1.0/index.ts";
+export * from "https://deno.land/x/grafana_api@10.3.1/index.ts";
