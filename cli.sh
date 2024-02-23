@@ -49,7 +49,7 @@ bundle_app() {
 }
 
 compile_app() {
-  deno compile --check --lock=deno.lock --cached-only --unstable -A "$@"
+  deno compile --check --lock=deno.lock --cached-only -A "$@"
 }
 
 smoke_test() {

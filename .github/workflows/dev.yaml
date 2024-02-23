@@ -16,6 +16,7 @@ jobs:
       - ${{ matrix.runner.runner }}
       - ${{ matrix.runner.size }}
     strategy:
+      fail-fast: false
       matrix:
         runner:
           - arch: x86_64-linux
@@ -54,6 +55,7 @@ jobs:
     env:
       IMAGE_REPOSITORY: public.ecr.aws/shopstic
     strategy:
+      fail-fast: false
       matrix:
         imageArch: [amd64, arm64]
 

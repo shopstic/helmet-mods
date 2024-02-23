@@ -10,7 +10,7 @@ import {
   K8sServiceAccount,
 } from "../../deps/helmet.ts";
 import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autoscaler/meta.ts";
-import crd from "./crd.json" assert { type: "json" };
+import crd from "./crd.json" with { type: "json" };
 import { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/types.ts";
 
 export const defaultName = "k8s-job-autoscaler";
@@ -116,7 +116,7 @@ export function createK8sJobAutoscalerResources({
             {
               name: "kubectl-proxy",
               image:
-                "public.ecr.aws/shopstic/bin-kubectl:1.23.5@sha256:f0226b79af58eb2c091f995c57ee2d929608d127b72b76294fcbdb5912aa2fa3",
+                "public.ecr.aws/shopstic/kubectl:1.28.7@sha256:2b09ac312d8c2f28cf5820875ed8a2f533734074182733e3c7786fcdc713fa5f",
               command: ["/bin/kubectl", "proxy"],
             },
             {

@@ -28,7 +28,7 @@
               hasSuffix "/deno.lock" path
             );
           };
-        deno = hotPotPkgs.deno;
+        deno = hotPotPkgs.deno_1_41_x;
         buildahBuild = pkgs.callPackage hotPot.lib.buildahBuild;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
