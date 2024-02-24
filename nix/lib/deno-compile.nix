@@ -3,16 +3,17 @@
 , runCommand
 , deno-deps
 , deno
+, unzip
 , src
 , tsPath
-, denoRunFlags ? "--cached-only --unstable -A"
+, denoRunFlags ? "--cached-only -A"
 }:
 let
   name = lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
   compiled = stdenv.mkDerivation
     {
       inherit src name;
-      nativeBuildInputs = [ deno ];
+      nativeBuildInputs = [ deno unzip ];
 
       phases = [ "unpackPhase" "installPhase" ];
 
