@@ -28,7 +28,8 @@
               hasSuffix "/deno.lock" path
             );
           };
-        deno = hotPotPkgs.deno;
+        deno = hotPotPkgs.deno_1_41_x;
+        denort = hotPotPkgs.denort_1_41_x;
         buildahBuild = pkgs.callPackage hotPot.lib.buildahBuild;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
@@ -38,20 +39,8 @@
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            patch = ./src/patched_fetch.ts;
-            patchedSrc = pkgs.runCommand "patched-${name}-src"
-              {
-                buildInputs = [ hotPotPkgs.symlink-mirror ];
-              } ''
-              mkdir -p $out
-              symlink-mirror --absolute "${src}" $out
-              cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
-              rm -f "$out/${tsPath}"
-              mv "$out/${tsPath}.temp" "$out/${tsPath}"
-            '';
             compiled = pkgs.callPackage ./nix/lib/deno-compile.nix {
-              src = patchedSrc;
-              inherit tsPath deno deno-deps;
+              inherit src tsPath deno denort deno-deps;
             };
           in
           compiled;
@@ -122,6 +111,7 @@
             echo 'will cite' | parallel --citation >/dev/null 2>&1
             mkdir -p ./.vscode
             cat ${vscode-settings} > ./.vscode/settings.json
+            export DENORT_BIN="${denort}/bin/denort"
 
             if [[ -f ./.env ]]; then 
               source ./.env
