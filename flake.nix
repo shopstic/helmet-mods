@@ -30,7 +30,6 @@
           };
         deno = hotPotPkgs.deno_1_41_x;
         denort = hotPotPkgs.denort_1_41_x;
-        buildahBuild = pkgs.callPackage hotPot.lib.buildahBuild;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
         deno-deps = pkgs.callPackage ./nix/lib/deno-deps.nix {
@@ -39,19 +38,19 @@
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            # patch = ./src/patched_fetch.ts;
-            # patchedSrc = pkgs.runCommand "patched-${name}-src"
-            #   {
-            #     buildInputs = [ hotPotPkgs.symlink-mirror ];
-            #   } ''
-            #   mkdir -p $out
-            #   symlink-mirror --absolute "${src}" $out
-            #   cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
-            #   rm -f "$out/${tsPath}"
-            #   mv "$out/${tsPath}.temp" "$out/${tsPath}"
-            # '';
+            patch = ./src/patched_fetch.ts;
+            patchedSrc = pkgs.runCommand "patched-${name}-src"
+              {
+                buildInputs = [ hotPotPkgs.symlink-mirror ];
+              } ''
+              mkdir -p $out
+              symlink-mirror --absolute "${src}" $out
+              cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
+              rm -f "$out/${tsPath}"
+              mv "$out/${tsPath}.temp" "$out/${tsPath}"
+            '';
             compiled = pkgs.callPackage ./nix/lib/deno-compile.nix {
-              src = src;
+              src = patchedSrc;
               inherit tsPath deno denort deno-deps;
             };
           in
@@ -95,6 +94,7 @@
             };
             "nix.enableLanguageServer" = true;
             "nix.formatterPath" = pkgs.nixpkgs-fmt + "/bin/nixpkgs-fmt";
+            "nix.serverPath" = pkgs.nil + "/bin/nil";
             "[nix]" = {
               "editor.defaultFormatter" = "jnoortheen.nix-ide";
             };
