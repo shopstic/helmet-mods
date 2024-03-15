@@ -134,7 +134,7 @@ export function createGrafanaSyncerResources({
             {
               name: "kubectl-proxy",
               image:
-                "public.ecr.aws/shopstic/kubectl:1.25.4@sha256:d565e499a017c29a663c99254927254ba1ab553ec78110d8cbd46c25e5df3b3b",
+                "public.ecr.aws/shopstic/kubectl:1.28.7@sha256:eac5e237ae8a765130b264b7df189f15230d95621b473479e6da470e7169efe4",
               command: ["/bin/kubectl", "proxy"],
             },
             {

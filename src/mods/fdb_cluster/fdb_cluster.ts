@@ -22,7 +22,7 @@ import { FdbLocalityMode } from "./lib/fdb_container.ts";
 export { fdbConfiguratorImage };
 
 export const fdbExporterImage =
-  "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.21@sha256:34232af0327e7a05580d72efbced682390f277e32af086a4ffed48131db49151";
+  "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.53@sha256:5aba29a8e52cbb2e11fad33cb89dda9c6e6af162b30f70e59b7b894a85e57df0";
 export const defaultDedupProxyImage =
   "public.ecr.aws/shopstic/dedup-proxy:2.0.1@sha256:bc87c6736d0fc1ce4ee57ec4a03839e77515ae323c6f123f5964acea1a799974";
 
