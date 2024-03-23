@@ -8,6 +8,7 @@
 , coreutils
 , bash
 , awscli2
+, kubectl
 , registry-authenticator
 }:
 let
@@ -24,6 +25,7 @@ let
       coreutils
       bash
       awscli2
+      kubectl
     ];
   };
   image = nix2container.buildImage {
