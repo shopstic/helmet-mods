@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s globstar
 
 deno_which_depends_on() {
   local dir_path=${1:?"Directory path is required"}
@@ -25,6 +26,8 @@ code_quality() {
   deno fmt --check
   echo "Linting..."
   deno lint
+  echo "Checking..."
+  deno check ./src/**/*.ts
 }
 
 auto_fmt() {

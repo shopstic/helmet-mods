@@ -5,29 +5,17 @@ import {
   createK8sVolume,
   createK8sVolumeMount,
   K8s,
-  K8sConfigMap,
-  K8sDeployment,
-  K8sSecret,
 } from "../../deps/helmet.ts";
 import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
 import { image as defaultIacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
-import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";
 
 export const defaultName = "iac-version-bumper";
-
-export interface IacVersionBumperResources {
-  targetsConfigMap: K8sConfigMap;
-  registryAuthConfigSecret: K8sSecret;
-  registryAuthSecret: K8sSecret;
-  sshSecret: K8sSecret;
-  deployment: K8sDeployment;
-}
 
 export function createIacVersionBumperResources({
   name = defaultName,
   image = defaultIacVersionBumperImage,
   serviceAccountName,
-  registryAuthResources,
+  registryAuthOutputSecretName,
   gitBranch,
   gitRepoUri,
   checkIntervalSeconds,
@@ -42,14 +30,14 @@ export function createIacVersionBumperResources({
   name?: string;
   image?: string;
   serviceAccountName?: string;
-  registryAuthResources: RegistryAuthenticatorResources;
+  registryAuthOutputSecretName: string;
   committerName: string;
   committerEmail: string;
   sshPrivateKey: string;
   targets: VersionBumpTargets;
   nodeSelector?: Record<string, string>;
   tolerations?: K8s["core.v1.Toleration"][];
-} & Omit<VersionBumpParams, "targetsConfigFile">): IacVersionBumperResources {
+} & Omit<VersionBumpParams, "targetsConfigFile">) {
   const labels = {
     "app.kubernetes.io/name": defaultName,
     "app.kubernetes.io/instance": name,
@@ -118,15 +106,24 @@ export function createIacVersionBumperResources({
     mountPath: "/home/app/config",
   });
 
-  const {
-    registryAuthContainer,
-    registryAuthConfigVolume,
-    registryAuthConfigSecret,
-    dockerConfigVolume,
-    dockerConfigVolumeMount,
-    registryAuthSecret,
-    registryAuthSecretVolume,
-  } = registryAuthResources;
+  const dockerConfigVolume = createK8sVolume({
+    name: "docker-config",
+    secret: {
+      secretName: registryAuthOutputSecretName,
+      optional: true,
+      items: [
+        {
+          key: ".dockerconfigjson",
+          path: "config.json",
+        },
+      ],
+    },
+  });
+
+  const dockerConfigVolumeMount = createK8sVolumeMount({
+    name: dockerConfigVolume.name,
+    mountPath: "/home/app/.docker",
+  });
 
   const deployment = createK8sDeployment({
     metadata: {
@@ -154,7 +151,6 @@ export function createIacVersionBumperResources({
           nodeSelector,
           tolerations,
           containers: [
-            registryAuthContainer,
             {
               name,
               image,
@@ -190,11 +186,9 @@ export function createIacVersionBumperResources({
           ],
           volumes: [
             targetsConfigVolume,
-            registryAuthConfigVolume,
             dockerConfigVolume,
             sshPrivateKeyVolume,
             sshConfigVolume,
-            registryAuthSecretVolume,
           ],
         },
       },
@@ -203,9 +197,9 @@ export function createIacVersionBumperResources({
 
   return {
     targetsConfigMap,
-    registryAuthConfigSecret,
-    registryAuthSecret,
     sshSecret,
     deployment,
   };
 }
+
+export type IacVersionBumperResources = ReturnType<typeof createIacVersionBumperResources>;

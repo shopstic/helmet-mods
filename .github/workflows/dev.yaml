@@ -6,6 +6,22 @@ on:
       - release
       - 'releases/*'
 jobs:
+  check:
+    name: Check code quality
+    timeout-minutes: 20
+    runs-on:
+      - self-hosted
+      - nix
+      - general
+      - arm64-linux
+      - medium
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check code quality
+        shell: nix develop -v -c bash {0}
+        run: ./cli.sh code_quality
+          
   build-packages:
     name: Build packages
     timeout-minutes: 20
