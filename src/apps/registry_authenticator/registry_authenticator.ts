@@ -107,7 +107,7 @@ async function writeSecret({ namespace, name, data }: { namespace: string; name:
   await inheritExec({
     cmd: commandWithTimeout([
       "kubectl",
-      "replace",
+      "apply",
       "-f",
       "-",
     ], 5),
