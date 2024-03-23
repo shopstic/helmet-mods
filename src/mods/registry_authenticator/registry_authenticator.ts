@@ -119,7 +119,12 @@ export function createRegistryAuthenticatorResources({
       {
         apiGroups: [""],
         resources: ["secrets"],
-        verbs: ["create", "get", "watch", "list", "update", "patch"],
+        verbs: ["create"],
+      },
+      {
+        apiGroups: [""],
+        resources: ["secrets"],
+        verbs: ["get", "watch", "list", "update", "patch"],
         resourceNames: [outputSecretName],
       },
     ],
