@@ -2,7 +2,6 @@ import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "..
 import { RegistrySyncJob, RegistrySyncJobs, RegistrySyncJobsSchema, RegistrySyncParamsSchema } from "./libs/types.ts";
 import { commandWithTimeout, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { readAll } from "../../deps/std_stream.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import {
   catchError,
@@ -138,11 +137,7 @@ async function loadConfig(configFile: string): Promise<RegistrySyncJobs> {
     configFile,
   });
 
-  const jobsConfigHandle = await Deno.open(configFile, { read: true, write: false });
-
-  const jobsConfigRaw = JSON.parse(new TextDecoder().decode(
-    await readAll(jobsConfigHandle),
-  ));
+  const jobsConfigRaw = JSON.parse(await Deno.readTextFile(configFile));
 
   const jobsConfigResult = validate(
     RegistrySyncJobsSchema,

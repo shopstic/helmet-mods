@@ -4,30 +4,19 @@ import {
   createK8sVolume,
   createK8sVolumeMount,
   K8s,
-  K8sConfigMap,
-  K8sDeployment,
-  K8sSecret,
 } from "../../deps/helmet.ts";
 import { image as defaultRegistrySyncImage } from "../../apps/registry_syncer/meta.ts";
 import { RegistrySyncJobs, RegistrySyncParams } from "../../apps/registry_syncer/libs/types.ts";
-import { RegistryAuthenticatorResources } from "../registry_authenticator/registry_authenticator.ts";
 
-export const defaultName = "iac-version-bumper";
-
-export interface RegistrySyncerResources {
-  jobsConfigMap: K8sConfigMap;
-  registryAuthConfigSecret: K8sSecret;
-  registryAuthSecret: K8sSecret;
-  deployment: K8sDeployment;
-}
+export const defaultName = "registry-syncer";
 
 export function createRegistrySyncerResources({
   name = defaultName,
   image = defaultRegistrySyncImage,
   serviceAccountName,
-  registryAuthResources,
   digestCheckIntervalSeconds,
   configCheckIntervalSeconds,
+  registryAuthOutputSecretName,
   jobs,
   nodeSelector,
   tolerations,
@@ -35,11 +24,11 @@ export function createRegistrySyncerResources({
   name?: string;
   image?: string;
   serviceAccountName?: string;
-  registryAuthResources: RegistryAuthenticatorResources;
+  registryAuthOutputSecretName: string;
   jobs: RegistrySyncJobs;
   nodeSelector?: Record<string, string>;
   tolerations?: K8s["core.v1.Toleration"][];
-} & Omit<RegistrySyncParams, "configFile">): RegistrySyncerResources {
+} & Omit<RegistrySyncParams, "configFile">) {
   const labels = {
     "app.kubernetes.io/name": defaultName,
     "app.kubernetes.io/instance": name,
@@ -67,15 +56,30 @@ export function createRegistrySyncerResources({
     mountPath: "/home/app/config",
   });
 
-  const {
-    registryAuthContainer,
-    registryAuthConfigVolume,
-    registryAuthConfigSecret,
-    dockerConfigVolume,
-    dockerConfigVolumeMount,
-    registryAuthSecret,
-    registryAuthSecretVolume,
-  } = registryAuthResources;
+  const dockerConfigVolume = createK8sVolume({
+    name: "docker-config",
+    secret: {
+      secretName: registryAuthOutputSecretName,
+      optional: true,
+      items: [
+        {
+          key: ".dockerconfigjson",
+          path: "config.json",
+        },
+      ],
+    },
+  });
+
+  const dockerConfigVolumeMount = createK8sVolumeMount({
+    name: dockerConfigVolume.name,
+    mountPath: "/home/app/.docker",
+  });
+
+  const containerParams = {
+    configFile: `${jobsConfigVolumeMount.mountPath}/${jobsConfigFileName}`,
+    configCheckIntervalSeconds,
+    digestCheckIntervalSeconds,
+  } satisfies RegistrySyncParams;
 
   const deployment = createK8sDeployment({
     metadata: {
@@ -103,15 +107,10 @@ export function createRegistrySyncerResources({
           nodeSelector,
           tolerations,
           containers: [
-            registryAuthContainer,
             {
               name,
               image,
-              args: [
-                `--configCheckIntervalSeconds=${configCheckIntervalSeconds}`,
-                `--digestCheckIntervalSeconds=${digestCheckIntervalSeconds}`,
-                `--configFile=${jobsConfigVolumeMount.mountPath}/${jobsConfigFileName}`,
-              ],
+              args: Object.entries(containerParams).filter(([_, v]) => v !== undefined).map(([k, v]) => `--${k}=${v}`),
               volumeMounts: [
                 jobsConfigVolumeMount,
                 dockerConfigVolumeMount,
@@ -120,9 +119,7 @@ export function createRegistrySyncerResources({
           ],
           volumes: [
             jobsConfigVolume,
-            registryAuthConfigVolume,
             dockerConfigVolume,
-            registryAuthSecretVolume,
           ],
         },
       },
@@ -131,8 +128,8 @@ export function createRegistrySyncerResources({
 
   return {
     jobsConfigMap,
-    registryAuthConfigSecret,
-    registryAuthSecret,
     deployment,
   };
 }
+
+export type RegistrySyncerResources = ReturnType<typeof createRegistrySyncerResources>;

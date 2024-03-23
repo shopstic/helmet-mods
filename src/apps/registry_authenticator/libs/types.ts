@@ -19,3 +19,12 @@ export const RegistryAuthSchema = Type.Union([
 export type RegistryAuth = Static<typeof RegistryAuthSchema>;
 export const RegistryAuthConfigSchema = Type.Array(RegistryAuthSchema);
 export type RegistryAuthConfig = Static<typeof RegistryAuthConfigSchema>;
+
+export const RegistryAuthParamsSchema = Type.Object({
+  configFile: NonEmptyString,
+  outputSecretNamespace: Type.Optional(NonEmptyString),
+  outputSecretName: NonEmptyString,
+  configLoadIntervalSeconds: Type.Number({ minimum: 1 }),
+});
+
+export type RegistryAuthParams = Static<typeof RegistryAuthParamsSchema>;

@@ -1,10 +1,8 @@
-import { captureExec, ExecAbortedError, NonZeroExitError } from "../../deps/exec_utils.ts";
-import { commandWithTimeout, exhaustiveMatchingGuard, NonEmptyString, withAbortSignal } from "../../libs/utils.ts";
+import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
+import { commandWithTimeout, exhaustiveMatchingGuard, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { readAll } from "../../deps/std_stream.ts";
 import { validate } from "../../deps/validation_utils.ts";
-import { RegistryAuth, RegistryAuthConfig, RegistryAuthConfigSchema } from "./libs/types.ts";
-import { Type } from "../../deps/typebox.ts";
+import { RegistryAuth, RegistryAuthConfig, RegistryAuthConfigSchema, RegistryAuthParamsSchema } from "./libs/types.ts";
 import {
   catchError,
   combineLatest,
@@ -23,8 +21,8 @@ import {
   throwError,
 } from "../../deps/rxjs.ts";
 import { deepEqual } from "../../deps/std_testing.ts";
-import { dirname, resolvePath } from "../../deps/std_path.ts";
 import { Logger } from "../../libs/logger.ts";
+import { createK8sSecret } from "../../deps/helmet.ts";
 
 interface AuthResult {
   auth: string;
@@ -78,12 +76,7 @@ async function loadConfig(configFile: string): Promise<RegistryAuthConfig> {
     configFile,
   });
 
-  const configHandle = await Deno.open(configFile, { read: true, write: false });
-
-  const configRaw = JSON.parse(new TextDecoder().decode(
-    await readAll(configHandle),
-  ));
-
+  const configRaw = JSON.parse(await Deno.readTextFile(configFile));
   const configResult = validate(RegistryAuthConfigSchema, configRaw);
 
   if (!configResult.isSuccess) {
@@ -97,27 +90,45 @@ async function loadConfig(configFile: string): Promise<RegistryAuthConfig> {
   return configResult.value;
 }
 
+async function writeSecret({ namespace, name, data }: { namespace: string; name: string; data: unknown }) {
+  const secret = createK8sSecret({
+    metadata: {
+      name,
+      namespace,
+    },
+    type: "kubernetes.io/dockerconfigjson",
+    data: {
+      ".dockerconfigjson": btoa(
+        JSON.stringify(data),
+      ),
+    },
+  });
+
+  await inheritExec({
+    cmd: commandWithTimeout([
+      "kubectl",
+      "replace",
+      "-f",
+      "-",
+    ], 5),
+    stdin: {
+      pipe: JSON.stringify(secret),
+    },
+  });
+}
+
 await new CliProgram()
   .addAction(
     "run",
     createCliAction(
-      Type.Object({
-        configFile: NonEmptyString,
-        outputFile: NonEmptyString,
-        configLoadIntervalSeconds: Type.Number({ minimum: 1 }),
-      }),
-      async ({ configFile, outputFile, configLoadIntervalSeconds }) => {
+      RegistryAuthParamsSchema,
+      async ({ configFile, outputSecretNamespace, outputSecretName, configLoadIntervalSeconds }) => {
+        const outputNamespace = outputSecretNamespace ?? await Deno.readTextFile(
+          "/var/run/secrets/kubernetes.io/serviceaccount/namespace",
+        );
         const logger = new Logger({ ctx: "main" });
 
         const seedConfig: RegistryAuthConfig | null = null;
-
-        const resolvedOutputFile = resolvePath(outputFile);
-
-        try {
-          await Deno.mkdir(dirname(resolvedOutputFile), { recursive: true });
-        } catch {
-          // Ignore
-        }
 
         const stream = interval(configLoadIntervalSeconds * 1000)
           .pipe(
@@ -150,14 +161,14 @@ await new CliProgram()
                   ),
                 );
             }),
-            concatMap((auths) => Deno.writeTextFile(outputFile, JSON.stringify({ auths }, null, 2))),
+            concatMap((auths) => writeSecret({ name: outputSecretName, namespace: outputNamespace, data: { auths } })),
             catchError((e) => {
               if (e instanceof NonZeroExitError) {
                 logger.error({ msg: "Command failed", error: e });
               }
               return throwError(() => e);
             }),
-            tap(() => logger.info({ msg: "Updated output file", outputFile })),
+            tap(() => logger.info({ msg: "Updated secret", name: outputSecretName, namespace: outputNamespace })),
           );
 
         await lastValueFrom(stream);

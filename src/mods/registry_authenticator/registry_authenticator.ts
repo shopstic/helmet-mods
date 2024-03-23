@@ -1,42 +1,49 @@
-import { RegistryAuthConfig } from "../../apps/registry_authenticator/libs/types.ts";
+import { RegistryAuthConfig, RegistryAuthParams } from "../../apps/registry_authenticator/libs/types.ts";
 import { image as defaultRegistryAuthImage } from "../../apps/registry_authenticator/meta.ts";
 import {
   createK8sContainer,
+  createK8sDeployment,
+  createK8sRole,
+  createK8sRoleBinding,
   createK8sSecret,
+  createK8sServiceAccount,
   createK8sVolume,
   createK8sVolumeMount,
   K8s,
-  K8sSecret,
 } from "../../deps/helmet.ts";
 
-export interface RegistryAuthenticatorResources {
-  registryAuthContainer: K8s["core.v1.Container"];
-  registryAuthConfigVolume: K8s["core.v1.Volume"];
-  registryAuthConfigSecret: K8sSecret;
-  dockerConfigVolume: K8s["core.v1.Volume"];
-  dockerConfigVolumeMount: K8s["core.v1.VolumeMount"];
-  registryAuthSecret: K8sSecret;
-  registryAuthSecretVolume: K8s["core.v1.Volume"];
-}
+export const defaultName = "registry-authenticator";
 
 export function createRegistryAuthenticatorResources({
   name,
+  namespace,
   image = defaultRegistryAuthImage,
   config,
-  configLoadIntervalSeconds = 5,
   secretMounts,
+  configLoadIntervalSeconds = 5,
+  outputSecretName,
+  nodeSelector,
+  tolerations,
 }: {
   name: string;
+  namespace: string;
   image?: string;
   config: RegistryAuthConfig;
-  configLoadIntervalSeconds?: number;
   secretMounts?: Record<string, {
     path: string;
     content: string;
   }>;
-}): RegistryAuthenticatorResources {
+  configLoadIntervalSeconds?: number;
+  nodeSelector?: Record<string, string>;
+  tolerations?: K8s["core.v1.Toleration"][];
+} & Pick<RegistryAuthParams, "outputSecretName">) {
+  const labels = {
+    "app.kubernetes.io/name": defaultName,
+    "app.kubernetes.io/instance": name,
+  };
+
   const registryAuthConfigFileName = "registry-auth.json";
-  const registryAuthConfigSecret = createK8sSecret({
+  const configSecret = createK8sSecret({
     metadata: {
       name: `${name}-config`,
     },
@@ -45,39 +52,29 @@ export function createRegistryAuthenticatorResources({
     },
   });
 
-  const dockerConfigVolume = createK8sVolume({
-    name: "docker-config",
-    emptyDir: {},
-  });
-
-  const dockerConfigVolumeMount = createK8sVolumeMount({
-    name: dockerConfigVolume.name,
-    mountPath: "/home/app/.docker",
-  });
-
-  const registryAuthConfigVolume = createK8sVolume({
+  const configVolume = createK8sVolume({
     name: `registry-auth-config`,
     secret: {
-      secretName: registryAuthConfigSecret.metadata.name,
+      secretName: configSecret.metadata.name,
     },
   });
 
   const registryAuthConfigVolumeMount = createK8sVolumeMount({
-    name: registryAuthConfigVolume.name,
+    name: configVolume.name,
     mountPath: "/home/app/config",
   });
 
-  const registryAuthSecret = createK8sSecret({
+  const secret = createK8sSecret({
     metadata: {
       name,
     },
     data: Object.fromEntries(Object.entries(secretMounts ?? {}).map(([key, { content }]) => [key, btoa(content)])),
   });
 
-  const registryAuthSecretVolume = createK8sVolume({
+  const secretVolume = createK8sVolume({
     name: `${name}-secrets`,
     secret: {
-      secretName: registryAuthSecret.metadata.name,
+      secretName: secret.metadata.name,
       items: Object.entries(secretMounts ?? {}).map(([key, { path }]) => ({
         key,
         path,
@@ -85,20 +82,22 @@ export function createRegistryAuthenticatorResources({
     },
   });
 
-  const registryAuthContainer = createK8sContainer({
+  const containerParams = {
+    configFile: `${registryAuthConfigVolumeMount.mountPath}/${registryAuthConfigFileName}`,
+    configLoadIntervalSeconds,
+    outputSecretName,
+    outputSecretNamespace: namespace,
+  } satisfies RegistryAuthParams;
+
+  const container = createK8sContainer({
     name,
     image,
-    args: [
-      `--configFile=${registryAuthConfigVolumeMount.mountPath}/${registryAuthConfigFileName}`,
-      `--configLoadIntervalSeconds=${configLoadIntervalSeconds}`,
-      `--outputFile=${dockerConfigVolumeMount.mountPath}/config.json`,
-    ],
+    args: Object.entries(containerParams).filter(([_, v]) => v !== undefined).map(([k, v]) => `--${k}=${v}`),
     volumeMounts: [
       registryAuthConfigVolumeMount,
-      dockerConfigVolumeMount,
       ...Object.values(secretMounts ?? {}).map(({ path }) =>
         createK8sVolumeMount({
-          name: registryAuthSecretVolume.name,
+          name: secretVolume.name,
           mountPath: `/home/app/${path}`,
           subPath: path,
         })
@@ -106,16 +105,89 @@ export function createRegistryAuthenticatorResources({
     ],
   });
 
-  return {
-    registryAuthContainer,
-    registryAuthConfigVolume,
-    registryAuthConfigSecret,
-    registryAuthSecret,
-    registryAuthSecretVolume,
-    dockerConfigVolume,
-    dockerConfigVolumeMount: {
-      ...dockerConfigVolumeMount,
-      readOnly: true,
+  const serviceAccount = createK8sServiceAccount({
+    metadata: {
+      name,
     },
+  });
+
+  const role = createK8sRole({
+    metadata: {
+      name,
+    },
+    rules: [
+      {
+        apiGroups: [""],
+        resources: ["secrets"],
+        verbs: ["create", "get", "watch", "list", "update", "patch"],
+        resourceNames: [outputSecretName],
+      },
+    ],
+  });
+
+  const roleBinding = createK8sRoleBinding({
+    metadata: {
+      name,
+    },
+    subjects: [
+      {
+        kind: "ServiceAccount",
+        name,
+        namespace,
+      },
+    ],
+    roleRef: {
+      kind: "Role",
+      name,
+      apiGroup: "rbac.authorization.k8s.io",
+    },
+  });
+
+  const deployment = createK8sDeployment({
+    metadata: {
+      name,
+    },
+    spec: {
+      selector: {
+        matchLabels: labels,
+      },
+      strategy: {
+        type: "Recreate",
+      },
+      template: {
+        metadata: {
+          labels,
+        },
+        spec: {
+          serviceAccountName: serviceAccount.metadata.name,
+          securityContext: {
+            runAsUser: 1001,
+            runAsGroup: 1001,
+            fsGroup: 1001,
+            fsGroupChangePolicy: "OnRootMismatch",
+          },
+          nodeSelector,
+          tolerations,
+          containers: [
+            container,
+          ],
+          volumes: [
+            configVolume,
+            secretVolume,
+          ],
+        },
+      },
+    },
+  });
+
+  return {
+    configSecret,
+    secret,
+    serviceAccount,
+    role,
+    roleBinding,
+    deployment,
   };
 }
+
+export type RegistryAuthenticatorResources = ReturnType<typeof createRegistryAuthenticatorResources>;
