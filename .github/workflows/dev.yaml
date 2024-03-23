@@ -25,6 +25,7 @@ jobs:
   build-packages:
     name: Build packages
     timeout-minutes: 20
+    needs: [check]
     runs-on:
       - self-hosted
       - nix
