@@ -19,8 +19,6 @@ jobs:
   release:
     name: Release ${{ github.event.inputs.version }}
     runs-on: [self-hosted, nix, general, arm64-linux, small]
-    env:
-      IMAGE_REPOSITORY: public.ecr.aws/shopstic
     steps:
       - uses: actions/checkout@v4
         with:
