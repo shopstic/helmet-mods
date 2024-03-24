@@ -9,6 +9,7 @@ import {
   concatMap,
   EMPTY,
   exhaustMap,
+  fromEvent,
   interval,
   lastValueFrom,
   map,
@@ -17,6 +18,7 @@ import {
   startWith,
   switchMap,
   switchScan,
+  takeUntil,
   tap,
   throwError,
 } from "../../deps/rxjs.ts";
@@ -122,7 +124,7 @@ await new CliProgram()
     "run",
     createCliAction(
       RegistryAuthParamsSchema,
-      async ({ configFile, outputSecretNamespace, outputSecretName, configLoadIntervalSeconds }) => {
+      async ({ configFile, outputSecretNamespace, outputSecretName, configLoadIntervalSeconds }, _, abortSignal) => {
         const outputNamespace = outputSecretNamespace ?? await Deno.readTextFile(
           "/var/run/secrets/kubernetes.io/serviceaccount/namespace",
         );
@@ -169,6 +171,7 @@ await new CliProgram()
               return throwError(() => e);
             }),
             tap(() => logger.info({ msg: "Updated secret", name: outputSecretName, namespace: outputNamespace })),
+            takeUntil(fromEvent(abortSignal, "abort")),
           );
 
         await lastValueFrom(stream);

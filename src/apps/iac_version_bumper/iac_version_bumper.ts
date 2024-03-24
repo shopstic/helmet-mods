@@ -1,8 +1,7 @@
 import { captureExec, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
 import { dirname, joinPath } from "../../deps/std_path.ts";
-import { CliProgram, createCliAction } from "../../deps/cli_utils.ts";
+import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
-import { readAll } from "../../deps/std_stream.ts";
 import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
 import { commandWithTimeout } from "../../libs/utils.ts";
 import { delay } from "../../deps/async_utils.ts";
@@ -171,6 +170,8 @@ await new CliProgram()
           checkIntervalSeconds,
           groupingDelaySeconds,
         },
+        _,
+        abortSignal,
       ) => {
         const logger = new Logger({ ctx: "main" });
 
@@ -178,20 +179,13 @@ await new CliProgram()
 
         await inheritExec({ cmd: commandWithTimeout(["git", "clone", gitRepoUri, repoPath], 5) });
 
-        while (true) {
+        while (!abortSignal.aborted) {
           logger.info({
             msg: "Reading targets config",
             targetsConfigFile,
           });
 
-          const targetsConfigHandle = await Deno.open(
-            targetsConfigFile,
-            { read: true, write: false },
-          );
-
-          const targetsConfigRaw = JSON.parse(new TextDecoder().decode(
-            await readAll(targetsConfigHandle),
-          ));
+          const targetsConfigRaw = JSON.parse(await Deno.readTextFile(targetsConfigFile));
 
           const targetsConfigResult = validate(
             VersionBumpTargetsSchema,
@@ -214,8 +208,13 @@ await new CliProgram()
             targets,
             groupingDelayMs: groupingDelaySeconds * 1000,
           });
-          await delay(checkIntervalSeconds * 1000);
+
+          await delay(checkIntervalSeconds * 1000, {
+            signal: abortSignal,
+          });
         }
+
+        return ExitCode.One;
       },
     ),
   )

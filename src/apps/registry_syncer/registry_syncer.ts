@@ -8,6 +8,7 @@ import {
   concatMap,
   EMPTY,
   exhaustMap,
+  fromEvent,
   interval,
   lastValueFrom,
   merge,
@@ -15,6 +16,7 @@ import {
   startWith,
   switchMap,
   switchScan,
+  takeUntil,
   tap,
   throwError,
 } from "../../deps/rxjs.ts";
@@ -166,6 +168,8 @@ await new CliProgram()
           digestCheckIntervalSeconds,
           configCheckIntervalSeconds,
         },
+        _,
+        abortSignal,
       ) => {
         const logger = new Logger({ ctx: "main" });
 
@@ -222,6 +226,7 @@ await new CliProgram()
               }
               return throwError(() => e);
             }),
+            takeUntil(fromEvent(abortSignal, "abort")),
           );
 
         return lastValueFrom(stream).then(() => ExitCode.One);
