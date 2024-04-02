@@ -6,7 +6,6 @@ import {
   createK8sRole,
   createK8sRoleBinding,
   createK8sSecret,
-  createK8sServiceAccount,
   createK8sVolume,
   createK8sVolumeMount,
   K8s,
@@ -17,6 +16,7 @@ export const defaultName = "registry-authenticator";
 export function createRegistryAuthenticatorResources({
   name,
   namespace,
+  serviceAccountName,
   image = defaultRegistryAuthImage,
   config,
   secretMounts,
@@ -27,6 +27,7 @@ export function createRegistryAuthenticatorResources({
 }: {
   name: string;
   namespace: string;
+  serviceAccountName: string;
   image?: string;
   config: RegistryAuthConfig;
   secretMounts?: Record<string, {
@@ -105,12 +106,6 @@ export function createRegistryAuthenticatorResources({
     ],
   });
 
-  const serviceAccount = createK8sServiceAccount({
-    metadata: {
-      name,
-    },
-  });
-
   const role = createK8sRole({
     metadata: {
       name,
@@ -137,13 +132,13 @@ export function createRegistryAuthenticatorResources({
     subjects: [
       {
         kind: "ServiceAccount",
-        name,
+        name: serviceAccountName,
         namespace,
       },
     ],
     roleRef: {
       kind: "Role",
-      name,
+      name: role.metadata.name,
       apiGroup: "rbac.authorization.k8s.io",
     },
   });
@@ -164,7 +159,7 @@ export function createRegistryAuthenticatorResources({
           labels,
         },
         spec: {
-          serviceAccountName: serviceAccount.metadata.name,
+          serviceAccountName,
           securityContext: {
             runAsUser: 1001,
             runAsGroup: 1001,
@@ -188,7 +183,6 @@ export function createRegistryAuthenticatorResources({
   return {
     configSecret,
     secret,
-    serviceAccount,
     role,
     roleBinding,
     deployment,
