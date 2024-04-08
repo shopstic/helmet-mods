@@ -118,7 +118,7 @@ async function promFetch<T extends TSchema>(
     let check = schemaCheckCache.get(schema);
 
     if (!check) {
-      check = TypeCompiler.Compile(schema);
+      check = TypeCompiler.Compile(schema) as unknown as TypeCheck<TSchema>;
       schemaCheckCache.set(schema, check);
     }
 

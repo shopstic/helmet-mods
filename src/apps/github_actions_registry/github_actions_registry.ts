@@ -10,11 +10,11 @@ import {
   getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
 import { GithubActionsRegistryParamsSchema } from "./libs/types.ts";
-import { deferred } from "../../deps/async_utils.ts";
 import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
 import { captureExec } from "../../deps/exec_utils.ts";
+import { deferred } from "../../deps/async_utils.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -82,7 +82,7 @@ function renderQueueJobsMetrics() {
 
 async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequest>) {
   for await (const { org: owner, repo } of requests) {
-    const client = await accessClientPromise;
+    const client = await accessClientPromise.promise;
 
     logger.info({ msg: "Getting repo pending jobs", owner, repo });
     const jobs = await getRepoPendingJobs({ client, owner, repo });
@@ -122,7 +122,7 @@ const program = new CliProgram()
 
         (async () => {
           for await (const _ of agInterval(5000)) {
-            const accessClient = await accessClientPromise;
+            const accessClient = await accessClientPromise.promise;
             const rate = (await accessClient.endpoint("/rate_limit").method("get")({})).data.rate;
             githubApiRateUsedGauge.set(rate.used);
             logger.info({ msg: "Github rate", rate });
@@ -165,7 +165,7 @@ const program = new CliProgram()
             logger.info({ msg: "Polling from all active repos" });
 
             const activeRepos = await getLastActiveRepoNames({
-              client: await accessClientPromise,
+              client: await accessClientPromise.promise,
               org,
               lastPushedWithinHours: activeReposLastPushedWithinHours,
             });
@@ -283,7 +283,10 @@ const program = new CliProgram()
               }
 
               if (url.pathname === "/runner-token") {
-                const token = await createOrgRunnerRegistrationToken({ client: await accessClientPromise, org });
+                const token = await createOrgRunnerRegistrationToken({
+                  client: await accessClientPromise.promise,
+                  org,
+                });
                 return new Response(token, { status: 200 });
               }
 

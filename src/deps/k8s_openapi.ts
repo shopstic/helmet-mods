@@ -1,8 +1,9 @@
-export * from "https://deno.land/x/k8s@1.29.1/index.ts";
+export * from "@wok/utils/k8s";
+export * from "@wok/k8s";
 export type {
   OpenapiClient,
   OpenapiOperationApi,
   OpenapiOperationApiArgType,
   OpenapiOperationApiReturnType,
-} from "https://deno.land/x/k8s@1.29.1/deps.ts";
-export { createOpenapiClient, OpenapiOperationError } from "https://deno.land/x/k8s@1.29.1/deps.ts";
+} from "@wok/openapi-client";
+export { createOpenapiClient, OpenapiOperationError } from "@wok/openapi-client";

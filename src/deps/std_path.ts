@@ -1,1 +1,2 @@
-export * from "https://deno.land/x/helmet@1.28.0/deps/std_path.ts";
+export * from "@std/path";
+export { join as joinPath } from "@std/path";

@@ -42,7 +42,7 @@ export function k8sControllerStream<
                 watch: true,
                 ...(lastResourceVersion ? { resourceVersion: lastResourceVersion } : {}),
               },
-            }),
+            } as Args),
             init,
           )).data!.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream())
         ) {

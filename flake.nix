@@ -28,8 +28,8 @@
               hasSuffix "/deno.lock" path
             );
           };
-        deno = hotPotPkgs.deno_1_41_x;
-        denort = hotPotPkgs.denort_1_41_x;
+        deno = hotPotPkgs.deno_1_42_x;
+        denort = hotPotPkgs.denort_1_42_x;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
         deno-deps = pkgs.callPackage ./nix/lib/deno-deps.nix {
