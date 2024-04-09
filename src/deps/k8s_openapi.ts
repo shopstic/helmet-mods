@@ -1,4 +1,3 @@
-export * from "@wok/utils/k8s";
 export * from "@wok/k8s";
 export type {
   OpenapiClient,

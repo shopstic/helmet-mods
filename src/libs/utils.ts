@@ -36,7 +36,7 @@ export function createReconciliationLoop<T = void>(): ReconciliationLoop<T> {
 
   async function* generator() {
     while (true) {
-      await promise;
+      await promise.promise;
       promise = deferred();
       yield lastValue;
     }

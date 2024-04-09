@@ -146,7 +146,10 @@
         "integrity": "abc7670454142e94c8bc28e7b6dc66bbd9405654846c095499f1dea08bc876b4"
       },
       "@wok/utils@1.1.5": {
-        "integrity": "2a7581c49b3d9738167e0b81018b9a014f0af11726def8534f757a0a1f549ba4"
+        "integrity": "2a7581c49b3d9738167e0b81018b9a014f0af11726def8534f757a0a1f549ba4",
+        "dependencies": [
+          "jsr:@wok/k8s@~1.29.0"
+        ]
       },
       "@wok/utils@1.2.0": {
         "integrity": "6df92db025c435b9a051622315a041ff3d1824b63b1a2c1498ed1cee5cb0821d",

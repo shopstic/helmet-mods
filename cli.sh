@@ -28,6 +28,8 @@ code_quality() {
   deno lint
   echo "Checking..."
   deno check ./src/**/*.ts
+  echo "Running eslint..."
+  eslint ./src
 }
 
 auto_fmt() {

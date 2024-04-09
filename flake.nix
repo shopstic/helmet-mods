@@ -120,6 +120,7 @@
                 manifest-tool
                 skopeo-nix2container
                 regclient
+                typescript-eslint
                 ;
             };
           shellHook = ''
