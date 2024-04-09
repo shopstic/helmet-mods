@@ -4,10 +4,12 @@ import { stableHash } from "../../deps/stable_hash.ts";
 import { validate } from "../../deps/validation_utils.ts";
 import { constantTimeCompare } from "../../libs/crypto_utils.ts";
 import { Logger } from "../../libs/logger.ts";
-import { agInterval, agThrottle, createReconciliationLoop, ReconciliationLoop } from "../../libs/utils.ts";
+import type { ReconciliationLoop } from "../../libs/utils.ts";
+import { agInterval, agThrottle, createReconciliationLoop } from "../../libs/utils.ts";
+import type {
+  GitlabJob} from "../gitlab_cicd_registry/libs/types.ts";
 import {
   GitlabCicdRegistryParamsSchema,
-  GitlabJob,
   GitlabWebhookBuildSchema,
 } from "../gitlab_cicd_registry/libs/types.ts";
 import { fetchLastActiveProjects, fetchProjectPendingJobs } from "./libs/gitlab_api_service.ts";

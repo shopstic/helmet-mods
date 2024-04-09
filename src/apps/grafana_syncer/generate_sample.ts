@@ -1,4 +1,4 @@
-import { GrafanaDashboard } from "./libs/types.ts";
+import type { GrafanaDashboard } from "./libs/types.ts";
 
 const sample: GrafanaDashboard = {
   apiVersion: "shopstic.com/v1",

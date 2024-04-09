@@ -1,21 +1,23 @@
-import {
-  createK8sDeployment,
-  createK8sIngress,
-  createK8sRole,
-  createK8sRoleBinding,
-  createK8sService,
-  createK8sServiceAccount,
+import type {
   K8s,
   K8sDeployment,
   K8sIngress,
   K8sRole,
   K8sRoleBinding,
   K8sService,
-  K8sServiceAccount,
+  K8sServiceAccount} from "../../deps/helmet.ts";
+import {
+  createK8sDeployment,
+  createK8sIngress,
+  createK8sRole,
+  createK8sRoleBinding,
+  createK8sService,
+  createK8sServiceAccount
 } from "../../deps/helmet.ts";
 import { image as defaultGitlabCicdRegistryImage } from "../../apps/gitlab_cicd_registry/meta.ts";
-import { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/types.ts";
-import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import type { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/types.ts";
+import type { ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import { createServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 
 export const defaultName = "gitlab-cicd-registry";
 

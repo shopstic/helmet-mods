@@ -1,4 +1,4 @@
-import { K8sResource } from "../../deps/helmet.ts";
+import type { K8sResource } from "../../deps/helmet.ts";
 
 // These are generated from prometheus-operator CRDs
 

@@ -1,4 +1,5 @@
-import { Static, Type } from "../../../deps/typebox.ts";
+import type { Static} from "../../../deps/typebox.ts";
+import { Type } from "../../../deps/typebox.ts";
 import { NonEmptyString } from "../../../libs/utils.ts";
 
 export const RegistryAuthSchema = Type.Union([

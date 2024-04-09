@@ -1,8 +1,10 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { createOpenapiClient, OpenapiClient } from "../../deps/k8s_openapi.ts";
+import type { OpenapiClient } from "../../deps/k8s_openapi.ts";
+import { createOpenapiClient } from "../../deps/k8s_openapi.ts";
 import { constantTimeCompare, createWebhookSigner } from "../../libs/crypto_utils.ts";
 import { Logger } from "../../libs/logger.ts";
-import { agInterval, agThrottle, createReconciliationLoop, ReconciliationLoop } from "../../libs/utils.ts";
+import type { ReconciliationLoop } from "../../libs/utils.ts";
+import { agInterval, agThrottle, createReconciliationLoop } from "../../libs/utils.ts";
 import {
   createOrgRunnerRegistrationToken,
   generateAccessClient,
@@ -10,7 +12,7 @@ import {
   getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
 import { GithubActionsRegistryParamsSchema } from "./libs/types.ts";
-import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
+import type { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
 import { captureExec } from "../../deps/exec_utils.ts";

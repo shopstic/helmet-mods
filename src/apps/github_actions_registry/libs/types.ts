@@ -1,4 +1,5 @@
-import { Static, Type } from "../../../deps/typebox.ts";
+import type { Static} from "../../../deps/typebox.ts";
+import { Type } from "../../../deps/typebox.ts";
 
 export const GithubActionsRegistryParamsSchema = Type.Object({
   org: Type.String({ minLength: 1 }),

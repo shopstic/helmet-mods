@@ -1,4 +1,5 @@
-import { Deferred, deferred, delay } from "../deps/async_utils.ts";
+import type { Deferred} from "../deps/async_utils.ts";
+import { deferred, delay } from "../deps/async_utils.ts";
 import { Observable } from "../deps/rxjs.ts";
 import { Type } from "../deps/typebox.ts";
 

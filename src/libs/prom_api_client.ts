@@ -1,4 +1,5 @@
-import { Static, TSchema, Type, TypeCheck, TypeCompiler } from "../deps/typebox.ts";
+import type { Static, TSchema, TypeCheck} from "../deps/typebox.ts";
+import { Type, TypeCompiler } from "../deps/typebox.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");

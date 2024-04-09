@@ -1,5 +1,5 @@
 import { deepMerge } from "../deps/helmet.ts";
-import {
+import type {
   K8sApiExtractListItemType,
   K8sApiWatchEvent,
   OpenapiOperationApi,
