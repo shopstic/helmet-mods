@@ -19,6 +19,9 @@ jobs:
   release:
     name: Release ${{ github.event.inputs.version }}
     runs-on: [self-hosted, nix, general, arm64-linux, small]
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,4 +41,5 @@ jobs:
             DEV_TAG=$(./cli.sh generate_image_tag)
           fi
 
+          ./cli.sh jsr_publish
           ./cli.sh release "${DEV_TAG}" "${RELEASE_VERSION}"
