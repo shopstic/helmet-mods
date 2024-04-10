@@ -1,6 +1,7 @@
 import { validate } from "../../../deps/validation_utils.ts";
-import { Logger } from "../../../libs/logger.ts";
-import { GitlabJob, GitlabJobListSchema, GitlabProject, GitlabProjectListSchema } from "./types.ts";
+import type { Logger } from "../../../libs/logger.ts";
+import type { GitlabJob, GitlabProject } from "./types.ts";
+import { GitlabJobListSchema, GitlabProjectListSchema } from "./types.ts";
 
 export async function fetchLastActiveProjects(
   { accessToken, groupId, lastActivityWithinHours, logger }: {

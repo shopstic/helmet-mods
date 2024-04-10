@@ -1,5 +1,5 @@
 import { inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
-import { GitlabCicdRegistryParams } from "./libs/types.ts";
+import type { GitlabCicdRegistryParams } from "./libs/types.ts";
 import { dirname, fromFileUrl } from "../../deps/std_path.ts";
 import { watchOsSignal } from "../../deps/std_signal.ts";
 

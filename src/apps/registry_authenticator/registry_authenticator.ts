@@ -2,7 +2,9 @@ import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "..
 import { commandWithTimeout, exhaustiveMatchingGuard, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
-import { RegistryAuth, RegistryAuthConfig, RegistryAuthConfigSchema, RegistryAuthParamsSchema } from "./libs/types.ts";
+import type { RegistryAuth, RegistryAuthConfig } from "./libs/types.ts";
+import { RegistryAuthConfigSchema, RegistryAuthParamsSchema } from "./libs/types.ts";
+import type { Observable } from "../../deps/rxjs.ts";
 import {
   catchError,
   combineLatest,
@@ -13,7 +15,6 @@ import {
   interval,
   lastValueFrom,
   map,
-  Observable,
   of,
   startWith,
   switchMap,

@@ -2,7 +2,8 @@ import { captureExec, inheritExec, NonZeroExitError } from "../../deps/exec_util
 import { dirname, joinPath } from "../../deps/std_path.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { validate } from "../../deps/validation_utils.ts";
-import { VersionBumpParamsSchema, VersionBumpTargets, VersionBumpTargetsSchema } from "./libs/types.ts";
+import type { VersionBumpTargets } from "./libs/types.ts";
+import { VersionBumpParamsSchema, VersionBumpTargetsSchema } from "./libs/types.ts";
 import { commandWithTimeout } from "../../libs/utils.ts";
 import { delay } from "../../deps/async_utils.ts";
 import { Logger } from "../../libs/logger.ts";

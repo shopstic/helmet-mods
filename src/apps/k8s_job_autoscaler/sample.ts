@@ -1,4 +1,4 @@
-import { AutoscaledJob } from "./libs/types.ts";
+import type { AutoscaledJob } from "./libs/types.ts";
 
 const autoscaledJob: AutoscaledJob = {
   apiVersion: "shopstic.com/v1",

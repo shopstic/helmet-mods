@@ -20,7 +20,11 @@ jobs:
 
       - name: Check code quality
         shell: nix develop -v -c bash {0}
-        run: ./cli.sh code_quality
+        run: |
+          export DENO_DIR=$(mktemp -d)
+          trapt "rm -rf $DENO_DIR" EXIT
+          ./cli.sh populate_deno_dir_from_nix aarch64-linux "${DENO_DIR}"
+          ./cli.sh code_quality
           
   build-packages:
     name: Build packages

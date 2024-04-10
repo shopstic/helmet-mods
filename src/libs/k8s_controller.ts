@@ -1,5 +1,5 @@
 import { deepMerge } from "../deps/helmet.ts";
-import {
+import type {
   K8sApiExtractListItemType,
   K8sApiWatchEvent,
   OpenapiOperationApi,
@@ -42,7 +42,7 @@ export function k8sControllerStream<
                 watch: true,
                 ...(lastResourceVersion ? { resourceVersion: lastResourceVersion } : {}),
               },
-            }),
+            } as Args),
             init,
           )).data!.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream())
         ) {

@@ -1,10 +1,10 @@
+import type { K8s } from "../../deps/helmet.ts";
 import {
   createK8sConfigMap,
   createK8sDeployment,
   createK8sSecret,
   createK8sVolume,
   createK8sVolumeMount,
-  K8s,
 } from "../../deps/helmet.ts";
 import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
 import { image as defaultIacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";

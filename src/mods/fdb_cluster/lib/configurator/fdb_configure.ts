@@ -1,10 +1,4 @@
-import {
-  createK8sConfigMap,
-  createK8sContainer,
-  createK8sJob,
-  createK8sRole,
-  createK8sRoleBinding,
-  createK8sServiceAccount,
+import type {
   K8s,
   K8sConfigMap,
   K8sImagePullPolicy,
@@ -13,8 +7,16 @@ import {
   K8sRoleBinding,
   K8sServiceAccount,
 } from "../../../../deps/helmet.ts";
+import {
+  createK8sConfigMap,
+  createK8sContainer,
+  createK8sJob,
+  createK8sRole,
+  createK8sRoleBinding,
+  createK8sServiceAccount,
+} from "../../../../deps/helmet.ts";
 
-import { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
+import type { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";
 
 export interface FdbConfigureResources {
   job: K8sJob;

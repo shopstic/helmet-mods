@@ -1,10 +1,4 @@
-import {
-  createK8sDeployment,
-  createK8sIngress,
-  createK8sRole,
-  createK8sRoleBinding,
-  createK8sService,
-  createK8sServiceAccount,
+import type {
   K8s,
   K8sDeployment,
   K8sIngress,
@@ -13,9 +7,18 @@ import {
   K8sService,
   K8sServiceAccount,
 } from "../../deps/helmet.ts";
+import {
+  createK8sDeployment,
+  createK8sIngress,
+  createK8sRole,
+  createK8sRoleBinding,
+  createK8sService,
+  createK8sServiceAccount,
+} from "../../deps/helmet.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
-import { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
-import { createServiceMonitorV1, ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import type { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";
+import type { ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import { createServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 
 export const defaultName = "github-actions-registry";
 

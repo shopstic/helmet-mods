@@ -1,15 +1,7 @@
-import {
-  createK8sContainer,
-  createK8sPvc,
-  createK8sService,
-  createK8sStatefulSet,
-  K8s,
-  K8sImagePullPolicy,
-  K8sPvc,
-  K8sService,
-  K8sStatefulSet,
-} from "../../../deps/helmet.ts";
-import { createFdbContainer, FdbConfiguredProcessClass, FdbLocalityMode } from "./fdb_container.ts";
+import type { K8s, K8sImagePullPolicy, K8sPvc, K8sService, K8sStatefulSet } from "../../../deps/helmet.ts";
+import { createK8sContainer, createK8sPvc, createK8sService, createK8sStatefulSet } from "../../../deps/helmet.ts";
+import type { FdbConfiguredProcessClass, FdbLocalityMode } from "./fdb_container.ts";
+import { createFdbContainer } from "./fdb_container.ts";
 
 export interface FdbStatefulServer {
   port: number;

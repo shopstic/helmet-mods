@@ -1,4 +1,5 @@
-import { Static, TSchema, Type, TypeCheck, TypeCompiler } from "../deps/typebox.ts";
+import type { Static, TSchema, TypeCheck } from "../deps/typebox.ts";
+import { Type, TypeCompiler } from "../deps/typebox.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");
@@ -118,7 +119,7 @@ async function promFetch<T extends TSchema>(
     let check = schemaCheckCache.get(schema);
 
     if (!check) {
-      check = TypeCompiler.Compile(schema);
+      check = TypeCompiler.Compile(schema) as unknown as TypeCheck<TSchema>;
       schemaCheckCache.set(schema, check);
     }
 

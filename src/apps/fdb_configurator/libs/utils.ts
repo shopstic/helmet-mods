@@ -1,8 +1,11 @@
-import { captureExec, inheritExec, StdInputBehavior } from "../../../deps/exec_utils.ts";
+import type { StdInputBehavior } from "../../../deps/exec_utils.ts";
+import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
 import { validate } from "../../../deps/validation_utils.ts";
 import { memoizePromise } from "../../../deps/async_utils.ts";
-import { FlexObject, Static, TSchema, Type } from "../../../deps/typebox.ts";
-import { FdbDatabaseConfig, FdbStatus, FdbStatusSchema } from "./types.ts";
+import type { Static, TSchema } from "../../../deps/typebox.ts";
+import { FlexObject, Type } from "../../../deps/typebox.ts";
+import type { FdbDatabaseConfig, FdbStatus } from "./types.ts";
+import { FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
 import { commandWithTimeout } from "../../../libs/utils.ts";
 import { createK8sConfigMap } from "../../../deps/helmet.ts";

@@ -1,4 +1,5 @@
-import { Static, Type, TypeCompiler } from "../../../deps/typebox.ts";
+import type { Static } from "../../../deps/typebox.ts";
+import { Type, TypeCompiler } from "../../../deps/typebox.ts";
 import { NonEmptyString } from "../../../libs/utils.ts";
 
 export const OpenapiMergerParamsSchema = Type.Object({

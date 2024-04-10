@@ -1,17 +1,13 @@
+import type { K8sCrd, K8sDeployment, K8sRole, K8sRoleBinding, K8sServiceAccount } from "../../deps/helmet.ts";
 import {
   createK8sDeployment,
   createK8sRole,
   createK8sRoleBinding,
   createK8sServiceAccount,
-  K8sCrd,
-  K8sDeployment,
-  K8sRole,
-  K8sRoleBinding,
-  K8sServiceAccount,
 } from "../../deps/helmet.ts";
 import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autoscaler/meta.ts";
 import crd from "./crd.json" with { type: "json" };
-import { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/types.ts";
+import type { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/types.ts";
 
 export const defaultName = "k8s-job-autoscaler";
 

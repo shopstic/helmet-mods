@@ -1,18 +1,14 @@
 import { deepEqual } from "../../deps/std_testing.ts";
 import { immerProduce } from "../../deps/immer.ts";
-import {
-  getJobs,
-  jobReplicaIndexLabel,
-  MetricSnapshot,
-  watchJobGroups,
-  watchJobs,
-  watchMetric,
-} from "./libs/autoscaled_job.ts";
+import type { MetricSnapshot } from "./libs/autoscaled_job.ts";
+import { getJobs, jobReplicaIndexLabel, watchJobGroups, watchJobs, watchMetric } from "./libs/autoscaled_job.ts";
 import { delay } from "../../deps/async_utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { AutoscaledJob, AutoscaledJobAutoscaling, K8sJobAutoscalerParamsSchema, Paths } from "./libs/types.ts";
+import type { AutoscaledJob, AutoscaledJobAutoscaling, Paths } from "./libs/types.ts";
+import { K8sJobAutoscalerParamsSchema } from "./libs/types.ts";
 import { Logger } from "../../libs/logger.ts";
-import { createOpenapiClient, K8s } from "../../deps/k8s_openapi.ts";
+import type { K8s } from "../../deps/k8s_openapi.ts";
+import { createOpenapiClient } from "../../deps/k8s_openapi.ts";
 import { createReconciliationLoop } from "../../libs/utils.ts";
 
 function findNextAvailableIndices(count: number, unavailable: number[]) {

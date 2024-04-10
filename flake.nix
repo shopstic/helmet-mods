@@ -24,34 +24,37 @@
             name = "helmet-mods-src";
             filter = with pkgs.lib; (path: type:
               hasInfix "/src" path ||
-              hasSuffix "/cli.sh" path ||
+              hasSuffix "/deno.json" path ||
               hasSuffix "/deno.lock" path
             );
           };
-        deno = hotPotPkgs.deno_1_41_x;
-        denort = hotPotPkgs.denort_1_41_x;
+        deno = hotPotPkgs.deno_1_42_x;
+        denort = hotPotPkgs.denort_1_42_x;
+        deno-app-build = hotPotPkgs.deno-app-build /* pkgs.callPackage ./nix/deno-app-build {
+          inherit deno denort;
+        } */;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
-        deno-deps = pkgs.callPackage ./nix/lib/deno-deps.nix {
+        deno-cache = pkgs.callPackage hotPot.lib.denoAppCache {
           inherit src deno;
+          name = "helmet-mods";
+          cacheArgs = "./src/**/*.ts";
         };
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            patch = ./src/patched_fetch.ts;
-            patchedSrc = pkgs.runCommand "patched-${name}-src"
-              {
-                buildInputs = [ hotPotPkgs.symlink-mirror ];
-              } ''
-              mkdir -p $out
-              symlink-mirror --absolute "${src}" $out
-              cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
-              rm -f "$out/${tsPath}"
-              mv "$out/${tsPath}.temp" "$out/${tsPath}"
-            '';
-            compiled = pkgs.callPackage ./nix/lib/deno-compile.nix {
-              src = patchedSrc;
-              inherit tsPath deno denort deno-deps;
+            patch = ./src/patched_fetch.js;
+            compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
+              inherit name deno denort deno-cache src deno-app-build;
+              # inherit (hotPotPkgs) deno-app-build;
+              appSrcPath = tsPath;
+              postBuild = ''
+                PATCHED_RESULT=$(mktemp)
+                cat ${patch} > "$PATCHED_RESULT"
+                cat "$RESULT" >> "$PATCHED_RESULT"
+                rm "$RESULT"
+                mv "$PATCHED_RESULT" "$RESULT"
+              '';
             };
           in
           compiled;
@@ -109,7 +112,7 @@
         devShell = pkgs.mkShellNoCC {
           buildInputs = builtins.attrValues
             {
-              inherit deno;
+              inherit deno deno-app-build;
               inherit (pkgs)
                 gh
                 awscli2
@@ -120,6 +123,7 @@
                 manifest-tool
                 skopeo-nix2container
                 regclient
+                typescript-eslint
                 ;
             };
           shellHook = ''
@@ -127,7 +131,6 @@
             mkdir -p ./.vscode
             cat ${vscode-settings} > ./.vscode/settings.json
             export DENORT_BIN="${denort}/bin/denort"
-
             if [[ -f ./.env ]]; then 
               source ./.env
             fi
@@ -135,7 +138,6 @@
         };
         packages = {
           inherit
-            deno-deps
             fdb-configurator
             iac-version-bumper
             registry-authenticator

@@ -1,8 +1,10 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { createOpenapiClient, OpenapiClient } from "../../deps/k8s_openapi.ts";
+import type { OpenapiClient } from "../../deps/k8s_openapi.ts";
+import { createOpenapiClient } from "../../deps/k8s_openapi.ts";
 import { constantTimeCompare, createWebhookSigner } from "../../libs/crypto_utils.ts";
 import { Logger } from "../../libs/logger.ts";
-import { agInterval, agThrottle, createReconciliationLoop, ReconciliationLoop } from "../../libs/utils.ts";
+import type { ReconciliationLoop } from "../../libs/utils.ts";
+import { agInterval, agThrottle, createReconciliationLoop } from "../../libs/utils.ts";
 import {
   createOrgRunnerRegistrationToken,
   generateAccessClient,
@@ -10,11 +12,11 @@ import {
   getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
 import { GithubActionsRegistryParamsSchema } from "./libs/types.ts";
-import { deferred } from "../../deps/async_utils.ts";
-import { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
+import type { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
 import { captureExec } from "../../deps/exec_utils.ts";
+import { deferred } from "../../deps/async_utils.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -82,7 +84,7 @@ function renderQueueJobsMetrics() {
 
 async function runReconciliationLoop(requests: AsyncGenerator<ReconciliationRequest>) {
   for await (const { org: owner, repo } of requests) {
-    const client = await accessClientPromise;
+    const client = await accessClientPromise.promise;
 
     logger.info({ msg: "Getting repo pending jobs", owner, repo });
     const jobs = await getRepoPendingJobs({ client, owner, repo });
@@ -122,7 +124,7 @@ const program = new CliProgram()
 
         (async () => {
           for await (const _ of agInterval(5000)) {
-            const accessClient = await accessClientPromise;
+            const accessClient = await accessClientPromise.promise;
             const rate = (await accessClient.endpoint("/rate_limit").method("get")({})).data.rate;
             githubApiRateUsedGauge.set(rate.used);
             logger.info({ msg: "Github rate", rate });
@@ -165,7 +167,7 @@ const program = new CliProgram()
             logger.info({ msg: "Polling from all active repos" });
 
             const activeRepos = await getLastActiveRepoNames({
-              client: await accessClientPromise,
+              client: await accessClientPromise.promise,
               org,
               lastPushedWithinHours: activeReposLastPushedWithinHours,
             });
@@ -283,7 +285,10 @@ const program = new CliProgram()
               }
 
               if (url.pathname === "/runner-token") {
-                const token = await createOrgRunnerRegistrationToken({ client: await accessClientPromise, org });
+                const token = await createOrgRunnerRegistrationToken({
+                  client: await accessClientPromise.promise,
+                  org,
+                });
                 return new Response(token, { status: 200 });
               }
 

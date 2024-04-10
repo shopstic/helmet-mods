@@ -1,4 +1,5 @@
-import { FlexObject, Static, Type } from "../../../deps/typebox.ts";
+import type { Static } from "../../../deps/typebox.ts";
+import { FlexObject, Type } from "../../../deps/typebox.ts";
 
 export const GitlabCicdRegistryParamsSchema = Type.Object({
   groupId: Type.Number(),

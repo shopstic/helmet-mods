@@ -1,12 +1,7 @@
-import {
-  createK8sConfigMap,
-  createK8sDeployment,
-  createK8sVolume,
-  createK8sVolumeMount,
-  K8s,
-} from "../../deps/helmet.ts";
+import type { K8s } from "../../deps/helmet.ts";
+import { createK8sConfigMap, createK8sDeployment, createK8sVolume, createK8sVolumeMount } from "../../deps/helmet.ts";
 import { image as defaultRegistrySyncImage } from "../../apps/registry_syncer/meta.ts";
-import { RegistrySyncJobs, RegistrySyncParams } from "../../apps/registry_syncer/libs/types.ts";
+import type { RegistrySyncJobs, RegistrySyncParams } from "../../apps/registry_syncer/libs/types.ts";
 
 export const defaultName = "registry-syncer";
 

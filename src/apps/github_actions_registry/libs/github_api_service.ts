@@ -1,6 +1,6 @@
-import { OpenapiClient } from "../../../deps/k8s_openapi.ts";
+import type { OpenapiClient } from "../../../deps/k8s_openapi.ts";
 import { delay } from "../../../deps/async_utils.ts";
-import { GhComponents, GhPaths } from "../../../deps/github_api.ts";
+import type { GhComponents, GhPaths } from "../../../deps/github_api.ts";
 import { decodeBase64 } from "../../../deps/std_encoding.ts";
 import { createJwt } from "../../../deps/djwt.ts";
 

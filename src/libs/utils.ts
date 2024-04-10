@@ -1,4 +1,5 @@
-import { Deferred, deferred, delay } from "../deps/async_utils.ts";
+import type { Deferred } from "../deps/async_utils.ts";
+import { deferred, delay } from "../deps/async_utils.ts";
 import { Observable } from "../deps/rxjs.ts";
 import { Type } from "../deps/typebox.ts";
 
@@ -36,7 +37,7 @@ export function createReconciliationLoop<T = void>(): ReconciliationLoop<T> {
 
   async function* generator() {
     while (true) {
-      await promise;
+      await promise.promise;
       promise = deferred();
       yield lastValue;
     }

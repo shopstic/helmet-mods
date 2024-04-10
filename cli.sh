@@ -21,6 +21,17 @@ deno_which_depends_on() {
   done < <(find "$dir_path" -type f -name "*.ts" -print0)
 }
 
+populate_deno_dir_from_nix() {
+  local ARCH=${1:?"Arch is required"}
+  local DENO_DIR=${2:?"Target path is required"}
+  local CACHE_DIR
+  nix build --no-link -v ".#packages.${ARCH}.deno-cache"
+  CACHE_DIR=$(nix path-info ".#packages.${ARCH}.deno-cache") || exit $?
+  ln -s "${CACHE_DIR}"/deps "${DENO_DIR}/deps"
+  ln -s "${CACHE_DIR}"/npm "${DENO_DIR}/npm"
+  ln -s "${CACHE_DIR}"/registries "${DENO_DIR}/registries"
+}
+
 code_quality() {
   echo "Checking formatting..."
   deno fmt --check
@@ -28,6 +39,8 @@ code_quality() {
   deno lint
   echo "Checking..."
   deno check ./src/**/*.ts
+  echo "Running eslint..."
+  eslint ./src
 }
 
 auto_fmt() {
@@ -52,7 +65,15 @@ bundle_app() {
 }
 
 compile_app() {
-  deno compile --check --lock=deno.lock --cached-only -A "$@"
+  local APP=${1:?"App path is required"}
+  local OUT=${2:?"Output path is required"}
+
+  local TEMP_DIR
+  TEMP_DIR=$(mktemp -d) || exit $?
+  deno check "${APP}"
+  local APP_RET
+  APP_RET=$(deno-app-build "${APP}" "${TEMP_DIR}") || exit $?
+  deno compile --cached-only -A --output="${OUT}" "${APP_RET}"
 }
 
 smoke_test() {
@@ -73,7 +94,7 @@ test_app() {
   local APP=${1:?"App path is required"}
   local OUT="$(mktemp -d)/$(basename "${APP}" .ts)"
   trap "rm -Rf ${OUT}" EXIT
-  compile_app --output="${OUT}" "${APP}" 
+  compile_app "${APP}" "${OUT}"
   test_run_app "${OUT}"
 }
 
