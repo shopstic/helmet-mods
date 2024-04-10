@@ -230,11 +230,14 @@ release() {
   done
 
   echo "export default \"${RELEASE_VERSION}\";" >./src/version.ts
+  jq --arg VERSION "${RELEASE_VERSION}" '.version=$VERSION' ./jsr.json
 
-  git add ./src/apps/*/meta.ts ./src/version.ts
+  git add ./src/apps/*/meta.ts ./src/version.ts ./jsr.json
   git commit -m "Release ${RELEASE_VERSION}"
-  git push origin "${RELEASE_BRANCH}"
 
+  "$0" jsr_publish
+
+  git push origin "${RELEASE_BRANCH}"
   gh release create "${RELEASE_VERSION}" --title "Release ${RELEASE_VERSION}" --notes "" --target "${RELEASE_BRANCH}"
 }
 

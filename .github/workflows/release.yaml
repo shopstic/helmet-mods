@@ -41,5 +41,4 @@ jobs:
             DEV_TAG=$(./cli.sh generate_image_tag)
           fi
 
-          ./cli.sh jsr_publish
           ./cli.sh release "${DEV_TAG}" "${RELEASE_VERSION}"

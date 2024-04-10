@@ -1,6 +1,6 @@
 {
   "name": "@wok/helmet-mods",
-  "version": "1.53.0",
+  "version": "latest",
   "exports": {
     "./fdb-cluster": "./src/mods/fdb_cluster/fdb_cluster.ts",
     "./github-actions-registry": "./src/mods/github_actions_registry/github_actions_registry.ts",
