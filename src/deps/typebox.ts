@@ -1,1 +1,1 @@
-export * from "jsr:@wok/helmet@~1.29.0/deps/typebox";
+export * from "jsr:@wok/helmet@~1.29.1/deps/typebox";
