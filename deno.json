@@ -5,7 +5,8 @@
   "fmt": {
     "include": [
       "src/",
-      "test/"
+      "test/",
+      "nix/**/*.ts"
     ],
     "lineWidth": 120
   },

@@ -30,7 +30,9 @@
           };
         deno = hotPotPkgs.deno_1_42_x;
         denort = hotPotPkgs.denort_1_42_x;
-        deno-app-build = hotPotPkgs.deno-app-build;
+        deno-app-build = hotPotPkgs.deno-app-build /* pkgs.callPackage ./nix/deno-app-build {
+          inherit deno denort;
+        } */;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
         deno-cache = pkgs.callPackage hotPot.lib.denoAppCache {
@@ -110,7 +112,7 @@
         devShell = pkgs.mkShellNoCC {
           buildInputs = builtins.attrValues
             {
-              inherit deno;
+              inherit deno deno-app-build;
               inherit (pkgs)
                 gh
                 awscli2
@@ -122,7 +124,6 @@
                 skopeo-nix2container
                 regclient
                 typescript-eslint
-                deno-app-build
                 ;
             };
           shellHook = ''
