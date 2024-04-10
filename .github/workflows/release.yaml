@@ -20,7 +20,7 @@ jobs:
     name: Release ${{ github.event.inputs.version }}
     runs-on: [self-hosted, nix, general, arm64-linux, small]
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
