@@ -6,8 +6,9 @@ import {
   createK8sVolume,
   createK8sVolumeMount,
 } from "../../deps/helmet.ts";
-import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/types.ts";
+import type { VersionBumpParams, VersionBumpTargets } from "../../apps/iac_version_bumper/libs/schemas.ts";
 import { image as defaultIacVersionBumperImage } from "../../apps/iac_version_bumper/meta.ts";
+export * from "../../apps/iac_version_bumper/libs/schemas.ts";
 
 export const defaultName = "iac-version-bumper";
 

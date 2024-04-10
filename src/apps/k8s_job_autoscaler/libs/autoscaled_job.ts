@@ -5,7 +5,8 @@ import { k8sControllerStream } from "../../../libs/k8s_controller.ts";
 import type { Logger } from "../../../libs/logger.ts";
 import { createPromApiClient } from "../../../libs/prom_api_client.ts";
 import { exhaustiveMatchingGuard } from "../../../libs/utils.ts";
-import type { AutoscaledJob, AutoscaledJobAutoscaling, Paths } from "./types.ts";
+import type { AutoscaledJob, AutoscaledJobAutoscaling } from "./schemas.ts";
+import type { Paths } from "./types.ts";
 
 export const jobReplicaIndexLabel = "autoscaledjob.shopstic.com/index";
 

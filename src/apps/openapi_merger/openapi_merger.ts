@@ -1,5 +1,5 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { OpenapiMergerConfigCheck, OpenapiMergerParamsSchema } from "./libs/types.ts";
+import { OpenapiMergerConfigCheck, OpenapiMergerParamsSchema } from "./libs/schemas.ts";
 import { Logger } from "../../libs/logger.ts";
 import { serveDir } from "../../deps/std_http.ts";
 import { stripMargin } from "../../libs/utils.ts";

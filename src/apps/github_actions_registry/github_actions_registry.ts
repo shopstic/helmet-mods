@@ -11,7 +11,7 @@ import {
   getLastActiveRepoNames,
   getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
-import { GithubActionsRegistryParamsSchema } from "./libs/types.ts";
+import { GithubActionsRegistryParamsSchema } from "./libs/schemas.ts";
 import type { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
 import { Gauge, Registry } from "../../deps/ts_prometheus.ts";

@@ -12,11 +12,11 @@ import type { FdbDatabaseConfig } from "../../apps/fdb_configurator/libs/types.t
 import type { FdbExporterResources } from "./lib/fdb_exporter.ts";
 import { createFdbExporterResources } from "./lib/fdb_exporter.ts";
 import { createFdbBackupDeployment } from "./lib/fdb_backup.ts";
-
 import type { K8sImagePullPolicy } from "../../deps/helmet.ts";
 import { image as fdbImage } from "../../apps/fdb_server/meta.ts";
 import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
 import type { FdbLocalityMode } from "./lib/fdb_container.ts";
+export * from "./lib/fdb_stateful.ts";
 
 export { fdbConfiguratorImage };
 

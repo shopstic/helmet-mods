@@ -7,7 +7,8 @@ import {
 } from "../../deps/helmet.ts";
 import { image as defaultGrafanaSyncerImage } from "../../apps/grafana_syncer/meta.ts";
 import crd from "./crd.ts";
-import type { GrafanaSyncerParams } from "../../apps/grafana_syncer/libs/types.ts";
+import type { GrafanaSyncerParams } from "../../apps/grafana_syncer/libs/schemas.ts";
+export type { GrafanaDashboard } from "../../apps/grafana_syncer/libs/types.ts";
 
 export const defaultName = "grafana-syncer";
 

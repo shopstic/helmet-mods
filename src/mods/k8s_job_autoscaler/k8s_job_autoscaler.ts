@@ -7,7 +7,8 @@ import {
 } from "../../deps/helmet.ts";
 import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autoscaler/meta.ts";
 import crd from "./crd.json" with { type: "json" };
-import type { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/types.ts";
+import type { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/schemas.ts";
+export * from "../../apps/k8s_job_autoscaler/libs/schemas.ts";
 
 export const defaultName = "k8s-job-autoscaler";
 

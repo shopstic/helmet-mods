@@ -16,9 +16,10 @@ import {
   createK8sServiceAccount,
 } from "../../deps/helmet.ts";
 import { image as defaultGitlabCicdRegistryImage } from "../../apps/gitlab_cicd_registry/meta.ts";
-import type { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/types.ts";
+import type { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/schemas.ts";
 import type { ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 import { createServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+export * from "../../apps/gitlab_cicd_registry/libs/schemas.ts";
 
 export const defaultName = "gitlab-cicd-registry";
 

@@ -5,8 +5,8 @@ import { createOpenapiClient, OpenapiOperationError } from "../../deps/k8s_opena
 import { k8sControllerStream } from "../../libs/k8s_controller.ts";
 import { Logger } from "../../libs/logger.ts";
 import { exhaustiveMatchingGuard } from "../../libs/utils.ts";
+import { GrafanaSyncerParamsSchema } from "./libs/schemas.ts";
 import type { GrafanaDashboard, Paths } from "./libs/types.ts";
-import { GrafanaSyncerParamsSchema } from "./libs/types.ts";
 
 interface UpsertDashboard {
   action: "upsert";
