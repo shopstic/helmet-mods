@@ -11,13 +11,13 @@ deno_which_depends_on() {
     local output=$(deno info "$file_path" 2>/dev/null | grep -e "$grep_pattern")
 
     if [ -n "$output" ]; then
-        echo "$file_path"
+      echo "$file_path"
     fi
   }
 
   # Walk the directory and process each file
   while IFS= read -r -d '' file; do
-      process_file "$file"
+    process_file "$file"
   done < <(find "$dir_path" -type f -name "*.ts" -print0)
 }
 
@@ -72,7 +72,7 @@ compile_app() {
   TEMP_DIR=$(mktemp -d) || exit $?
   deno check "${APP}"
   local APP_RET
-  APP_RET=$(deno-app-build "${APP}" "${TEMP_DIR}") || exit $?
+  APP_RET=$(deno-app-build --allow-npm-specifier --app-path="${APP}" --out-path="${TEMP_DIR}") || exit $?
   deno compile --cached-only -A --output="${OUT}" "${APP_RET}"
 }
 
@@ -124,8 +124,8 @@ image_arch_to_nix_arch() {
   elif [[ "${IMAGE_ARCH}" == "amd64" ]]; then
     echo "x86_64"
   else
-     >&2 echo "Invalid image arch of ${IMAGE_ARCH}"
-     exit 1
+    echo >&2 "Invalid image arch of ${IMAGE_ARCH}"
+    exit 1
   fi
 }
 
@@ -158,7 +158,7 @@ push_single_arch() {
 
   local IMAGE=${1:?"Image name is required"}
   local ARCH=${2:?"Arch is required (amd64 | arm64)"}
-  
+
   local NIX_ARCH
   NIX_ARCH=$("$0" image_arch_to_nix_arch "${ARCH}") || exit $?
 
@@ -170,7 +170,7 @@ push_single_arch() {
 
   local TARGET_IMAGE="${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}-${ARCH}"
 
-  >&2 echo "Pushing ${TARGET_IMAGE}"
+  echo >&2 "Pushing ${TARGET_IMAGE}"
 
   skopeo --insecure-policy copy --dest-tls-verify=false \
     nix:"./result/${FILE_NAME}" \
@@ -184,8 +184,8 @@ push_manifest() {
   IMAGE_TAG=$("$0" generate_image_tag) || exit $?
 
   local TARGET="${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}"
-  
-  >&2 echo "Writing manifest for ${TARGET}"
+
+  echo >&2 "Writing manifest for ${TARGET}"
 
   manifest-tool push from-args \
     --platforms linux/amd64,linux/arm64 \
@@ -208,14 +208,14 @@ release_image() {
   local APP_NAME
   APP_NAME=$(echo "${IMAGE}" | sed 's/-/_/g') || exit $?
 
-  echo "export const image = \"${IMAGE_REPOSITORY}/${IMAGE}@${DIGEST}\";" > "./src/apps/${APP_NAME}/meta.ts"
+  echo "export const image = \"${IMAGE_REPOSITORY}/${IMAGE}@${DIGEST}\";" >"./src/apps/${APP_NAME}/meta.ts"
 }
 
 release() {
   local IMAGE_REPOSITORY=${IMAGE_REPOSITORY:?"IMAGE_REPOSITORY env var is required"}
   local DEV_TAG=${1:?"Image dev tag is required"}
   local RELEASE_VERSION=${2:?"Release version is required"}
-  
+
   local RELEASE_BRANCH="releases/${RELEASE_VERSION}"
 
   git config --global user.email "ci-runner@shopstic.com"
@@ -229,13 +229,50 @@ release() {
     "$0" release_image "${IMAGE}" "${DEV_TAG}" "${RELEASE_VERSION}"
   done
 
-  echo "export default \"${RELEASE_VERSION}\";" > ./src/version.ts
+  echo "export default \"${RELEASE_VERSION}\";" >./src/version.ts
 
   git add ./src/apps/*/meta.ts ./src/version.ts
   git commit -m "Release ${RELEASE_VERSION}"
   git push origin "${RELEASE_BRANCH}"
 
   gh release create "${RELEASE_VERSION}" --title "Release ${RELEASE_VERSION}" --notes "" --target "${RELEASE_BRANCH}"
+}
+
+gen_github_openapi_types() {
+  local SPEC_URL=${1:-"https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"}
+  local DIR="$(dirname "$(realpath "$0")")"
+  local FORMATTER_DIR=$(mktemp -d)
+  local OUT="$DIR"/src/libs/github/openapi_types.ts
+  trap "rm -Rf ${FORMATTER_DIR}" EXIT
+
+  cat <<EOF >"${FORMATTER_DIR}/formatter.mjs"
+export default (node) => {
+  if (node.format === "int-or-string") {
+    return "string | number";
+  }
+}
+EOF
+
+  echo "// deno-lint-ignore-file" >"${OUT}"
+  echo "/* eslint-disable */" >>"${OUT}"
+  echo "// Generated from ${SPEC_URL}" >>"${OUT}"
+  openapi-ts-gen <(curl -sf "${SPEC_URL}") "${FORMATTER_DIR}/formatter.mjs" >>"${OUT}"
+  deno fmt "${OUT}"
+}
+
+gen_grafana_openapi_types() {
+  local SPEC_URL=${1:-"https://raw.githubusercontent.com/grafana/grafana/v10.4.1/public/openapi3.json"}
+  local DIR="$(dirname "$(realpath "$0")")"
+  local OUT="$DIR"/src/libs/grafana/openapi_types.ts
+  echo "// deno-lint-ignore-file" >"${OUT}"
+  echo "/* eslint-disable */" >>"${OUT}"
+  echo "// Generated from ${SPEC_URL}" >>"${OUT}"
+  openapi-ts-gen <(curl -sf "${SPEC_URL}") >>"${OUT}"
+  deno fmt "${OUT}"
+}
+
+jsr_publish() {
+  deno publish --config ./jsr.json --allow-slow-types --allow-dirty
 }
 
 "$@"

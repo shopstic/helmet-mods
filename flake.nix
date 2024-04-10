@@ -124,6 +124,7 @@
                 skopeo-nix2container
                 regclient
                 typescript-eslint
+                openapi-ts-gen
                 ;
             };
           shellHook = ''

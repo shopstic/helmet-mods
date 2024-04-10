@@ -1,7 +1,6 @@
 {
-
   "name": "@wok/helmet-mods",
-  "version": "1.52.0",
+  "version": "1.53.0",
   "exports": {
     "./fdb-cluster": "./src/mods/fdb_cluster/fdb_cluster.ts",
     "./github-actions-registry": "./src/mods/github_actions_registry/github_actions_registry.ts",
@@ -19,13 +18,10 @@
     "./deps/cli-utils": "./src/deps/cli_utils.ts",
     "./deps/djwt": "./src/deps/djwt.ts",
     "./deps/exec-utils": "./src/deps/exec_utils.ts",
-    "./deps/github-api": "./src/deps/github_api.ts",
-    "./deps/grafana-openapi": "./src/deps/grafana_openapi.ts",
     "./deps/helmet": "./src/deps/helmet.ts",
     "./deps/immer": "./src/deps/immer.ts",
     "./deps/k8s-openapi": "./src/deps/k8s_openapi.ts",
     "./deps/openapi-merge": "./src/deps/openapi_merge.ts",
-    "./deps/optic": "./src/deps/optic.ts",
     "./deps/rxjs": "./src/deps/rxjs.ts",
     "./deps/stable-hash": "./src/deps/stable_hash.ts",
     "./deps/std-encoding": "./src/deps/std_encoding.ts",
@@ -36,11 +32,11 @@
     "./deps/std-stream": "./src/deps/std_stream.ts",
     "./deps/std-testing": "./src/deps/std_testing.ts",
     "./deps/std-yaml": "./src/deps/std_yaml.ts",
-    "./deps/ts-prometheus": "./src/deps/ts_prometheus.ts",
+    "./deps/prometheus": "./src/deps/prometheus.ts",
     "./deps/typebox": "./src/deps/typebox.ts",
     "./deps/validation-utils": "./src/deps/validation_utils.ts"
   },
   "publish": {
-    "include": ["./src", "./deno.json", "./README.md", "./LICENSE"]
+    "include": ["./src", "./jsr.json", "./README.md", "./LICENSE"]
   }
 }

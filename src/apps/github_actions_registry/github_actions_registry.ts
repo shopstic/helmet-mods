@@ -12,11 +12,12 @@ import {
   getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
 import { GithubActionsRegistryParamsSchema } from "./libs/schemas.ts";
-import type { GhPaths, WorkflowJobEvent } from "../../deps/github_api.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
-import { Gauge, Registry } from "../../deps/ts_prometheus.ts";
+import { Gauge, Registry } from "../../deps/prometheus.ts";
 import { captureExec } from "../../deps/exec_utils.ts";
 import { deferred } from "../../deps/async_utils.ts";
+import type { GhComponents, GhPaths } from "./libs/types.ts";
+import type { WorkflowJobEvent } from "../../deps/github_webhooks.ts";
 
 interface ReconciliationRequest {
   id: string;
@@ -36,7 +37,7 @@ const githubApiRateUsedGauge = Gauge.with({
 interface GithubJob {
   name: string;
   labels: string[];
-  status: "queued" | "in_progress" | "completed";
+  status: GhComponents["parameters"]["workflow-run-status"];
   runnerName: string | null;
 }
 
