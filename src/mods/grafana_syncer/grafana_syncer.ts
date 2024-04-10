@@ -1,15 +1,9 @@
-import type {
-  K8s,
-  K8sCrd,
-  K8sDeployment,
-  K8sRole,
-  K8sRoleBinding,
-  K8sServiceAccount} from "../../deps/helmet.ts";
+import type { K8s, K8sCrd, K8sDeployment, K8sRole, K8sRoleBinding, K8sServiceAccount } from "../../deps/helmet.ts";
 import {
   createK8sDeployment,
   createK8sRole,
   createK8sRoleBinding,
-  createK8sServiceAccount
+  createK8sServiceAccount,
 } from "../../deps/helmet.ts";
 import { image as defaultGrafanaSyncerImage } from "../../apps/grafana_syncer/meta.ts";
 import crd from "./crd.ts";

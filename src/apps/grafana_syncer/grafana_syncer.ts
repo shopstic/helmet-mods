@@ -1,6 +1,6 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import type { GrafanaApiPaths } from "../../deps/grafana_openapi.ts";
-import type { OpenapiClient} from "../../deps/k8s_openapi.ts";
+import type { OpenapiClient } from "../../deps/k8s_openapi.ts";
 import { createOpenapiClient, OpenapiOperationError } from "../../deps/k8s_openapi.ts";
 import { k8sControllerStream } from "../../libs/k8s_controller.ts";
 import { Logger } from "../../libs/logger.ts";

@@ -1,12 +1,5 @@
-import type {
-  K8s,
-  K8sDeployment,
-  K8sImagePullPolicy,
-  K8sService} from "../../../deps/helmet.ts";
-import {
-  createK8sDeployment,
-  createK8sService
-} from "../../../deps/helmet.ts";
+import type { K8s, K8sDeployment, K8sImagePullPolicy, K8sService } from "../../../deps/helmet.ts";
+import { createK8sDeployment, createK8sService } from "../../../deps/helmet.ts";
 import type { ServiceMonitorV1 } from "../../prometheus_operator/prometheus_operator.ts";
 import { createServiceMonitorV1 } from "../../prometheus_operator/prometheus_operator.ts";
 

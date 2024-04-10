@@ -54,7 +54,15 @@ bundle_app() {
 }
 
 compile_app() {
-  deno compile --check --lock=deno.lock --cached-only -A "$@"
+  local APP=${1:?"App path is required"}
+  local OUT=${2:?"Output path is required"}
+
+  local TEMP_DIR
+  TEMP_DIR=$(mktemp -d) || exit $?
+  deno check "${APP}"
+  local APP_RET
+  APP_RET=$(deno-app-build "${APP}" "${TEMP_DIR}") || exit $?
+  deno compile --cached-only -A --output="${OUT}" "${APP_RET}"
 }
 
 smoke_test() {
@@ -75,7 +83,7 @@ test_app() {
   local APP=${1:?"App path is required"}
   local OUT="$(mktemp -d)/$(basename "${APP}" .ts)"
   trap "rm -Rf ${OUT}" EXIT
-  compile_app --output="${OUT}" "${APP}" 
+  compile_app "${APP}" "${OUT}"
   test_run_app "${OUT}"
 }
 

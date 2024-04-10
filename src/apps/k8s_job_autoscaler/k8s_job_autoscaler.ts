@@ -1,14 +1,7 @@
 import { deepEqual } from "../../deps/std_testing.ts";
 import { immerProduce } from "../../deps/immer.ts";
-import type {
-  MetricSnapshot} from "./libs/autoscaled_job.ts";
-import {
-  getJobs,
-  jobReplicaIndexLabel,
-  watchJobGroups,
-  watchJobs,
-  watchMetric,
-} from "./libs/autoscaled_job.ts";
+import type { MetricSnapshot } from "./libs/autoscaled_job.ts";
+import { getJobs, jobReplicaIndexLabel, watchJobGroups, watchJobs, watchMetric } from "./libs/autoscaled_job.ts";
 import { delay } from "../../deps/async_utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import type { AutoscaledJob, AutoscaledJobAutoscaling, Paths } from "./libs/types.ts";

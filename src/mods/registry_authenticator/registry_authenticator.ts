@@ -1,7 +1,6 @@
 import type { RegistryAuthConfig, RegistryAuthParams } from "../../apps/registry_authenticator/libs/types.ts";
 import { image as defaultRegistryAuthImage } from "../../apps/registry_authenticator/meta.ts";
-import type {
-  K8s} from "../../deps/helmet.ts";
+import type { K8s } from "../../deps/helmet.ts";
 import {
   createK8sContainer,
   createK8sDeployment,
@@ -9,7 +8,7 @@ import {
   createK8sRoleBinding,
   createK8sSecret,
   createK8sVolume,
-  createK8sVolumeMount
+  createK8sVolumeMount,
 } from "../../deps/helmet.ts";
 
 export const defaultName = "registry-authenticator";

@@ -5,14 +5,15 @@ import type {
   K8sJob,
   K8sRole,
   K8sRoleBinding,
-  K8sServiceAccount} from "../../../../deps/helmet.ts";
+  K8sServiceAccount,
+} from "../../../../deps/helmet.ts";
 import {
   createK8sConfigMap,
   createK8sContainer,
   createK8sJob,
   createK8sRole,
   createK8sRoleBinding,
-  createK8sServiceAccount
+  createK8sServiceAccount,
 } from "../../../../deps/helmet.ts";
 
 import type { FdbDatabaseConfig } from "../../../../apps/fdb_configurator/libs/types.ts";

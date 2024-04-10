@@ -1,5 +1,5 @@
 import type { K8s, K8sApiPaths, K8sApiPathsWithCrd } from "../../../deps/k8s_openapi.ts";
-import type { Static} from "../../../deps/typebox.ts";
+import type { Static } from "../../../deps/typebox.ts";
 import { Type } from "../../../deps/typebox.ts";
 
 export const K8sJobAutoscalerParamsSchema = Type.Object({

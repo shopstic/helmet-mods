@@ -1,16 +1,10 @@
 import type { K8s, K8sDeployment, K8sService, K8sStatefulSet } from "../../deps/helmet.ts";
 import type { FdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
 import { createFdbConfigureResources } from "./lib/configurator/fdb_configure.ts";
-import type {
-  FdbCreateConnectionStringResources} from "./lib/configurator/fdb_create_connection_string.ts";
-import {
-  createFdbCreateConnectionStringResources
-} from "./lib/configurator/fdb_create_connection_string.ts";
-import type {
-  FdbSyncConnectionStringResources} from "./lib/configurator/fdb_sync_connection_string.ts";
-import {
-  createFdbSyncConnectionStringResources
-} from "./lib/configurator/fdb_sync_connection_string.ts";
+import type { FdbCreateConnectionStringResources } from "./lib/configurator/fdb_create_connection_string.ts";
+import { createFdbCreateConnectionStringResources } from "./lib/configurator/fdb_create_connection_string.ts";
+import type { FdbSyncConnectionStringResources } from "./lib/configurator/fdb_sync_connection_string.ts";
+import { createFdbSyncConnectionStringResources } from "./lib/configurator/fdb_sync_connection_string.ts";
 import type { FdbStatefulConfig } from "./lib/fdb_stateful.ts";
 import { createFdbStatefulResources, FDB_COMPONENT_LABEL } from "./lib/fdb_stateful.ts";
 import { createFdbStatelessDeployment } from "./lib/fdb_stateless.ts";

@@ -5,14 +5,15 @@ import type {
   K8sRole,
   K8sRoleBinding,
   K8sService,
-  K8sServiceAccount} from "../../deps/helmet.ts";
+  K8sServiceAccount,
+} from "../../deps/helmet.ts";
 import {
   createK8sDeployment,
   createK8sIngress,
   createK8sRole,
   createK8sRoleBinding,
   createK8sService,
-  createK8sServiceAccount
+  createK8sServiceAccount,
 } from "../../deps/helmet.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
 import type { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/types.ts";

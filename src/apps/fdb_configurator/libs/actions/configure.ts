@@ -2,7 +2,7 @@ import { memoizePromise } from "../../../../deps/async_utils.ts";
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { Type } from "../../../../deps/typebox.ts";
 import { Logger } from "../../../../libs/logger.ts";
-import type { FdbDatabaseConfig, FdbStatus, FdbStatusProcess} from "../types.ts";
+import type { FdbDatabaseConfig, FdbStatus, FdbStatusProcess } from "../types.ts";
 import { NonEmptyString } from "../types.ts";
 
 import {

@@ -1,15 +1,5 @@
-import type {
-  K8s,
-  K8sDeployment,
-  K8sIngress,
-  K8sSecret,
-  K8sService} from "../../deps/helmet.ts";
-import {
-  createK8sDeployment,
-  createK8sIngress,
-  createK8sSecret,
-  createK8sService
-} from "../../deps/helmet.ts";
+import type { K8s, K8sDeployment, K8sIngress, K8sSecret, K8sService } from "../../deps/helmet.ts";
+import { createK8sDeployment, createK8sIngress, createK8sSecret, createK8sService } from "../../deps/helmet.ts";
 import { image as defaultOpenapiMergerImage } from "../../apps/openapi_merger/meta.ts";
 import type { OpenapiMergerConfig, OpenapiMergerParams } from "../../apps/openapi_merger/libs/types.ts";
 import { stableHash } from "../../deps/stable_hash.ts";

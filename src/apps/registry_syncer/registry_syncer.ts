@@ -1,5 +1,5 @@
 import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
-import type { RegistrySyncJob, RegistrySyncJobs} from "./libs/types.ts";
+import type { RegistrySyncJob, RegistrySyncJobs } from "./libs/types.ts";
 import { RegistrySyncJobsSchema, RegistrySyncParamsSchema } from "./libs/types.ts";
 import { commandWithTimeout, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";

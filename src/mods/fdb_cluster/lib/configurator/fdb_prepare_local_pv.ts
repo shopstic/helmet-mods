@@ -4,13 +4,14 @@ import type {
   K8sClusterRoleBinding,
   K8sDaemonSet,
   K8sImagePullPolicy,
-  K8sServiceAccount} from "../../../../deps/helmet.ts";
+  K8sServiceAccount,
+} from "../../../../deps/helmet.ts";
 import {
   createK8sClusterRole,
   createK8sClusterRoleBinding,
   createK8sContainer,
   createK8sDaemonSet,
-  createK8sServiceAccount
+  createK8sServiceAccount,
 } from "../../../../deps/helmet.ts";
 
 export const PENDING_LABEL_VALUE_YES = "yes";

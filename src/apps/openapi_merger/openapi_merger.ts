@@ -3,7 +3,7 @@ import { OpenapiMergerConfigCheck, OpenapiMergerParamsSchema } from "./libs/type
 import { Logger } from "../../libs/logger.ts";
 import { serveDir } from "../../deps/std_http.ts";
 import { stripMargin } from "../../libs/utils.ts";
-import type { OpenapiMergeInput} from "../../deps/openapi_merge.ts";
+import type { OpenapiMergeInput } from "../../deps/openapi_merge.ts";
 import { openapiMerge, openapiMergeIsErrorResult } from "../../deps/openapi_merge.ts";
 import { yamlParse, yamlStringify } from "../../deps/std_yaml.ts";
 import { deepMerge } from "../../deps/helmet.ts";
