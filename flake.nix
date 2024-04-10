@@ -37,28 +37,21 @@
           name = "helmet-mods";
           cacheArgs = "./src/**/*.ts";
         };
-        # deno-app-build = pkgs.callPackage ./nix/deno-app-build {
-        #   inherit deno denort;
-        # };
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            patch = ./src/patched_fetch.ts;
-            patchedSrc = pkgs.runCommand "patched-${name}-src"
-              {
-                buildInputs = [ hotPotPkgs.symlink-mirror ];
-              } ''
-              mkdir -p $out
-              symlink-mirror --absolute "${src}" $out
-              cat "${patch}" "$out/${tsPath}" > "$out/${tsPath}.temp"
-              rm -f "$out/${tsPath}"
-              mv "$out/${tsPath}.temp" "$out/${tsPath}"
-            '';
+            patch = ./src/patched_fetch.js;
             compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
-              inherit name deno denort deno-cache;
+              inherit name deno denort deno-cache src;
               inherit (hotPotPkgs) deno-app-build;
-              src = patchedSrc;
               appSrcPath = tsPath;
+              postBuild = ''
+                PATCHED_RESULT=$(mktemp)
+                cat ${patch} > "$PATCHED_RESULT"
+                cat "$RESULT" >> "$PATCHED_RESULT"
+                rm "$RESULT"
+                mv "$PATCHED_RESULT" "$RESULT"
+              '';
             };
           in
           compiled;

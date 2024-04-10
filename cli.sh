@@ -21,6 +21,17 @@ deno_which_depends_on() {
   done < <(find "$dir_path" -type f -name "*.ts" -print0)
 }
 
+populate_deno_dir_from_nix() {
+  local ARCH=${1:?"Arch is required"}
+  local DENO_DIR=${2:?"Target path is required"}
+  local CACHE_DIR
+  nix build --no-link -v ".#packages.${ARCH}.deno-cache"
+  CACHE_DIR=$(nix path-info ".#packages.${ARCH}.deno-cache") || exit $?
+  ln -s "${CACHE_DIR}"/deps "${DENO_DIR}/deps"
+  ln -s "${CACHE_DIR}"/npm "${DENO_DIR}/npm"
+  ln -s "${CACHE_DIR}"/registries "${DENO_DIR}/registries"
+}
+
 code_quality() {
   echo "Checking formatting..."
   deno fmt --check
