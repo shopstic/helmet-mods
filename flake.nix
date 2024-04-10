@@ -138,7 +138,6 @@
         };
         packages = {
           inherit
-            deno-cache
             fdb-configurator
             iac-version-bumper
             registry-authenticator
