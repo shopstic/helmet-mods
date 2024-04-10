@@ -33,7 +33,6 @@
     "./deps/std-fs": "./src/deps/std_fs.ts",
     "./deps/std-http": "./src/deps/std_http.ts",
     "./deps/std-path": "./src/deps/std_path.ts",
-    "./deps/std-signal": "./src/deps/std_signal.ts",
     "./deps/std-stream": "./src/deps/std_stream.ts",
     "./deps/std-testing": "./src/deps/std_testing.ts",
     "./deps/std-yaml": "./src/deps/std_yaml.ts",

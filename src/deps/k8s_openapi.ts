@@ -1,8 +1,8 @@
-export * from "@wok/k8s";
+export * from "jsr:@wok/k8s@~1.29.3+5";
 export type {
   OpenapiClient,
   OpenapiOperationApi,
   OpenapiOperationApiArgType,
   OpenapiOperationApiReturnType,
-} from "@wok/openapi-client";
-export { createOpenapiClient, OpenapiOperationError } from "@wok/openapi-client";
+} from "jsr:@wok/openapi-client@~1.0.1";
+export { createOpenapiClient, OpenapiOperationError } from "jsr:@wok/openapi-client@~1.0.1";

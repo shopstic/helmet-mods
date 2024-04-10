@@ -1,4 +1,4 @@
-export * from "@wok/utils/async";
+export * from "jsr:@wok/utils@~1.2.0/async";
 
 export type Deferred<T> = PromiseWithResolvers<T> & {
   state: "pending" | "resolved" | "rejected";

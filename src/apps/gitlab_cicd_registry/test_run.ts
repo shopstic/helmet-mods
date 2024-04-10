@@ -1,7 +1,6 @@
 import { inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
 import type { GitlabCicdRegistryParams } from "./libs/schemas.ts";
 import { dirname, fromFileUrl } from "../../deps/std_path.ts";
-import { watchOsSignal } from "../../deps/std_signal.ts";
 
 const accessToken = Deno.env.get("GITLAB_TEST_ACCESS_TOKEN");
 if (!accessToken) {
@@ -46,10 +45,15 @@ const mainPromise = inheritExec({
 });
 
 const interruptionPromise = (async () => {
-  for await (const _ of watchOsSignal("SIGTERM", "SIGINT")) {
-    abortController.abort();
-    await mainPromise;
-  }
+  const deferred = Promise.withResolvers<void>();
+
+  Deno.addSignalListener("SIGTERM", deferred.resolve);
+  Deno.addSignalListener("SIGINT", deferred.resolve);
+
+  await deferred.promise;
+
+  abortController.abort();
+  await mainPromise;
 })();
 
 await Promise.race([interruptionPromise, mainPromise]);

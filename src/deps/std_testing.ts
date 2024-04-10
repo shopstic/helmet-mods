@@ -1,3 +1,3 @@
-export { equal as deepEqual } from "@std/assert/equal";
-export { assertNotEquals } from "@std/assert/assert-not-equals";
-export { assertEquals } from "@std/assert/assert-equals";
+export { equal as deepEqual } from "jsr:@std/assert@^0.221.0/equal";
+export { assertNotEquals } from "jsr:@std/assert@^0.221.0/assert-not-equals";
+export { assertEquals } from "jsr:@std/assert@^0.221.0/assert-equals";
