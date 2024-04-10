@@ -30,6 +30,7 @@
           };
         deno = hotPotPkgs.deno_1_42_x;
         denort = hotPotPkgs.denort_1_42_x;
+        deno-app-build = hotPotPkgs.deno-app-build;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
         deno-cache = pkgs.callPackage hotPot.lib.denoAppCache {
@@ -42,8 +43,8 @@
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
             patch = ./src/patched_fetch.js;
             compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
-              inherit name deno denort deno-cache src;
-              inherit (hotPotPkgs) deno-app-build;
+              inherit name deno denort deno-cache src deno-app-build;
+              # inherit (hotPotPkgs) deno-app-build;
               appSrcPath = tsPath;
               postBuild = ''
                 PATCHED_RESULT=$(mktemp)
