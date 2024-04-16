@@ -1,1 +1,1 @@
-export * from "jsr:@wok/helmet@~1.29.1";
+export * from "jsr:@wok/helmet@~1.29.3";
