@@ -43,18 +43,10 @@
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            patch = ./src/patched_fetch.js;
             compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
               inherit name deno denort deno-cache src deno-app-build;
-              # inherit (hotPotPkgs) deno-app-build;
               appSrcPath = tsPath;
-              postBuild = ''
-                PATCHED_RESULT=$(mktemp)
-                cat ${patch} > "$PATCHED_RESULT"
-                cat "$RESULT" >> "$PATCHED_RESULT"
-                rm "$RESULT"
-                mv "$PATCHED_RESULT" "$RESULT"
-              '';
+              prefix-patch = ./src/patched_fetch.js;
             };
           in
           compiled;
