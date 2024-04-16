@@ -16,6 +16,8 @@ module.exports = tseslint.config(
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/require-await": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/prefer-promise-reject-errors": "error"
     },
     languageOptions: {
       parserOptions: {

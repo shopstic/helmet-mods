@@ -123,13 +123,13 @@ const program = new CliProgram()
             });
             const rl = createReconciliationLoop<ReconciliationRequest>();
             reconciliationLoopByIdMap.set(request.projectId, rl);
-            runReconciliationLoop(agThrottle(rl.loop, perProjectMinRefreshIntervalMs));
+            void runReconciliationLoop(agThrottle(rl.loop, perProjectMinRefreshIntervalMs));
           }
 
           reconciliationLoopByIdMap.get(request.projectId)!.request(request);
         }
 
-        (async () => {
+        const periodicProjectsRefreshPromise = (async () => {
           for await (const _ of agInterval(allProjectsRefreshIntervalSeconds * 1000)) {
             logger.info({ msg: "Fetching all active projects" });
             const activeProjects = await fetchLastActiveProjects({
@@ -292,7 +292,7 @@ const program = new CliProgram()
           }).finished;
         })();
 
-        await Promise.race([webhookServerPromise, registryServerPromise]);
+        await Promise.race([periodicProjectsRefreshPromise, webhookServerPromise, registryServerPromise]);
 
         return ExitCode.Zero;
       },

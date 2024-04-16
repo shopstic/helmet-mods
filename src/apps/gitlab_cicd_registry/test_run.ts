@@ -38,7 +38,7 @@ const mainPromise = inheritExec({
   ),
   cwd: dirname(fromFileUrl(import.meta.url)),
   abortSignal: abortController.signal,
-}).catch((e) => {
+}).catch((e: Error) => {
   if (!(e instanceof NonZeroExitError) || e.exitCode !== 123) {
     return Promise.reject(e);
   }

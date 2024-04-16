@@ -123,7 +123,7 @@ const program = new CliProgram()
           (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
         const signWebhookRequest = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
 
-        (async () => {
+        const periodicRateLimitLoggingPromise = (async () => {
           for await (const _ of agInterval(5000)) {
             const accessClient = await accessClientPromise.promise;
             const rate = (await accessClient.endpoint("/rate_limit").method("get")({})).data.rate;
@@ -132,7 +132,7 @@ const program = new CliProgram()
           }
         })();
 
-        (async () => {
+        const periodicTokenRefreshPromise = (async () => {
           for await (
             const accessClient of generateAccessClient({
               appId,
@@ -163,7 +163,7 @@ const program = new CliProgram()
           }
         })();
 
-        (async () => {
+        const periodicReposPollingPromise = (async () => {
           for await (const _ of agInterval(allReposRefreshIntervalSeconds * 1000)) {
             logger.info({ msg: "Polling from all active repos" });
 
@@ -186,7 +186,7 @@ const program = new CliProgram()
             logger.info({ msg: "Create reconciliation loop", id: request.id, perRepoMinRefreshIntervalMs });
             const rl = createReconciliationLoop<ReconciliationRequest>();
             reconciliationLoopByIdMap.set(request.id, rl);
-            runReconciliationLoop(agThrottle(rl.loop, perRepoMinRefreshIntervalMs));
+            void runReconciliationLoop(agThrottle(rl.loop, perRepoMinRefreshIntervalMs));
           }
           reconciliationLoopByIdMap.get(request.id)!.request(request);
         }
@@ -345,7 +345,13 @@ const program = new CliProgram()
           }, webhookHandler).finished;
         })();
 
-        await Promise.race([registryServerPromise, webhookServerPromise]);
+        await Promise.race([
+          periodicRateLimitLoggingPromise,
+          periodicTokenRefreshPromise,
+          periodicReposPollingPromise,
+          registryServerPromise,
+          webhookServerPromise,
+        ]);
 
         return ExitCode.Zero;
       },
