@@ -1,6 +1,6 @@
 {
   "name": "@wok/helmet-mods",
-  "version": "latest",
+  "version": "1.53.4",
   "exports": {
     "./fdb-cluster": "./src/mods/fdb_cluster/fdb_cluster.ts",
     "./github-actions-registry": "./src/mods/github_actions_registry/github_actions_registry.ts",
@@ -37,6 +37,11 @@
     "./deps/validation-utils": "./src/deps/validation_utils.ts"
   },
   "publish": {
-    "include": ["./src", "./jsr.json", "./README.md", "./LICENSE"]
+    "include": [
+      "./src",
+      "./jsr.json",
+      "./README.md",
+      "./LICENSE"
+    ]
   }
 }
