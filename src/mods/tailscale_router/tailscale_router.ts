@@ -15,10 +15,15 @@ import images from "../../images.json" with { type: "json" };
 
 const defaultName = "tailscale-router";
 
+export const defaultHelperImage = images.tailscaleRouterInit;
+export const defaultImage = images.tailscale;
+
 export function createTailscaleRouterResources(
   {
     replicas = 1,
     name = defaultName,
+    image = defaultImage,
+    helperImage = defaultHelperImage,
     namespace,
     serviceAccountName,
     clientId,
@@ -36,6 +41,8 @@ export function createTailscaleRouterResources(
   }: {
     replicas?: number;
     name?: string;
+    image?: string;
+    helperImage?: string;
     namespace: string;
     serviceAccountName?: string;
     clientId: string;
@@ -56,8 +63,6 @@ export function createTailscaleRouterResources(
     "app.kubernetes.io/name": defaultName,
     "app.kubernetes.io/instance": name,
   };
-
-  const helperImage = images.tailscaleRouterInit;
 
   const authKeyRefreshName = `${name}-auth-key-refresh`;
   const authKeySecretName = `${name}-auth-key`;
@@ -327,7 +332,7 @@ export function createTailscaleRouterResources(
           containers: [
             {
               name: "tailscale",
-              image: images.tailscale,
+              image,
               env: [{
                 name: "TS_AUTH_KEY",
                 valueFrom: {
