@@ -1,4 +1,4 @@
-import type { K8s, K8sVolumeMount } from "../../deps/helmet.ts";
+import type { K8s } from "../../deps/helmet.ts";
 import {
   createK8sCronJob,
   createK8sDeployment,
