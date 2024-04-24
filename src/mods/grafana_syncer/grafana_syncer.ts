@@ -9,6 +9,7 @@ import { image as defaultGrafanaSyncerImage } from "../../apps/grafana_syncer/me
 import crd from "./crd.ts";
 import type { GrafanaSyncerParams } from "../../apps/grafana_syncer/libs/schemas.ts";
 export type { GrafanaDashboard } from "../../apps/grafana_syncer/libs/types.ts";
+import images from "../../images.json" with { type: "json" };
 
 export const defaultName = "grafana-syncer";
 
@@ -129,8 +130,7 @@ export function createGrafanaSyncerResources({
           containers: [
             {
               name: "kubectl-proxy",
-              image:
-                "public.ecr.aws/shopstic/kubectl:1.28.7@sha256:eac5e237ae8a765130b264b7df189f15230d95621b473479e6da470e7169efe4",
+              image: images.kubectl,
               command: ["/bin/kubectl", "proxy"],
             },
             {

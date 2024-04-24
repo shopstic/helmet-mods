@@ -17,13 +17,12 @@ import { image as fdbImage } from "../../apps/fdb_server/meta.ts";
 import { image as fdbConfiguratorImage } from "../../apps/fdb_configurator/meta.ts";
 import type { FdbLocalityMode } from "./lib/fdb_container.ts";
 export * from "./lib/fdb_stateful.ts";
+import images from "../../images.json" with { type: "json" };
 
 export { fdbConfiguratorImage };
 
-export const fdbExporterImage =
-  "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.53@sha256:5aba29a8e52cbb2e11fad33cb89dda9c6e6af162b30f70e59b7b894a85e57df0";
-export const defaultDedupProxyImage =
-  "public.ecr.aws/shopstic/dedup-proxy:2.0.1@sha256:bc87c6736d0fc1ce4ee57ec4a03839e77515ae323c6f123f5964acea1a799974";
+export const fdbExporterImage = images.fdbExporter;
+export const defaultDedupProxyImage = images.dedupProxy;
 
 export interface FdbClusterResources {
   backupDeployment?: K8sDeployment;

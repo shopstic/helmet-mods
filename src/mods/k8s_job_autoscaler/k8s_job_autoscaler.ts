@@ -9,6 +9,7 @@ import { image as defaultK8sJobAutoscalerImage } from "../../apps/k8s_job_autosc
 import crd from "./crd.json" with { type: "json" };
 import type { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/schemas.ts";
 export * from "../../apps/k8s_job_autoscaler/libs/schemas.ts";
+import images from "../../images.json" with { type: "json" };
 
 export const defaultName = "k8s-job-autoscaler";
 
@@ -112,8 +113,7 @@ export function createK8sJobAutoscalerResources({
           containers: [
             {
               name: "kubectl-proxy",
-              image:
-                "public.ecr.aws/shopstic/kubectl:1.28.7@sha256:eac5e237ae8a765130b264b7df189f15230d95621b473479e6da470e7169efe4",
+              image: images.kubectl,
               command: ["/bin/kubectl", "proxy"],
             },
             {

@@ -277,7 +277,69 @@ gen_grafana_openapi_types() {
 }
 
 jsr_publish() {
-  deno publish --config ./jsr.json --allow-slow-types --allow-dirty
+  deno publish --config ./jsr.json --allow-slow-types --allow-dirty "$@"
 }
 
+update_images() {
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  JSON_FILE="${SCRIPT_DIR}/src/images.json"
+
+  if [ ! -f "$JSON_FILE" ]; then
+    echo "File not found at ${JSON_FILE}!"
+    exit 1
+  fi
+
+  KEYS=$(jq -r 'keys[]' "$JSON_FILE")
+  declare -A JOBS
+
+  update_digest() {
+    local KEY=$1
+    local TMP_RESULT="${TMP_DIR}/${KEY}.txt"
+    local IMAGE
+    local NEW_DIGEST
+    local IMAGE_BASE
+    local UPDATED_IMAGE
+
+    IMAGE=$(jq -r --arg KEY "$KEY" '.[$KEY]' "$JSON_FILE")
+    IMAGE_BASE=$(echo $IMAGE | cut -d '@' -f 1)
+    echo "Updating digest for ${IMAGE_BASE}..."
+    NEW_DIGEST=$(manifest-tool inspect --raw "$IMAGE_BASE" | jq -e -r .digest) || exit $?
+    
+    UPDATED_IMAGE="${IMAGE_BASE}@${NEW_DIGEST}"
+    echo "$UPDATED_IMAGE" > "$TMP_RESULT"
+  }
+
+  # Create a temporary directory to store individual results
+  TMP_DIR=$(mktemp -d)
+
+  # Kick off all jobs in parallel
+  for KEY in $KEYS; do
+    update_digest $KEY &
+    JOBS[$KEY]=$!
+  done
+
+  # Wait for all jobs to finish
+  for KEY in "${!JOBS[@]}"; do
+    wait ${JOBS[$KEY]}
+  done
+
+  # Collect results into an associative array
+  declare -A IMAGES
+  for KEY in $KEYS; do
+    TMP_RESULT="${TMP_DIR}/${KEY}.txt"
+    IMAGES[$KEY]=$(cat "$TMP_RESULT")
+  done
+
+  # Remove temporary directory
+  rm -r "$TMP_DIR"
+
+  # Update the JSON file
+  TMP_JSON=$(mktemp)
+  for KEY in "${!IMAGES[@]}"; do
+    jq --arg KEY "$KEY" --arg VALUE "${IMAGES[$KEY]}" '.[$KEY] = $VALUE' "$JSON_FILE" > "$TMP_JSON"
+    mv "$TMP_JSON" "$JSON_FILE"
+  done
+
+  echo "Successfully updated all image digests."
+}
 "$@"
