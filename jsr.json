@@ -13,6 +13,7 @@
     "./registry-authenticator": "./src/mods/registry_authenticator/registry_authenticator.ts",
     "./registry-syncer": "./src/mods/registry_syncer/registry_syncer.ts",
     "./resource-group": "./src/mods/resource_group/resource_group.ts",
+    "./tailscale-router": "./src/mods/tailscale_router/tailscale_router.ts",
     "./deps/async-utils": "./src/deps/async_utils.ts",
     "./deps/case": "./src/deps/case.ts",
     "./deps/cli-utils": "./src/deps/cli_utils.ts",
