@@ -1,4 +1,4 @@
-import type { K8s } from "../../deps/helmet.ts";
+import type { K8s, K8sVolumeMount } from "../../deps/helmet.ts";
 import {
   createK8sCronJob,
   createK8sDeployment,
@@ -38,6 +38,7 @@ export function createTailscaleRouterResources(
     aclTags,
     extraArgs,
     additionalContainers,
+    additionalVolumes,
   }: {
     replicas?: number;
     name?: string;
@@ -57,6 +58,7 @@ export function createTailscaleRouterResources(
     extraArgs?: string;
     aclTags?: string[];
     additionalContainers?: Array<K8s["core.v1.Container"]>;
+    additionalVolumes?: Array<K8s["core.v1.Volume"]>;
   },
 ) {
   const labels = {
@@ -238,13 +240,15 @@ export function createTailscaleRouterResources(
                   }],
                 },
               ],
-              volumes: [{
-                name: "scripts",
-                secret: {
-                  secretName: secret.metadata.name,
-                  defaultMode: 365,
+              volumes: [
+                {
+                  name: "scripts",
+                  secret: {
+                    secretName: secret.metadata.name,
+                    defaultMode: 365,
+                  },
                 },
-              }],
+              ],
             },
           },
         },
@@ -379,18 +383,22 @@ export function createTailscaleRouterResources(
             },
             ...additionalContainers ?? [],
           ],
-          volumes: [{
-            name: "dev-net-tun",
-            hostPath: {
-              path: "/dev/net/tun",
+          volumes: [
+            {
+              name: "dev-net-tun",
+              hostPath: {
+                path: "/dev/net/tun",
+              },
             },
-          }, {
-            name: "scripts",
-            secret: {
-              secretName: secret.metadata.name,
-              defaultMode: 365,
+            {
+              name: "scripts",
+              secret: {
+                secretName: secret.metadata.name,
+                defaultMode: 365,
+              },
             },
-          }],
+            ...additionalVolumes ?? [],
+          ],
         },
       },
     },
