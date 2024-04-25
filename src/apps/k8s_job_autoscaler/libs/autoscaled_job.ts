@@ -45,19 +45,18 @@ export async function* watchMetric(
         pending: pendingValue ? Number(pendingValue) : 0,
         inProgress: inProgressMetric ? (inProgressValue ? Number(inProgressValue) : 0) : null,
       };
-
-      const now = performance.now();
-      const elapseMs = now - last;
-
-      const toDelayMs = Math.max(maxDelayMs - elapseMs, 0);
-      if (toDelayMs > 0) {
-        await delay(toDelayMs);
-      }
     } catch (error) {
       if (!(error instanceof DOMException) || error.name !== "AbortError") {
         logger.error({ msg: "Metric query failed", error });
       }
     } finally {
+      const now = performance.now();
+      const elapseMs = now - last;
+
+      const toDelayMs = Math.max(maxDelayMs - elapseMs, 0);
+      if (toDelayMs > 0) {
+        await delay(toDelayMs, { signal });
+      }
       last = performance.now();
     }
   }
