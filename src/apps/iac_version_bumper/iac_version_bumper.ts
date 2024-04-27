@@ -178,7 +178,7 @@ await new CliProgram()
 
         const repoPath = await Deno.makeTempDir();
 
-        await inheritExec({ cmd: commandWithTimeout(["git", "clone", gitRepoUri, repoPath], 5) });
+        await inheritExec({ cmd: commandWithTimeout(["git", "clone", "-b", gitBranch, gitRepoUri, repoPath], 5) });
 
         while (!abortSignal.aborted) {
           logger.info({
