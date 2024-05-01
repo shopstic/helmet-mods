@@ -28,8 +28,8 @@
               hasSuffix "/deno.lock" path
             );
           };
-        deno = hotPotPkgs.deno_1_42_x;
-        denort = hotPotPkgs.denort_1_42_x;
+        deno = hotPotPkgs.deno;
+        denort = hotPotPkgs.denort;
         deno-app-build = hotPotPkgs.deno-app-build /* pkgs.callPackage ./nix/deno-app-build {
           inherit deno denort;
         } */;
@@ -46,7 +46,7 @@
             compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
               inherit name deno denort deno-cache src deno-app-build;
               appSrcPath = tsPath;
-              prefix-patch = ./src/patched_fetch.js;
+              prefix-patch = ./src/patched_fetch.ts;
             };
           in
           compiled;

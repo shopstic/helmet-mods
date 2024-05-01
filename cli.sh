@@ -68,12 +68,12 @@ compile_app() {
   local APP=${1:?"App path is required"}
   local OUT=${2:?"Output path is required"}
 
-  local TEMP_DIR
-  TEMP_DIR=$(mktemp -d) || exit $?
+  # local TEMP_DIR
+  # TEMP_DIR=$(mktemp -d) || exit $?
   deno check "${APP}"
-  local APP_RET
-  APP_RET=$(deno-app-build --allow-npm-specifier --app-path="${APP}" --out-path="${TEMP_DIR}") || exit $?
-  deno compile --cached-only -A --output="${OUT}" "${APP_RET}"
+  # local APP_RET
+  # APP_RET=$(deno-app-build --allow-npm-specifier --app-path="${APP}" --out-path="${TEMP_DIR}") || exit $?
+  deno compile --cached-only -A --output="${OUT}" "${APP}"
 }
 
 smoke_test() {
