@@ -1,6 +1,7 @@
 import { inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
 import type { GitlabCicdRegistryParams } from "./libs/schemas.ts";
 import { dirname, fromFileUrl } from "../../deps/std_path.ts";
+import { toParamCase } from "../../deps/case.ts";
 
 const accessToken = Deno.env.get("GITLAB_TEST_ACCESS_TOKEN");
 if (!accessToken) {
@@ -34,7 +35,7 @@ const abortController = new AbortController();
 
 const mainPromise = inheritExec({
   cmd: ["deno", "run", "-A", "--check", "./gitlab_cicd_registry.ts", "run"].concat(
-    Object.entries(args).map(([k, v]) => `--${k}=${v}`),
+    Object.entries(args).map(([k, v]) => `--${toParamCase(k)}=${v}`),
   ),
   cwd: dirname(fromFileUrl(import.meta.url)),
   abortSignal: abortController.signal,

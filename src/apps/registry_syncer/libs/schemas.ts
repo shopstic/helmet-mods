@@ -1,5 +1,5 @@
 import { Type } from "../../../deps/typebox.ts";
-import type { Static } from "../../../deps/typebox.ts";
+import type { Static, TObject } from "../../../deps/typebox.ts";
 import { NonEmptyString } from "../../../libs/utils.ts";
 
 export const RegistrySyncJobSchema = Type.Object({
@@ -20,10 +20,10 @@ export const RegistrySyncJobsSchema = Type.Array(RegistrySyncJobSchema);
 
 export type RegistrySyncJobs = Static<typeof RegistrySyncJobsSchema>;
 
-export const RegistrySyncParamsSchema = Type.Object({
+export const RegistrySyncParamsSchema = {
   digestCheckIntervalSeconds: Type.Number({ minimum: 1 }),
   configCheckIntervalSeconds: Type.Number({ minimum: 1 }),
   configFile: NonEmptyString,
-});
+};
 
-export type RegistrySyncParams = Static<typeof RegistrySyncParamsSchema>;
+export type RegistrySyncParams = Static<TObject<typeof RegistrySyncParamsSchema>>;

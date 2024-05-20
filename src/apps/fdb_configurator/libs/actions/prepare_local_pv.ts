@@ -9,13 +9,13 @@ import { Logger } from "../../../../libs/logger.ts";
 const logger = new Logger();
 
 export default createCliAction(
-  Type.Object({
+  {
     nodeNameEnvVarName: NonEmptyString(),
     pendingLabelName: NonEmptyString(),
     pendingLabelCompletedValue: NonEmptyString(),
     pendingDeviceIdsAnnotationName: NonEmptyString(),
     rootMountPath: NonEmptyString(),
-  }),
+  },
   async (
     {
       nodeNameEnvVarName,

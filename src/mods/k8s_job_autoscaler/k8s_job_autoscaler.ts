@@ -10,6 +10,7 @@ import crd from "./crd.json" with { type: "json" };
 import type { K8sJobAutoscalerParams } from "../../apps/k8s_job_autoscaler/libs/schemas.ts";
 export * from "../../apps/k8s_job_autoscaler/libs/schemas.ts";
 import images from "../../images.json" with { type: "json" };
+import { toParamCase } from "../../deps/case.ts";
 
 export const defaultName = "k8s-job-autoscaler";
 
@@ -119,7 +120,7 @@ export function createK8sJobAutoscalerResources({
             {
               name,
               image,
-              args: Object.entries(args).map(([k, v]) => `--${k}=${v}`),
+              args: Object.entries(args).map(([k, v]) => `--${toParamCase(k)}=${v}`),
             },
           ],
         },

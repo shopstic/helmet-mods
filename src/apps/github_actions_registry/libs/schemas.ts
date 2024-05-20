@@ -1,7 +1,7 @@
-import type { Static } from "../../../deps/typebox.ts";
+import type { Static, TObject } from "../../../deps/typebox.ts";
 import { Type } from "../../../deps/typebox.ts";
 
-export const GithubActionsRegistryParamsSchema = Type.Object({
+export const GithubActionsRegistryParamsSchema = {
   org: Type.String({ minLength: 1 }),
   appId: Type.Integer(),
   installationId: Type.Number(),
@@ -15,6 +15,6 @@ export const GithubActionsRegistryParamsSchema = Type.Object({
   registryServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
   busyJobAnnotation: Type.String({ minLength: 1 }),
   namespace: Type.Optional(Type.String({ minLength: 1 })),
-});
+};
 
-export type GithubActionsRegistryParams = Static<typeof GithubActionsRegistryParamsSchema>;
+export type GithubActionsRegistryParams = Static<TObject<typeof GithubActionsRegistryParamsSchema>>;

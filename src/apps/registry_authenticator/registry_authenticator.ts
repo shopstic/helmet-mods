@@ -125,7 +125,7 @@ await new CliProgram()
     "run",
     createCliAction(
       RegistryAuthParamsSchema,
-      async ({ configFile, outputSecretNamespace, outputSecretName, configLoadIntervalSeconds }, _, abortSignal) => {
+      async ({ configFile, outputSecretNamespace, outputSecretName, configLoadIntervalSeconds }, abortSignal) => {
         const outputNamespace = outputSecretNamespace ?? await Deno.readTextFile(
           "/var/run/secrets/kubernetes.io/serviceaccount/namespace",
         );

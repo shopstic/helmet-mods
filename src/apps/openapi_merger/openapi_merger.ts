@@ -43,7 +43,6 @@ await new CliProgram()
           serverPort,
           docsPath,
         },
-        _,
         abortSignal,
       ) => {
         const logger = new Logger();

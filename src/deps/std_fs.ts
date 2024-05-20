@@ -1,1 +1,1 @@
-export * from "jsr:@std/fs@^0.221.0";
+export * from "jsr:@std/fs@0.224.0";

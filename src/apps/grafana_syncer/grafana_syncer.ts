@@ -107,7 +107,6 @@ await new CliProgram()
           labelSelector,
           fieldSelector,
         },
-        _,
         signal,
       ) => {
         const namespace = maybeNamespace ??

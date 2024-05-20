@@ -171,7 +171,6 @@ await new CliProgram()
           checkIntervalSeconds,
           groupingDelaySeconds,
         },
-        _,
         abortSignal,
       ) => {
         const logger = new Logger({ ctx: "main" });

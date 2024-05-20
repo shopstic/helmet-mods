@@ -107,7 +107,6 @@ const program = new CliProgram()
           busyJobAnnotation,
           namespace: maybeNamespace,
         },
-        _,
         signal,
       ) => {
         const namespace = maybeNamespace ??

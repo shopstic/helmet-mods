@@ -19,6 +19,7 @@ import { image as defaultGitlabCicdRegistryImage } from "../../apps/gitlab_cicd_
 import type { GitlabCicdRegistryParams } from "../../apps/gitlab_cicd_registry/libs/schemas.ts";
 import type { ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 import { createServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import { toParamCase } from "../../deps/case.ts";
 export * from "../../apps/gitlab_cicd_registry/libs/schemas.ts";
 
 export const defaultName = "gitlab-cicd-registry";
@@ -235,10 +236,10 @@ export function createGitlabCicdRegistryResources({
               args: Object
                 .entries(args)
                 .filter(([_, v]) => v !== undefined)
-                .map(([k, v]) => `--${k}=${v}`)
+                .map(([k, v]) => `--${toParamCase(k)}=${v}`)
                 .concat(
-                  "--accessToken=$(GITLAB_ACCESS_TOKEN)",
-                  "--webhookSecretToken=$(GITLAB_WEBHOOK_SECRET_TOKEN)",
+                  "--access-token=$(GITLAB_ACCESS_TOKEN)",
+                  "--webhook-secret-token=$(GITLAB_WEBHOOK_SECRET_TOKEN)",
                 ),
             },
           ],

@@ -19,6 +19,7 @@ import { image as defaultGithubActionsRegistryImage } from "../../apps/github_ac
 import type { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/schemas.ts";
 import type { ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 import { createServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
+import { toParamCase } from "../../deps/case.ts";
 export * from "../../apps/github_actions_registry/libs/schemas.ts";
 
 export const defaultName = "github-actions-registry";
@@ -245,7 +246,9 @@ export function createGithubActionsRegistryResources({
             {
               name: "registry",
               image,
-              args: Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) => `--${k}=${v}`),
+              args: Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) =>
+                `--${toParamCase(k)}=${v}`
+              ),
               volumeMounts: [{
                 name: "private-key",
                 mountPath: privateKeyMountPath,

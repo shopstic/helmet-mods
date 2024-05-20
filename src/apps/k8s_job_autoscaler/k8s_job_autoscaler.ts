@@ -38,7 +38,6 @@ await new CliProgram()
           minReconcileIntervalMs,
           namespace: maybeNamespace,
         },
-        _,
         signal,
       ) => {
         const namespace = maybeNamespace ??

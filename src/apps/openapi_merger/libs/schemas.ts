@@ -1,16 +1,16 @@
-import type { Static } from "../../../deps/typebox.ts";
+import type { Static, TObject } from "../../../deps/typebox.ts";
 import { Type, TypeCompiler } from "../../../deps/typebox.ts";
 import { NonEmptyString } from "../../../libs/utils.ts";
 
-export const OpenapiMergerParamsSchema = Type.Object({
+export const OpenapiMergerParamsSchema = {
   configFile: NonEmptyString,
   staticRoot: NonEmptyString,
   docsPath: NonEmptyString,
   serverInterface: NonEmptyString,
   serverPort: Type.Number({ minimum: 0, maximum: 65535 }),
-});
+};
 
-export type OpenapiMergerParams = Static<typeof OpenapiMergerParamsSchema>;
+export type OpenapiMergerParams = Static<TObject<typeof OpenapiMergerParamsSchema>>;
 
 export const OpenapiMergerConfigSchema = Type.Object({
   overrides: Type.Optional(Type.Record(Type.String(), Type.Unknown())),

@@ -10,11 +10,11 @@ const FDB_CLUSTER_FILE = "FDB_CLUSTER_FILE";
 const connectionStringResultRegex = /`\\xff\\xff\/connection_string' is `([^']+)'/;
 
 export default createCliAction(
-  Type.Object({
+  {
     configMapKey: NonEmptyString(),
     configMapName: NonEmptyString(),
     updateIntervalMs: Type.Number(),
-  }),
+  },
   async (
     {
       configMapKey,

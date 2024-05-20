@@ -10,6 +10,7 @@ import crd from "./crd.ts";
 import type { GrafanaSyncerParams } from "../../apps/grafana_syncer/libs/schemas.ts";
 export type { GrafanaDashboard } from "../../apps/grafana_syncer/libs/types.ts";
 import images from "../../images.json" with { type: "json" };
+import { toParamCase } from "../../deps/case.ts";
 
 export const defaultName = "grafana-syncer";
 
@@ -145,9 +146,9 @@ export function createGrafanaSyncerResources({
               args: Object
                 .entries(args)
                 .filter(([, v]) => v !== undefined)
-                .map(([k, v]) => `--${k}=${v}`)
+                .map(([k, v]) => `--${toParamCase(k)}=${v}`)
                 .concat(
-                  "--grafanaBearerToken=$(GRAFANA_BEARER_TOKEN)",
+                  "--grafana-bearer-token=$(GRAFANA_BEARER_TOKEN)",
                 ),
             },
           ],

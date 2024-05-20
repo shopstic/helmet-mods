@@ -21,11 +21,11 @@ function generateString(length: number): string {
 }
 
 export default createCliAction(
-  Type.Object({
+  {
     configMapKey: NonEmptyString(),
     configMapName: NonEmptyString(),
     serviceNames: Type.Union([Type.Array(NonEmptyString()), NonEmptyString()]),
-  }),
+  },
   async (
     {
       configMapKey,

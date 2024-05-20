@@ -169,7 +169,6 @@ await new CliProgram()
           digestCheckIntervalSeconds,
           configCheckIntervalSeconds,
         },
-        _,
         abortSignal,
       ) => {
         const logger = new Logger({ ctx: "main" });

@@ -1,7 +1,7 @@
-import type { Static } from "../../../deps/typebox.ts";
+import type { Static, TObject } from "../../../deps/typebox.ts";
 import { FlexObject, Type } from "../../../deps/typebox.ts";
 
-export const GitlabCicdRegistryParamsSchema = Type.Object({
+export const GitlabCicdRegistryParamsSchema = {
   groupId: Type.Number(),
   accessToken: Type.String({ minLength: 1 }),
   allProjectsRefreshIntervalSeconds: Type.Number({ minimum: 1 }),
@@ -12,9 +12,9 @@ export const GitlabCicdRegistryParamsSchema = Type.Object({
   registryServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
   busyJobAnnotation: Type.String({ minLength: 1 }),
   namespace: Type.Optional(Type.String({ minLength: 1 })),
-});
+};
 
-export type GitlabCicdRegistryParams = Static<typeof GitlabCicdRegistryParamsSchema>;
+export type GitlabCicdRegistryParams = Static<TObject<typeof GitlabCicdRegistryParamsSchema>>;
 
 export const GitlabWebhookBuildSchema = FlexObject({
   object_kind: Type.Literal("build"),

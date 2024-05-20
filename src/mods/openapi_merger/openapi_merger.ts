@@ -3,6 +3,7 @@ import { createK8sDeployment, createK8sIngress, createK8sSecret, createK8sServic
 import { image as defaultOpenapiMergerImage } from "../../apps/openapi_merger/meta.ts";
 import type { OpenapiMergerConfig, OpenapiMergerParams } from "../../apps/openapi_merger/libs/schemas.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
+import { toParamCase } from "../../deps/case.ts";
 export * from "../../apps/openapi_merger/libs/schemas.ts";
 
 export const defaultName = "gitlab-cicd-registry";
@@ -169,7 +170,7 @@ export function createOpenapiMergerResources({
               args: Object
                 .entries(args)
                 .filter(([_, v]) => v !== undefined)
-                .map(([k, v]) => `--${k}=${v}`),
+                .map(([k, v]) => `--${toParamCase(k)}=${v}`),
             },
           ],
         },

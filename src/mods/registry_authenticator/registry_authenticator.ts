@@ -1,5 +1,6 @@
 import type { RegistryAuthConfig, RegistryAuthParams } from "../../apps/registry_authenticator/libs/schemas.ts";
 import { image as defaultRegistryAuthImage } from "../../apps/registry_authenticator/meta.ts";
+import { toParamCase } from "../../deps/case.ts";
 import type { K8s } from "../../deps/helmet.ts";
 import {
   createK8sContainer,
@@ -94,7 +95,9 @@ export function createRegistryAuthenticatorResources({
   const container = createK8sContainer({
     name,
     image,
-    args: Object.entries(containerParams).filter(([_, v]) => v !== undefined).map(([k, v]) => `--${k}=${v}`),
+    args: Object.entries(containerParams).filter(([_, v]) => v !== undefined).map(([k, v]) =>
+      `--${toParamCase(k)}=${v}`
+    ),
     volumeMounts: [
       registryAuthConfigVolumeMount,
       ...Object.values(secretMounts ?? {}).map(({ path }) =>
