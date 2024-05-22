@@ -51,13 +51,9 @@ test() {
   deno test -A ./src
 }
 
-update_cache() {
-  deno cache --lock=deno.lock ./src/deps/*
-}
-
 update_lock() {
   rm -f ./deno.lock
-  deno cache --reload --lock ./deno.lock --lock-write ./src/deps/*
+  deno cache --reload --lock ./deno.lock --lock-write ./src/**/*.ts
 }
 
 bundle_app() {

@@ -29,7 +29,7 @@
       "jsr:@std/yaml@0.224.0": "jsr:@std/yaml@0.224.0",
       "jsr:@wok/case@1.0.1": "jsr:@wok/case@1.0.1",
       "jsr:@wok/djwt@3.0.2": "jsr:@wok/djwt@3.0.2",
-      "jsr:@wok/helmet@1.30.1": "jsr:@wok/helmet@1.30.1",
+      "jsr:@wok/helmet@1.30.2": "jsr:@wok/helmet@1.30.2",
       "jsr:@wok/k8s@1.30.1+1": "jsr:@wok/k8s@1.30.1+1",
       "jsr:@wok/openapi-client@1.0.1": "jsr:@wok/openapi-client@1.0.1",
       "jsr:@wok/prometheus@1.0.0": "jsr:@wok/prometheus@1.0.0",
@@ -59,10 +59,7 @@
         "integrity": "a2250e1d0eb7d1c5a426f21267ab9bdeac2447fa87a3d0d1a467d3f7a6058e49"
       },
       "@std/cli@0.224.0": {
-        "integrity": "2612373d68984637bdad8b9c9dd160e9838ac2a6d463354d537d2897a7cc6d1c",
-        "dependencies": [
-          "jsr:@std/assert@^0.224.0"
-        ]
+        "integrity": "2612373d68984637bdad8b9c9dd160e9838ac2a6d463354d537d2897a7cc6d1c"
       },
       "@std/cli@0.224.2": {
         "integrity": "be330ce49928db596338b411037b082d8f8f218b34f8095bcad382fb0c3d6b31",
@@ -141,14 +138,11 @@
           "jsr:@std/encoding@^0.221.0"
         ]
       },
-      "@wok/helmet@1.30.1": {
-        "integrity": "39d877a106ca8c97982778be6e3b53cf593e1ebec2ac7dc8eeafdb734055bc86",
+      "@wok/helmet@1.30.2": {
+        "integrity": "8765c5faa89c191918047b3bd5e788b694e1715794b0ca05b28dcdb0013644ef",
         "dependencies": [
-          "jsr:@std/fmt@0.224.0",
           "jsr:@std/fs@0.224.0",
-          "jsr:@std/path@0.224.0",
           "jsr:@std/semver@0.224.0",
-          "jsr:@std/yaml@0.224.0",
           "jsr:@wok/utils@1.3.2"
         ]
       },
@@ -156,8 +150,7 @@
         "integrity": "dae7189bc7ff8ae18cd1385bab88487ab5b40090ea7d6d414b2ea4a4210b6907",
         "dependencies": [
           "jsr:@std/collections@0.224.0",
-          "jsr:@std/streams@0.224.0",
-          "jsr:@wok/openapi-client@1.0.1"
+          "jsr:@std/streams@0.224.0"
         ]
       },
       "@wok/openapi-client@1.0.1": {
@@ -176,8 +169,6 @@
           "jsr:@std/cli@0.224.0",
           "jsr:@std/fmt@0.224.0",
           "jsr:@std/streams@0.224.0",
-          "jsr:@wok/case@1.0.1",
-          "jsr:@wok/k8s@1.30.1+1",
           "jsr:@wok/typebox@0.32.30+1"
         ]
       }
