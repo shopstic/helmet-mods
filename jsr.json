@@ -17,7 +17,6 @@
     "./deps/async-utils": "./src/deps/async_utils.ts",
     "./deps/case": "./src/deps/case.ts",
     "./deps/cli-utils": "./src/deps/cli_utils.ts",
-    "./deps/djwt": "./src/deps/djwt.ts",
     "./deps/exec-utils": "./src/deps/exec_utils.ts",
     "./deps/helmet": "./src/deps/helmet.ts",
     "./deps/immer": "./src/deps/immer.ts",

@@ -1,8 +1,7 @@
 import type { OpenapiClient } from "../../../deps/k8s_openapi.ts";
 import { delay } from "../../../deps/async_utils.ts";
-import { decodeBase64 } from "../../../deps/std_encoding.ts";
-import { createJwt } from "../../../deps/djwt.ts";
 import type { GhComponents, GhPaths } from "./types.ts";
+import { importPKCS8, SignJWT } from "jose";
 
 export async function getLastActiveRepoNames(
   { client, org, lastPushedWithinHours }: {
@@ -95,30 +94,17 @@ export async function* generateAccessClient(
   },
 ): AsyncGenerator<OpenapiClient<GhPaths>> {
   const pemEncodedKey = await Deno.readTextFile(privateKeyPath);
-  const keyLines = pemEncodedKey.split("\n");
-  const keyBody = keyLines.map((l) => l.trim()).filter((l) => l.length > 0).slice(1, -1).join("");
-
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    decodeBase64(keyBody),
-    {
-      name: "RSASSA-PKCS1-v1_5",
-      hash: { name: "SHA-256" },
-    },
-    true,
-    ["sign"],
-  );
+  const key = await importPKCS8(pemEncodedKey, "RS256");
 
   while (!signal?.aborted) {
     const nowSeconds = Math.floor(Date.now() / 1000);
-    const jwt = await createJwt({ alg: "RS256", typ: "JWT" }, {
-      // issued at time, 60 seconds in the past to allow for clock drift
-      iat: nowSeconds - 60,
-      // JWT expiration time (10 minute maximum)
-      exp: nowSeconds + (10 * 60),
-      // GitHub App's identifier
-      iss: String(appId),
-    }, key);
+
+    const jwt = await new SignJWT({})
+      .setProtectedHeader({ alg: "RS256" })
+      .setIssuedAt(nowSeconds - 60)
+      .setExpirationTime(nowSeconds + 10 * 60)
+      .setIssuer(String(appId))
+      .sign(key);
 
     const ret = await client
       .endpoint("/app/installations/{installation_id}/access_tokens").method("post")({

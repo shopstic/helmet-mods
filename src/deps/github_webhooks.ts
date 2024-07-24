@@ -1,1 +1,1 @@
-export type * from "npm:@octokit/webhooks-types@7.5.0";
+export type * from "@octokit/webhooks-types";

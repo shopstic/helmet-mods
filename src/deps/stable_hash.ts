@@ -1,6 +1,6 @@
-import originalStableHash from "npm:stable-hash@0.0.4";
-import { crypto } from "jsr:@std/crypto@0.224.0/crypto";
-import { encodeHex } from "jsr:@std/encoding@0.224.0/hex";
+import originalStableHash from "stable-hash";
+import { crypto } from "@std/crypto";
+import { encodeHex } from "@std/encoding";
 
 export function stableHash(obj: unknown) {
   // deno-lint-ignore no-explicit-any

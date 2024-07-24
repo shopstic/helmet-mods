@@ -53,7 +53,7 @@ test() {
 
 update_lock() {
   rm -f ./deno.lock
-  deno cache --reload --lock ./deno.lock --lock-write ./src/**/*.ts
+  deno cache --reload --lock ./deno.lock --frozen=false ./src/**/*.ts
 }
 
 bundle_app() {
