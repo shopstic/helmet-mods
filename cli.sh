@@ -227,10 +227,10 @@ release() {
 
   echo "export default \"${RELEASE_VERSION}\";" >./src/version.ts
   local JSR_JSON
-  JSR_JSON=$(jq -e --arg VERSION "${RELEASE_VERSION}" '.version=$VERSION' ./jsr.json)
-  echo "${JSR_JSON}" >./jsr.json
+  JSR_JSON=$(jq -e --arg VERSION "${RELEASE_VERSION}" '.version=$VERSION' ./deno.json)
+  echo "${JSR_JSON}" >./deno.json
 
-  git add ./src/apps/*/meta.ts ./src/version.ts ./jsr.json
+  git add ./src/apps/*/meta.ts ./src/version.ts ./deno.json
   git commit -m "Release ${RELEASE_VERSION}"
 
   "$0" jsr_publish
@@ -273,7 +273,7 @@ gen_grafana_openapi_types() {
 }
 
 jsr_publish() {
-  deno publish --config ./jsr.json --allow-slow-types --allow-dirty "$@"
+  deno publish --config ./deno.json --allow-slow-types --allow-dirty "$@"
 }
 
 update_images() {
