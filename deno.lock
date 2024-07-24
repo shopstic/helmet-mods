@@ -28,7 +28,7 @@
       "jsr:@std/streams@^0.224.5": "jsr:@std/streams@0.224.5",
       "jsr:@std/yaml@^0.224.3": "jsr:@std/yaml@0.224.3",
       "jsr:@wok/case@^1.0.1": "jsr:@wok/case@1.0.1",
-      "jsr:@wok/helmet@^1.31.1": "jsr:@wok/helmet@1.31.1",
+      "jsr:@wok/helmet@^1.31.2": "jsr:@wok/helmet@1.31.2",
       "jsr:@wok/k8s@^1.30.3": "jsr:@wok/k8s@1.30.3",
       "jsr:@wok/openapi-client@^1.0.1": "jsr:@wok/openapi-client@1.0.1",
       "jsr:@wok/prometheus@^1.0.0": "jsr:@wok/prometheus@1.0.0",
@@ -134,8 +134,8 @@
       "@wok/case@1.0.1": {
         "integrity": "409e94f961f5b278992bace87a0c7d3c6a3db516d01759bdb827d9ae4d75e9aa"
       },
-      "@wok/helmet@1.31.1": {
-        "integrity": "091076247eb9a99f7e46efe86db90b67343e654936f34243abf33bfd32af4aae",
+      "@wok/helmet@1.31.2": {
+        "integrity": "e1fde4e846a7b5fed0c1aee987299870d187d1817fb34cf17715041750dedc8f",
         "dependencies": [
           "jsr:@std/fmt@^0.225.6",
           "jsr:@std/fs@^0.229.3",
@@ -248,7 +248,7 @@
       "jsr:@std/streams@^0.224.5",
       "jsr:@std/yaml@^0.224.3",
       "jsr:@wok/case@^1.0.1",
-      "jsr:@wok/helmet@^1.31.1",
+      "jsr:@wok/helmet@^1.31.2",
       "jsr:@wok/k8s@^1.30.3",
       "jsr:@wok/openapi-client@^1.0.1",
       "jsr:@wok/prometheus@^1.0.0",
