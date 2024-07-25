@@ -53,9 +53,9 @@ export function createFdbSyncConnectionStringResources({
     imagePullPolicy,
     args: [
       "sync-connection-string",
-      `--configMapKey=${connectionStringConfigMapRef.key}`,
-      `--configMapName=${connectionStringConfigMapRef.name}`,
-      `--updateIntervalMs=1000`,
+      `--config-map-key=${connectionStringConfigMapRef.key}`,
+      `--config-map-name=${connectionStringConfigMapRef.name}`,
+      `--update-interval-ms=1000`,
     ],
     env: [
       {

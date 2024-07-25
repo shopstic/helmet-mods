@@ -74,11 +74,11 @@ export function createFdbPrepareLocalPvResources({
     },
     args: [
       "prepare-local-pv",
-      `--nodeNameEnvVarName=${nodeNameEnvVarName}`,
-      `--pendingLabelName=${pendingLabelName}`,
-      `--pendingLabelCompletedValue=${PENDING_LABEL_VALUE_NO}`,
-      `--pendingDeviceIdsAnnotationName=${pendingDeviceIdsAnnotationName}`,
-      `--rootMountPath=${rootMountPath}`,
+      `--node-name-env-var-name=${nodeNameEnvVarName}`,
+      `--pending-label-name=${pendingLabelName}`,
+      `--pending-label-completed-value=${PENDING_LABEL_VALUE_NO}`,
+      `--pending-device-ids-annotation-name=${pendingDeviceIdsAnnotationName}`,
+      `--root-mount-path=${rootMountPath}`,
     ],
     env: [
       {

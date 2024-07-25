@@ -156,11 +156,11 @@ export function createIacVersionBumperResources({
               name,
               image,
               args: [
-                `--gitRepoUri=${gitRepoUri}`,
-                `--gitBranch=${gitBranch}`,
-                `--checkIntervalSeconds=${checkIntervalSeconds}`,
-                `--groupingDelaySeconds=${groupingDelaySeconds}`,
-                `--targetsConfigFile=${targetsConfigVolumeMount.mountPath}/${targetsConfigFileName}`,
+                `--git-repo-uri=${gitRepoUri}`,
+                `--git-branch=${gitBranch}`,
+                `--check-interval-seconds=${checkIntervalSeconds}`,
+                `--grouping-delay-seconds=${groupingDelaySeconds}`,
+                `--targets-config-file=${targetsConfigVolumeMount.mountPath}/${targetsConfigFileName}`,
               ],
               volumeMounts: [
                 targetsConfigVolumeMount,

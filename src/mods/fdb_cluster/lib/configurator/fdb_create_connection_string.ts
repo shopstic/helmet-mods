@@ -57,9 +57,9 @@ export function createFdbCreateConnectionStringResources(
     imagePullPolicy,
     args: [
       "create-connection-string",
-      `--configMapKey=${connectionStringConfigMapRef.key}`,
-      `--configMapName=${connectionStringConfigMapRef.name}`,
-      ...(coordinatorServiceNames.map((n) => `--serviceNames=${n}`)),
+      `--config-map-key=${connectionStringConfigMapRef.key}`,
+      `--config-map-name=${connectionStringConfigMapRef.name}`,
+      ...(coordinatorServiceNames.map((n) => `--service-names=${n}`)),
     ],
   });
 

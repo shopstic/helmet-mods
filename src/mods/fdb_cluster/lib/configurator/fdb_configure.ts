@@ -75,7 +75,7 @@ export function createFdbConfigureResources(
     imagePullPolicy,
     args: [
       "configure",
-      `--configFile=${databaseConfigFileMountPath}`,
+      `--config-file=${databaseConfigFileMountPath}`,
     ],
     env: [
       {
