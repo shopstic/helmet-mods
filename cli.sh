@@ -338,4 +338,12 @@ update_images() {
 
   echo "Successfully updated all image digests."
 }
+
+update_deps() {
+  # shellcheck disable=SC2046
+  deno add \
+    $(jq -r '.imports | to_entries | .[] | select(.value | contains("jsr:")) | "jsr:" + .key' < deno.json) \
+    $(jq -r '.imports | to_entries | .[] | select(.value | contains("npm:")) | "npm:" + .key' < deno.json)
+}
+
 "$@"
