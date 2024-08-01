@@ -46,7 +46,7 @@
             compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
               inherit name deno denort deno-cache src deno-app-build;
               appSrcPath = tsPath;
-              prefix-patch = ./src/patched_fetch.ts;
+              # prefix-patch = ./src/patched_fetch.ts;
             };
           in
           compiled;

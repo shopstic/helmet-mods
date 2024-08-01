@@ -340,10 +340,7 @@ update_images() {
 }
 
 update_deps() {
-  # shellcheck disable=SC2046
-  deno add \
-    $(jq -r '.imports | to_entries | .[] | select(.value | contains("jsr:")) | "jsr:" + .key' < deno.json) \
-    $(jq -r '.imports | to_entries | .[] | select(.value | contains("npm:")) | "npm:" + .key' < deno.json)
+  deno run -A jsr:@wok/deup@1.0.3
 }
 
 "$@"
