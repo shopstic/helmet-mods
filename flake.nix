@@ -13,6 +13,7 @@
     flakeUtils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (system:
       let
         hotPotPkgs = hotPot.packages.${system};
+        hotPotLib = hotPot.lib.${system};
         nix2container = nix2containerPkg.packages.${system}.nix2container;
         pkgs = import nixpkgs {
           inherit system;
@@ -33,20 +34,17 @@
         deno-app-build = hotPotPkgs.deno-app-build /* pkgs.callPackage ./nix/deno-app-build {
           inherit deno denort;
         } */;
-        writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
-        nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
-        deno-cache = pkgs.callPackage hotPot.lib.denoAppCache2 {
-          inherit src deno;
+        deno-cache = pkgs.callPackage hotPotLib.denoAppCache2 {
+          inherit src;
           name = "helmet-mods";
           config-file = ./deno.json;
           lock-file = ./deno.lock;
-          deno-gen-cache-entry = hotPotPkgs.deno-gen-cache-entry;
         };
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            compiled = pkgs.callPackage hotPot.lib.denoAppCompile {
-              inherit name deno denort deno-cache src deno-app-build;
+            compiled = pkgs.callPackage hotPotLib.denoAppCompile {
+              inherit name deno-cache src;
               appSrcPath = tsPath;
               prefix-patch = ./src/patched_fetch.ts;
             };
@@ -133,6 +131,7 @@
         };
         packages = {
           inherit
+            deno-cache
             fdb-configurator
             iac-version-bumper
             registry-authenticator
@@ -142,6 +141,7 @@
             openapi-merger;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
+            inherit (hotPotLib) nonRootShadowSetup;
             images = {
               image-fdb-server = pkgs.callPackage ./nix/images/fdb-server {
                 inherit nix2container nonRootShadowSetup fdb;
