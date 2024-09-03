@@ -1,5 +1,6 @@
 export * from "@wok/utils/async";
 export { delay } from "@std/async/delay";
+export { memoize } from "@wok/utils/memoize";
 
 export type Deferred<T> = PromiseWithResolvers<T> & {
   state: "pending" | "resolved" | "rejected";
