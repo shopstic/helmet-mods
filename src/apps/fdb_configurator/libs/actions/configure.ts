@@ -1,4 +1,4 @@
-import { memoizePromise } from "../../../../deps/async_utils.ts";
+import { memoize } from "@wok/utils/memoize";
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { Logger } from "../../../../libs/logger.ts";
 import type { FdbDatabaseConfig, FdbStatus, FdbStatusProcess } from "../types.ts";
@@ -231,7 +231,7 @@ export default createCliAction(
   ) => {
     const config = await readClusterConfig(configFile);
     const status = await fetchStatus();
-    const memoizedProcessInclusionExclusion = memoizePromise(() => determineProcessInclusionExclusion(status, config));
+    const memoizedProcessInclusionExclusion = memoize(() => determineProcessInclusionExclusion(status, config));
 
     const steps = [
       {

@@ -35,10 +35,12 @@
         } */;
         writeTextFiles = pkgs.callPackage hotPot.lib.writeTextFiles { };
         nonRootShadowSetup = pkgs.callPackage hotPot.lib.nonRootShadowSetup { inherit writeTextFiles; };
-        deno-cache = pkgs.callPackage hotPot.lib.denoAppCache {
+        deno-cache = pkgs.callPackage hotPot.lib.denoAppCache2 {
           inherit src deno;
           name = "helmet-mods";
-          cacheArgs = "./src/**/*.ts";
+          config-file = ./deno.json;
+          lock-file = ./deno.lock;
+          deno-gen-cache-entry = hotPotPkgs.deno-gen-cache-entry;
         };
         denoCompile = tsPath:
           let

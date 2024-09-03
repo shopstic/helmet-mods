@@ -1,7 +1,7 @@
 import type { StdInputBehavior } from "../../../deps/exec_utils.ts";
 import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
 import { validate } from "../../../deps/validation_utils.ts";
-import { memoizePromise } from "../../../deps/async_utils.ts";
+import { memoize } from "@wok/utils/memoize";
 import type { Static, TSchema } from "../../../deps/typebox.ts";
 import { FlexObject, Type } from "../../../deps/typebox.ts";
 import type { FdbDatabaseConfig, FdbStatus } from "./types.ts";
@@ -125,7 +125,7 @@ export function toRootElevatedCommand(command: string[]) {
   ];
 }
 
-export const readCurrentNamespace = memoizePromise(() =>
+export const readCurrentNamespace = memoize(() =>
   Deno.readTextFile(
     "/var/run/secrets/kubernetes.io/serviceaccount/namespace",
   )
