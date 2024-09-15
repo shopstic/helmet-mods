@@ -29,24 +29,30 @@
               hasSuffix "/deno.lock" path
             );
           };
-        deno = hotPotPkgs.deno;
-        denort = hotPotPkgs.denort;
-        deno-app-build = hotPotPkgs.deno-app-build /* pkgs.callPackage ./nix/deno-app-build {
-          inherit deno denort;
-        } */;
-        deno-cache = pkgs.callPackage hotPotLib.denoAppCache2 {
+        cache-entry-file = pkgs.callPackage hotPotLib.denoAppCacheEntry {
           inherit src;
+          name = "helmet-mods";
+        };
+        deno-vendor-dir = pkgs.callPackage hotPotLib.denoAppVendor {
+          inherit cache-entry-file;
           name = "helmet-mods";
           config-file = ./deno.json;
           lock-file = ./deno.lock;
         };
+        deno = hotPotPkgs.deno;
+        denort = hotPotPkgs.denort;
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
             compiled = pkgs.callPackage hotPotLib.denoAppCompile {
-              inherit name deno-cache src;
+              inherit name deno-vendor-dir src;
               appSrcPath = tsPath;
               prefix-patch = ./src/patched_fetch.ts;
+              denoCompileFlags = (builtins.concatStringsSep " " [
+                "--cached-only"
+                "-A"
+                "--vendor"
+              ]);
             };
           in
           compiled;
@@ -104,7 +110,7 @@
         devShell = pkgs.mkShellNoCC {
           buildInputs = builtins.attrValues
             {
-              inherit deno deno-app-build;
+              inherit deno;
               inherit (pkgs)
                 gh
                 awscli2
@@ -131,7 +137,7 @@
         };
         packages = {
           inherit
-            deno-cache
+            deno-vendor-dir
             fdb-configurator
             iac-version-bumper
             registry-authenticator
