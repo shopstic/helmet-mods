@@ -68,7 +68,7 @@
     "@std/streams": "jsr:@std/streams@^1.0.6",
     "@std/yaml": "jsr:@std/yaml@^1.0.5",
     "@wok/case": "jsr:@wok/case@^1.0.1",
-    "@wok/helmet": "jsr:@wok/helmet@^1.35.0",
+    "@wok/helmet": "jsr:@wok/helmet@^1.35.2",
     "@wok/k8s": "jsr:@wok/k8s@^1.30.3",
     "@wok/openapi-client": "jsr:@wok/openapi-client@^1.0.1",
     "@wok/prometheus": "jsr:@wok/prometheus@^1.0.1",
