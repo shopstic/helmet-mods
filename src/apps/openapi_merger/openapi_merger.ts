@@ -10,7 +10,7 @@ import { deepMerge } from "../../deps/helmet.ts";
 import { immerProduce } from "../../deps/immer.ts";
 
 export class BackendRequestError extends Error {
-  readonly name = BackendRequestError.name;
+  override readonly name = BackendRequestError.name;
   constructor(readonly url: string, readonly response: Response) {
     super(`A request to a backend at url=${url} failed with status=${response.status} ${response.statusText}`);
     Object.setPrototypeOf(this, new.target.prototype);

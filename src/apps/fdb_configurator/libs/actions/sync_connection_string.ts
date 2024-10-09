@@ -78,8 +78,8 @@ export default createCliAction(
 
           lastConnectionString = connectionString;
         }
-      } catch (e) {
-        logger.error(e.toString());
+      } catch (error) {
+        logger.error({ error });
       }
 
       await delay(updateIntervalMs);
