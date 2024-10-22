@@ -24,7 +24,7 @@ export default createCliAction(
   {
     configMapKey: NonEmptyString(),
     configMapName: NonEmptyString(),
-    serviceNames: Type.Union([Type.Array(NonEmptyString()), NonEmptyString()]),
+    serviceNames: Type.Array(NonEmptyString()),
   },
   async (
     {
@@ -33,8 +33,6 @@ export default createCliAction(
       serviceNames,
     },
   ) => {
-    const serviceNameArray = typeof serviceNames === "string" ? [serviceNames] : serviceNames;
-
     const namespace = await readCurrentNamespace();
 
     const hasExistingConfigMap = await (async () => {
@@ -70,7 +68,7 @@ export default createCliAction(
       return ExitCode.Zero;
     }
 
-    const coordinatorEndpoints = await fetchCoordinatorEndpointsFromServiceNames(serviceNameArray);
+    const coordinatorEndpoints = await fetchCoordinatorEndpointsFromServiceNames(serviceNames);
     const clusterDescription = generateString(32);
     const clusterId = generateString(8);
     const connectionString = `${clusterDescription}:${clusterId}@${coordinatorEndpoints.join(",")}`;
