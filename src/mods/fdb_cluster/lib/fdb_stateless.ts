@@ -19,6 +19,7 @@ export function createFdbStatelessDeployment(
     resourceRequirements,
     locality,
     args,
+    labels,
     topologySpreadConstraints,
   }: {
     baseName: string;
@@ -34,6 +35,7 @@ export function createFdbStatelessDeployment(
     resourceRequirements?: K8s["core.v1.ResourceRequirements"];
     locality: FdbLocalityMode;
     args?: string[];
+    labels?: Record<string, string>;
     topologySpreadConstraints?: (labels: Record<string, string>) => Array<K8s["core.v1.TopologySpreadConstraint"]>;
   },
 ): K8sDeployment {
@@ -41,6 +43,7 @@ export function createFdbStatelessDeployment(
     ...baseLabels,
     "app.kubernetes.io/component": processClass,
     [FDB_COMPONENT_LABEL]: processClass,
+    ...labels,
   };
 
   const dataVolumeName = "data";

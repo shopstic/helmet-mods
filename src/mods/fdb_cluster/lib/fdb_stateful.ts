@@ -14,6 +14,7 @@ export interface FdbStatefulConfig {
   volumeSize: string;
   storageClassName: string;
   nodeSelector?: Record<string, string>;
+  labels?: Record<string, string>;
   tolerations?: K8s["core.v1.Toleration"][];
   args?: string[];
   affinity?: K8s["core.v1.Affinity"];
@@ -55,7 +56,7 @@ export function createFdbStatefulPersistentVolumeClaims({
       (
         [
           id,
-          { servers, processClass, volumeSize, storageClassName },
+          { servers, processClass, volumeSize, storageClassName, labels },
         ],
       ) => {
         return servers.map(({ port }) => {
@@ -67,6 +68,7 @@ export function createFdbStatefulPersistentVolumeClaims({
               processClass,
             }),
             [FDB_PROCESS_PORT_LABEL]: String(port),
+            ...labels,
           };
 
           return createK8sPvc({
@@ -131,14 +133,18 @@ export function createFdbStatefulResources(
           topologySpreadConstraints,
           args,
           resourceRequirements,
+          labels,
         },
       ],
     ) => {
-      const statefulLabels = createStatefulLabels({
-        id,
-        baseLabels,
-        processClass,
-      });
+      const statefulLabels = {
+        ...createStatefulLabels({
+          id,
+          baseLabels,
+          processClass,
+        }),
+        ...labels,
+      };
       const resourceName = `${baseName}-${id}`;
 
       const service = createK8sService({
