@@ -22,7 +22,7 @@ import {
 } from "../../deps/rxjs.ts";
 import { deepEqual } from "../../deps/std_testing.ts";
 import { Logger } from "../../libs/logger.ts";
-import { typedParse } from "../../deps/schema.ts";
+import { validate } from "../../deps/schema.ts";
 
 function getElapsedSeconds(startTime: number) {
   return Math.round((performance.now() - startTime) * 100) / 100000;
@@ -142,7 +142,7 @@ async function loadConfig(configFile: string): Promise<RegistrySyncJobs> {
 
   const jobsConfigRaw = JSON.parse(await Deno.readTextFile(configFile));
 
-  const jobsConfigResult = typedParse(
+  const jobsConfigResult = validate(
     RegistrySyncJobsSchema,
     jobsConfigRaw,
   );

@@ -1,1 +1,1 @@
-export * from "@wok/utils/validation";
+export * from "@wok/schema/validation";

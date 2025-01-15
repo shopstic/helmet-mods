@@ -1,7 +1,7 @@
 import type { StdInputBehavior } from "../../../deps/exec_utils.ts";
 import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
 import { memoize } from "@wok/utils/memoize";
-import { Arr, Num, PartObj, Str, typedParse, type TypedSchema } from "../../../deps/schema.ts";
+import { Arr, Num, PartObj, Str, type TypedSchema, validate } from "../../../deps/schema.ts";
 import type { FdbDatabaseConfig, FdbStatus } from "./types.ts";
 import { FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
@@ -90,7 +90,7 @@ export async function fetchStatus(
     }
   })();
 
-  const statusValidation = typedParse(FdbStatusSchema, parsed);
+  const statusValidation = validate(FdbStatusSchema, parsed);
 
   if (!statusValidation.isSuccess) {
     const errorMessage = "FDB status JSON payload failed schema validation";
@@ -134,7 +134,7 @@ export async function readClusterConfig(
 ): Promise<FdbDatabaseConfig> {
   const raw = await Deno.readTextFile(configFile);
   const configJson = JSON.parse(raw);
-  const configValidation = typedParse(
+  const configValidation = validate(
     FdbDatabaseConfigSchema,
     configJson,
   );
@@ -226,7 +226,7 @@ export async function kubectlGetJson<T>({
   });
 
   const json = JSON.parse(output);
-  const validation = typedParse(schema, json);
+  const validation = validate(schema, json);
 
   if (!validation.isSuccess) {
     const errorMessage = `'kubectl ${fullArgs.join(" ")}' output failed schema validation`;

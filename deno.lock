@@ -23,14 +23,13 @@
     "jsr:@std/streams@^1.0.8": "1.0.8",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@2": "2.0.0",
+    "jsr:@wok/helmet@^2.0.1": "2.0.1",
     "jsr:@wok/k8s@^1.32.0": "1.32.0",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.2",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
-    "jsr:@wok/schema@^2.0.1": "2.0.3",
-    "jsr:@wok/schema@^2.0.2": "2.0.3",
-    "jsr:@wok/typebox@1": "1.0.0",
-    "jsr:@wok/utils@^4.0.2": "4.0.2",
+    "jsr:@wok/schema@^2.1.0": "2.1.0",
+    "jsr:@wok/typebox@^1.1.0": "1.1.0",
+    "jsr:@wok/utils@^4.1.0": "4.1.0",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.13": "0.34.13",
     "npm:immer@^10.1.1": "10.1.1",
@@ -117,15 +116,15 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@2.0.0": {
-      "integrity": "b7414d963adcf8a9d6adbb7ff331f128c02572d4eda1a59376115b3fdb1e25c1",
+    "@wok/helmet@2.0.1": {
+      "integrity": "4a34f4ba01451cd14a458a10a99af0dbf3ec11e16619c1dedfe06e7d287ea785",
       "dependencies": [
         "jsr:@std/fmt@^1.0.4",
         "jsr:@std/fs",
         "jsr:@std/path",
         "jsr:@std/semver",
         "jsr:@std/yaml",
-        "jsr:@wok/schema@^2.0.2",
+        "jsr:@wok/schema",
         "jsr:@wok/utils"
       ]
     },
@@ -143,22 +142,21 @@
     "@wok/prometheus@1.0.2": {
       "integrity": "8b172f048b7e67a95e9bd77814267ee035bb0cdcc361675ffd697f9463675349"
     },
-    "@wok/schema@2.0.3": {
-      "integrity": "aabee9a36e52b40a855aa45fbc6018a83695557aaf05fe00d1de9872577fbb5f",
+    "@wok/schema@2.1.0": {
+      "integrity": "6e46324b03b49dbdc84486ec2a1949b9525ee1d8269e32c2f0e51baf8883f6ce",
       "dependencies": [
         "jsr:@wok/typebox",
-        "npm:@sinclair/typebox",
         "npm:type-fest"
       ]
     },
-    "@wok/typebox@1.0.0": {
-      "integrity": "b530e8b9b839406ead5f522e1ea78a5eabb9161e757120a518346b3e8d522df5",
+    "@wok/typebox@1.1.0": {
+      "integrity": "09a56923782648ae74d54a4839e808fa0b3bbef17c0b0879d654f42cc8b20b2e",
       "dependencies": [
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@4.0.2": {
-      "integrity": "69444ea6e3c5244164b0758279d75e0c3b361e00e2741bd51e9f4c41bb1a5c3d",
+    "@wok/utils@4.1.0": {
+      "integrity": "20e1aeb4d71076a5864f9acacee1df75345d1a69735dfcf71ac9a0a24fe03983",
       "dependencies": [
         "jsr:@std/assert",
         "jsr:@std/cli@^1.0.10",
@@ -166,9 +164,8 @@
         "jsr:@std/streams",
         "jsr:@wok/case",
         "jsr:@wok/k8s",
-        "jsr:@wok/schema@^2.0.1",
+        "jsr:@wok/schema",
         "jsr:@wok/typebox",
-        "npm:@sinclair/typebox",
         "npm:type-fest"
       ]
     }
@@ -242,12 +239,13 @@
       "jsr:@std/streams@^1.0.8",
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
-      "jsr:@wok/helmet@2",
+      "jsr:@wok/helmet@^2.0.1",
       "jsr:@wok/k8s@^1.32.0",
       "jsr:@wok/openapi-client@^1.0.2",
       "jsr:@wok/prometheus@^1.0.2",
-      "jsr:@wok/typebox@1",
-      "jsr:@wok/utils@^4.0.2",
+      "jsr:@wok/schema@^2.1.0",
+      "jsr:@wok/typebox@^1.1.0",
+      "jsr:@wok/utils@^4.1.0",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
       "npm:jose@^5.9.6",

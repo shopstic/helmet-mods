@@ -6,7 +6,7 @@ import { VersionBumpParamsSchema, VersionBumpTargetsSchema } from "./libs/schema
 import { commandWithTimeout } from "../../libs/utils.ts";
 import { delay } from "../../deps/async_utils.ts";
 import { Logger } from "../../libs/logger.ts";
-import { typedParse } from "../../deps/schema.ts";
+import { validate } from "../../deps/schema.ts";
 
 async function updateDigests({ repoPath, targets }: {
   repoPath: string;
@@ -187,7 +187,7 @@ await new CliProgram()
 
           const targetsConfigRaw = JSON.parse(await Deno.readTextFile(targetsConfigFile));
 
-          const targetsConfigResult = typedParse(
+          const targetsConfigResult = validate(
             VersionBumpTargetsSchema,
             targetsConfigRaw,
           );

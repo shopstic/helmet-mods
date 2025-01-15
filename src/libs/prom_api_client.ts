@@ -1,17 +1,17 @@
 import {
   type AnySchema,
   Arr,
-  createTypedParser,
+  createValidator,
   Lit,
   Num,
   Obj,
-  type ParseResult,
   Rec,
   Str,
   Tup,
   type TypedSchema,
   Uni,
   Unk,
+  type ValidationResult,
 } from "../deps/schema.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
@@ -108,8 +108,13 @@ export class PromApiError extends Error {
   }
 }
 
-// deno-lint-ignore no-explicit-any
-const schemaParserCache = new WeakMap<AnySchema, (value: unknown) => ParseResult<any>>();
+const schemaValidatorCache = new WeakMap<AnySchema, (value: unknown) => ValidationResult<unknown>>();
+function getSchemaValidator<T>(schema: TypedSchema<T, unknown>): (value: unknown) => ValidationResult<T> {
+  if (!schemaValidatorCache.has(schema)) {
+    schemaValidatorCache.set(schema, createValidator(schema));
+  }
+  return schemaValidatorCache.get(schema)! as (value: unknown) => ValidationResult<T>;
+}
 
 async function promFetch<T>(
   schema: TypedSchema<T, unknown>,
@@ -129,15 +134,7 @@ async function promFetch<T>(
 
   if (response.ok) {
     const json = await response.json();
-
-    let parse: ((value: unknown) => ParseResult<T>) | undefined = schemaParserCache.get(schema);
-
-    if (!parse) {
-      parse = createTypedParser(schema);
-      schemaParserCache.set(schema, parse);
-    }
-
-    const result = parse(json);
+    const result = getSchemaValidator(schema)(json);
 
     if (!result.isSuccess) {
       throw new Error(`Failed to parse response: ${JSON.stringify(result.errors.First(), null, 2)}`);

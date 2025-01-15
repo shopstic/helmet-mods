@@ -8,7 +8,7 @@ import { openapiMerge, openapiMergeIsErrorResult } from "../../deps/openapi_merg
 import { yamlParse, yamlStringify } from "../../deps/std_yaml.ts";
 import { deepMerge } from "../../deps/helmet.ts";
 import { immerProduce } from "../../deps/immer.ts";
-import { createTypedParser } from "../../deps/schema.ts";
+import { createValidator } from "../../deps/schema.ts";
 
 export class BackendRequestError extends Error {
   override readonly name = BackendRequestError.name;
@@ -31,7 +31,7 @@ function stripAllOperationSecurity<T>(swagger: T): T {
   });
 }
 
-const parseOpenapiMergerConfig = createTypedParser(OpenapiMergerConfigSchema);
+const parseOpenapiMergerConfig = createValidator(OpenapiMergerConfigSchema);
 
 await new CliProgram()
   .addAction(

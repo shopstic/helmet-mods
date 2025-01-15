@@ -340,7 +340,7 @@ update_images() {
 }
 
 update_deps() {
-  deno run -A jsr:@wok/deup@2.0.0 update "$@"
+  deno run -A jsr:@wok/deup@2.1.0 update "$@"
   "$0" update_lock
 }
 

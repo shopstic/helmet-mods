@@ -25,7 +25,7 @@ import {
 import { deepEqual } from "../../deps/std_testing.ts";
 import { Logger } from "../../libs/logger.ts";
 import { createK8sSecret } from "../../deps/helmet.ts";
-import { typedParse } from "../../deps/schema.ts";
+import { validate } from "../../deps/schema.ts";
 
 interface AuthResult {
   auth: string;
@@ -80,7 +80,7 @@ async function loadConfig(configFile: string): Promise<RegistryAuthConfig> {
   });
 
   const configRaw = JSON.parse(await Deno.readTextFile(configFile));
-  const configResult = typedParse(RegistryAuthConfigSchema, configRaw);
+  const configResult = validate(RegistryAuthConfigSchema, configRaw);
 
   if (!configResult.isSuccess) {
     throw new Error(
