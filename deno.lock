@@ -27,8 +27,8 @@
     "jsr:@wok/k8s@^1.32.0": "1.32.0",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.2",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
-    "jsr:@wok/schema@^2.0.1": "2.0.2",
-    "jsr:@wok/schema@^2.0.2": "2.0.2",
+    "jsr:@wok/schema@^2.0.1": "2.0.3",
+    "jsr:@wok/schema@^2.0.2": "2.0.3",
     "jsr:@wok/typebox@1": "1.0.0",
     "jsr:@wok/utils@^4.0.2": "4.0.2",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
@@ -143,8 +143,8 @@
     "@wok/prometheus@1.0.2": {
       "integrity": "8b172f048b7e67a95e9bd77814267ee035bb0cdcc361675ffd697f9463675349"
     },
-    "@wok/schema@2.0.2": {
-      "integrity": "a17e4c518d6d86ab59654f373502b39692d709ec6bb1c78bea4ea812beedb6fd",
+    "@wok/schema@2.0.3": {
+      "integrity": "aabee9a36e52b40a855aa45fbc6018a83695557aaf05fe00d1de9872577fbb5f",
       "dependencies": [
         "jsr:@wok/typebox",
         "npm:@sinclair/typebox",
