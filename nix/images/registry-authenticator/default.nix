@@ -46,6 +46,7 @@ let
       env = [
         "PATH=/bin"
       ];
+      workingdir = "/home/${user}";
       entrypoint = [ "dumb-init" "--" "${registry-authenticator}/bin/${registry-authenticator.name}" "run" ];
       user = "${user}:${user}";
     };

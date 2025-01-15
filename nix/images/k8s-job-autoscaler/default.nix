@@ -40,6 +40,7 @@ let
       env = [
         "PATH=/bin"
       ];
+      workingdir = "/home/${user}";
       entrypoint = [ "dumb-init" "--" "${k8s-job-autoscaler}/bin/${k8s-job-autoscaler.name}" "run" ];
       user = "${user}:${user}";
     };

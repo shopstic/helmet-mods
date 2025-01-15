@@ -54,6 +54,7 @@ let
         "PATH=/bin"
         "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
       ];
+      workingdir = "/home/${user}";
       entrypoint = [ "dumb-init" "--" "${openapi-merger}/bin/${openapi-merger.name}" "run" ];
       user = "${user}:${user}";
     };

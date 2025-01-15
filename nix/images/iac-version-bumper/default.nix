@@ -73,6 +73,7 @@ let
     config = {
       entrypoint = [ "dumb-init" "--" entrypoint ];
       user = "${user}:${user}";
+      workingdir = "/home/${user}";
       env = [
         "PATH=/bin"
         "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"

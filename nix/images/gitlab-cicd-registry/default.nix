@@ -40,6 +40,7 @@ let
       env = [
         "PATH=/bin"
       ];
+      workingdir = "/home/${user}";
       entrypoint = [ "dumb-init" "--" "${gitlab-cicd-registry}/bin/${gitlab-cicd-registry.name}" "run" ];
       user = "${user}:${user}";
     };

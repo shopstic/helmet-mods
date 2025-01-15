@@ -40,6 +40,7 @@ let
       env = [
         "PATH=/bin"
       ];
+      workingdir = "/home/${user}";
       entrypoint = [ "dumb-init" "--" "${github-actions-registry}/bin/${github-actions-registry.name}" "run" ];
       user = "${user}:${user}";
     };

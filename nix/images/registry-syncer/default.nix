@@ -44,6 +44,7 @@ let
         "PATH=/bin"
         "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
       ];
+      workingdir = "/home/${user}";
       entrypoint = [ "dumb-init" "--" "${registry-syncer}/bin/${registry-syncer.name}" "run" ];
       user = "${user}:${user}";
     };

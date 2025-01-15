@@ -41,6 +41,7 @@ let
         "PATH=/bin"
       ];
       entrypoint = [ "dumb-init" "--" "${grafana-syncer}/bin/${grafana-syncer.name}" "run" ];
+      workingdir = "/home/${user}";
       user = "${user}:${user}";
     };
   };
