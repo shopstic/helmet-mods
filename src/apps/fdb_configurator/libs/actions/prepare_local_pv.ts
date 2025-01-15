@@ -1,20 +1,19 @@
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { joinPath } from "../../../../deps/std_path.ts";
-import { Type } from "../../../../deps/typebox.ts";
-import { NonEmptyString } from "../types.ts";
 import { captureExec, inheritExec } from "../../../../deps/exec_utils.ts";
 import { kubectlGetJson, kubectlInherit, toRootElevatedCommand } from "../utils.ts";
 import { Logger } from "../../../../libs/logger.ts";
+import { NonEmpStr, Rec, Str } from "../../../../deps/schema.ts";
 
 const logger = new Logger();
 
 export default createCliAction(
   {
-    nodeNameEnvVarName: NonEmptyString(),
-    pendingLabelName: NonEmptyString(),
-    pendingLabelCompletedValue: NonEmptyString(),
-    pendingDeviceIdsAnnotationName: NonEmptyString(),
-    rootMountPath: NonEmptyString(),
+    nodeNameEnvVarName: NonEmpStr(),
+    pendingLabelName: NonEmpStr(),
+    pendingLabelCompletedValue: NonEmpStr(),
+    pendingDeviceIdsAnnotationName: NonEmpStr(),
+    rootMountPath: NonEmpStr(),
   },
   async (
     {
@@ -33,7 +32,7 @@ export default createCliAction(
 
     const nodeAnnotations = await kubectlGetJson({
       args: [`node/${nodeName}`, "-o=jsonpath={.metadata.annotations}"],
-      schema: Type.Record(Type.String(), Type.String()),
+      schema: Rec(Str(), Str()),
     });
 
     const deviceIdsString = (typeof nodeAnnotations[pendingDeviceIdsAnnotationName] === "string")

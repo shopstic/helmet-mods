@@ -1,113 +1,108 @@
-import { FlexObject, Type } from "../../../deps/typebox.ts";
-import type { Static } from "../../../deps/typebox.ts";
+import { Arr, Bool, Lit, Num, Opt, PartObj, Rec, Str, Uni } from "../../../deps/schema.ts";
 
-export function NonEmptyString() {
-  return Type.String({ minLength: 1 });
-}
-
-export const FdbRedundancyModeSchema = Type.Union([
-  Type.Literal("single"),
-  Type.Literal("double"),
-  Type.Literal("triple"),
-  Type.Literal("three_datacenter"),
-  Type.Literal("three_datacenter_fallback"),
-  Type.Literal("three_data_hall"),
-  Type.Literal("three_data_hall_fallback"),
+export const FdbRedundancyModeSchema = Uni([
+  Lit("single"),
+  Lit("double"),
+  Lit("triple"),
+  Lit("three_datacenter"),
+  Lit("three_datacenter_fallback"),
+  Lit("three_data_hall"),
+  Lit("three_data_hall_fallback"),
 ]);
 
-export const FdbStorageEngineSchema = Type.Union([
-  Type.Literal("memory-1"),
-  Type.Literal("memory-2"),
-  Type.Literal("memory-radixtree-beta"),
-  Type.Literal("ssd-1"),
-  Type.Literal("ssd-2"),
-  Type.Literal("ssd-redwood-1-experimental"),
-  Type.Literal("ssd-rocksdb-v1"),
+export const FdbStorageEngineSchema = Uni([
+  Lit("memory-1"),
+  Lit("memory-2"),
+  Lit("memory-radixtree-beta"),
+  Lit("ssd-1"),
+  Lit("ssd-2"),
+  Lit("ssd-redwood-1-experimental"),
+  Lit("ssd-rocksdb-v1"),
 ]);
 
-export const FdbDatabaseConfigSchema = FlexObject({
+export const FdbDatabaseConfigSchema = PartObj({
   storageEngine: FdbStorageEngineSchema,
   redundancyMode: FdbRedundancyModeSchema,
-  logCount: Type.Number({ minimum: 1 }),
-  grvProxyCount: Type.Number({ minimum: 1 }),
-  commitProxyCount: Type.Number({ minimum: 1 }),
-  resolverCount: Type.Number({ minimum: 1 }),
-  coordinatorServiceNames: Type.Array(Type.String()),
-  excludedServiceEndpoints: Type.Array(FlexObject({
-    name: Type.String(),
-    port: Type.Number({ minimum: 1, maximum: 65535 }),
+  logCount: Num({ minimum: 1 }),
+  grvProxyCount: Num({ minimum: 1 }),
+  commitProxyCount: Num({ minimum: 1 }),
+  resolverCount: Num({ minimum: 1 }),
+  coordinatorServiceNames: Arr(Str()),
+  excludedServiceEndpoints: Arr(PartObj({
+    name: Str(),
+    port: Num({ minimum: 1, maximum: 65535 }),
   })),
-  excludedServiceLabels: Type.Array(Type.Record(Type.String(), Type.String())),
-  excludedPodLabels: Type.Array(Type.Record(Type.String(), Type.String())),
-  perpetualStorageWiggle: Type.Number(),
-  perpetualStorageWiggleLocality: Type.String(),
-  storageMigrationType: Type.Union([
-    Type.Literal("disabled"),
-    Type.Literal("gradual"),
-    Type.Literal("aggressive"),
+  excludedServiceLabels: Arr(Rec(Str(), Str())),
+  excludedPodLabels: Arr(Rec(Str(), Str())),
+  perpetualStorageWiggle: Num(),
+  perpetualStorageWiggleLocality: Str(),
+  storageMigrationType: Uni([
+    Lit("disabled"),
+    Lit("gradual"),
+    Lit("aggressive"),
   ]),
-  tenantMode: Type.Optional(Type.Union([
-    Type.Literal("disabled"),
-    Type.Literal("optional_experimental"),
-    Type.Literal("required_experimental"),
+  tenantMode: Opt(Uni([
+    Lit("disabled"),
+    Lit("optional_experimental"),
+    Lit("required_experimental"),
   ])),
 });
 
-export type FdbDatabaseConfig = Static<typeof FdbDatabaseConfigSchema>;
+export type FdbDatabaseConfig = typeof FdbDatabaseConfigSchema.infer;
 
-export const FdbStatusProcessSchema = FlexObject({
-  address: Type.String(),
-  excluded: Type.Optional(Type.Boolean()),
-  machine_id: Type.Optional(Type.String()),
-  class_type: Type.Union([
-    Type.Literal("unset"),
-    Type.Literal("coordinator"),
-    Type.Literal("storage"),
-    Type.Literal("transaction"),
-    Type.Literal("stateless"),
-    Type.Literal("commit_proxy"),
-    Type.Literal("grv_proxy"),
-    Type.Literal("log"),
-    Type.Literal("master"),
+export const FdbStatusProcessSchema = PartObj({
+  address: Str(),
+  excluded: Opt(Bool()),
+  machine_id: Opt(Str()),
+  class_type: Uni([
+    Lit("unset"),
+    Lit("coordinator"),
+    Lit("storage"),
+    Lit("transaction"),
+    Lit("stateless"),
+    Lit("commit_proxy"),
+    Lit("grv_proxy"),
+    Lit("log"),
+    Lit("master"),
   ]),
 });
 
-export const FdbStatusSchema = FlexObject({
-  cluster: FlexObject({
-    configuration: Type.Optional(FlexObject({
-      resolvers: Type.Number(),
-      proxies: Type.Optional(Type.Number()),
-      grv_proxies: Type.Optional(Type.Number()),
-      commit_proxies: Type.Optional(Type.Number()),
-      logs: Type.Number(),
-      perpetual_storage_wiggle: Type.Number(),
-      perpetual_storage_wiggle_locality: Type.String(),
-      storage_migration_type: Type.String(),
-      tenant_mode: Type.String(),
+export const FdbStatusSchema = PartObj({
+  cluster: PartObj({
+    configuration: Opt(PartObj({
+      resolvers: Num(),
+      proxies: Opt(Num()),
+      grv_proxies: Opt(Num()),
+      commit_proxies: Opt(Num()),
+      logs: Num(),
+      perpetual_storage_wiggle: Num(),
+      perpetual_storage_wiggle_locality: Str(),
+      storage_migration_type: Str(),
+      tenant_mode: Str(),
       redundancy_mode: FdbRedundancyModeSchema,
       storage_engine: FdbStorageEngineSchema,
     })),
-    recovery_state: Type.Optional(FlexObject({
-      name: Type.String(),
-      description: Type.String(),
+    recovery_state: Opt(PartObj({
+      name: Str(),
+      description: Str(),
     })),
-    processes: Type.Optional(
-      Type.Record(Type.String(), FdbStatusProcessSchema),
+    processes: Opt(
+      Rec(Str(), FdbStatusProcessSchema),
     ),
   }),
-  client: FlexObject({
-    database_status: FlexObject({
-      available: Type.Boolean(),
+  client: PartObj({
+    database_status: PartObj({
+      available: Bool(),
     }),
-    coordinators: FlexObject({
-      quorum_reachable: Type.Boolean(),
-      coordinators: Type.Array(FlexObject({
-        address: Type.String(),
-        reachable: Type.Boolean(),
+    coordinators: PartObj({
+      quorum_reachable: Bool(),
+      coordinators: Arr(PartObj({
+        address: Str(),
+        reachable: Bool(),
       })),
     }),
   }),
 });
 
-export type FdbStatus = Static<typeof FdbStatusSchema>;
-export type FdbStatusProcess = Static<typeof FdbStatusProcessSchema>;
+export type FdbStatus = typeof FdbStatusSchema.infer;
+export type FdbStatusProcess = typeof FdbStatusProcessSchema.infer;

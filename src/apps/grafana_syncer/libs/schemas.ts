@@ -1,13 +1,14 @@
-import type { Static, TObject } from "../../../deps/typebox.ts";
-import { Type } from "../../../deps/typebox.ts";
+import { Obj, Opt, Str } from "../../../deps/schema.ts";
 
 export const GrafanaSyncerParamsSchema = {
-  namespace: Type.Optional(Type.String({ minLength: 1 })),
-  k8sApiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),
-  grafanaApiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),
-  grafanaBearerToken: Type.String({ minLength: 1 }),
-  labelSelector: Type.Optional(Type.String({ minLength: 1 })),
-  fieldSelector: Type.Optional(Type.String({ minLength: 1 })),
+  namespace: Opt(Str({ minLength: 1 })),
+  k8sApiServerBaseUrl: Str({ minLength: 1, format: "uri" }),
+  grafanaApiServerBaseUrl: Str({ minLength: 1, format: "uri" }),
+  grafanaBearerToken: Str({ minLength: 1 }),
+  labelSelector: Opt(Str({ minLength: 1 })),
+  fieldSelector: Opt(Str({ minLength: 1 })),
 };
 
-export type GrafanaSyncerParams = Static<TObject<typeof GrafanaSyncerParamsSchema>>;
+const GrafanaSyncerParamsSchemaObj = Obj(GrafanaSyncerParamsSchema);
+
+export type GrafanaSyncerParams = typeof GrafanaSyncerParamsSchemaObj.infer;

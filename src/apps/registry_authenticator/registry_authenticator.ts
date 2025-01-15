@@ -1,7 +1,6 @@
 import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
 import { commandWithTimeout, exhaustiveMatchingGuard, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { validate } from "../../deps/validation_utils.ts";
 import type { RegistryAuth, RegistryAuthConfig } from "./libs/schemas.ts";
 import { RegistryAuthConfigSchema, RegistryAuthParamsSchema } from "./libs/schemas.ts";
 import type { Observable } from "../../deps/rxjs.ts";
@@ -26,6 +25,7 @@ import {
 import { deepEqual } from "../../deps/std_testing.ts";
 import { Logger } from "../../libs/logger.ts";
 import { createK8sSecret } from "../../deps/helmet.ts";
+import { typedParse } from "../../deps/schema.ts";
 
 interface AuthResult {
   auth: string;
@@ -80,7 +80,7 @@ async function loadConfig(configFile: string): Promise<RegistryAuthConfig> {
   });
 
   const configRaw = JSON.parse(await Deno.readTextFile(configFile));
-  const configResult = validate(RegistryAuthConfigSchema, configRaw);
+  const configResult = typedParse(RegistryAuthConfigSchema, configRaw);
 
   if (!configResult.isSuccess) {
     throw new Error(

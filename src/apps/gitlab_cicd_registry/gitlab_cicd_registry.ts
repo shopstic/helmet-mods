@@ -1,7 +1,6 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
 import { captureExec } from "../../deps/exec_utils.ts";
 import { stableHash } from "../../deps/stable_hash.ts";
-import { validate } from "../../deps/validation_utils.ts";
 import { constantTimeCompare } from "../../libs/crypto_utils.ts";
 import { Logger } from "../../libs/logger.ts";
 import type { ReconciliationLoop } from "../../libs/utils.ts";
@@ -9,6 +8,7 @@ import { agInterval, agThrottle, createReconciliationLoop } from "../../libs/uti
 import type { GitlabJob } from "./libs/schemas.ts";
 import { GitlabCicdRegistryParamsSchema, GitlabWebhookBuildSchema } from "./libs/schemas.ts";
 import { fetchLastActiveProjects, fetchProjectPendingJobs } from "./libs/gitlab_api_service.ts";
+import { typedParse } from "../../deps/schema.ts";
 
 const GITLAB_WEBHOOK_TOKEN_HEADER = "X-Gitlab-Token";
 const logger = new Logger();
@@ -182,7 +182,7 @@ const program = new CliProgram()
 
             try {
               const payload = await request.json();
-              const validation = validate(GitlabWebhookBuildSchema, payload);
+              const validation = typedParse(GitlabWebhookBuildSchema, payload);
 
               if (!validation.isSuccess) {
                 logger.warn({

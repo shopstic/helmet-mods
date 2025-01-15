@@ -1,13 +1,10 @@
 import type { Deferred } from "../deps/async_utils.ts";
 import { deferred, delay } from "../deps/async_utils.ts";
 import { Observable } from "../deps/rxjs.ts";
-import { Type } from "../deps/typebox.ts";
 
 export function commandWithTimeout(command: string[], timeoutSeconds: number): string[] {
   return ["timeout", "-k", "0", `${timeoutSeconds}s`, ...command];
 }
-
-export const NonEmptyString = Type.String({ minLength: 1 });
 
 export function withAbortSignal<T>(fn: (signal: AbortSignal) => Observable<T>): Observable<T> {
   return new Observable<T>((subscriber) => {

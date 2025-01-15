@@ -1,14 +1,15 @@
 import type { K8s } from "../../../deps/k8s_openapi.ts";
-import type { Static, TObject } from "../../../deps/typebox.ts";
-import { Type } from "../../../deps/typebox.ts";
+import { Num, Obj, Opt, Str } from "../../../deps/schema.ts";
 
 export const K8sJobAutoscalerParamsSchema = {
-  minReconcileIntervalMs: Type.Number({ minimum: 1 }),
-  namespace: Type.Optional(Type.String({ minLength: 1 })),
-  apiServerBaseUrl: Type.String({ minLength: 1, format: "uri" }),
+  minReconcileIntervalMs: Num({ minimum: 1 }),
+  namespace: Opt(Str({ minLength: 1 })),
+  apiServerBaseUrl: Str({ minLength: 1, format: "uri" }),
 };
 
-export type K8sJobAutoscalerParams = Static<TObject<typeof K8sJobAutoscalerParamsSchema>>;
+const K8sJobAutoscalerParamsSchemaObj = Obj(K8sJobAutoscalerParamsSchema);
+
+export type K8sJobAutoscalerParams = typeof K8sJobAutoscalerParamsSchemaObj.infer;
 
 export type AutoscaledJobAutoscaling = {
   query: string;

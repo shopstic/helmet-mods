@@ -1,4 +1,4 @@
-import { validate } from "../../../deps/validation_utils.ts";
+import { typedParse } from "../../../deps/schema.ts";
 import type { Logger } from "../../../libs/logger.ts";
 import type { GitlabJob, GitlabProject } from "./schemas.ts";
 import { GitlabJobListSchema, GitlabProjectListSchema } from "./schemas.ts";
@@ -25,7 +25,7 @@ export async function fetchLastActiveProjects(
   }
 
   const body = await response.json();
-  const validation = validate(GitlabProjectListSchema, body);
+  const validation = typedParse(GitlabProjectListSchema, body);
 
   if (!validation.isSuccess) {
     logger.error({
@@ -58,7 +58,7 @@ export async function fetchProjectPendingJobs(
     }
 
     const body = await response.json();
-    const validation = validate(GitlabJobListSchema, body);
+    const validation = typedParse(GitlabJobListSchema, body);
 
     if (!validation.isSuccess) {
       logger.error({

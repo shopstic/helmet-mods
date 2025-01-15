@@ -1,54 +1,54 @@
-import type { Static, TObject } from "../../../deps/typebox.ts";
-import { FlexObject, Type } from "../../../deps/typebox.ts";
+import { Arr, Lit, Num, Obj, Opt, PartObj, Str, Uni } from "../../../deps/schema.ts";
 
 export const GitlabCicdRegistryParamsSchema = {
-  groupId: Type.Number(),
-  accessToken: Type.String({ minLength: 1 }),
-  allProjectsRefreshIntervalSeconds: Type.Number({ minimum: 1 }),
-  activeProjectLastPushedWithinHours: Type.Number({ minimum: 1 }),
-  perProjectMinRefreshIntervalMs: Type.Number({ minimum: 1 }),
-  webhookSecretToken: Type.String({ minLength: 1 }),
-  webhookServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
-  registryServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
-  busyJobAnnotation: Type.String({ minLength: 1 }),
-  namespace: Type.Optional(Type.String({ minLength: 1 })),
+  groupId: Num(),
+  accessToken: Str({ minLength: 1 }),
+  allProjectsRefreshIntervalSeconds: Num({ minimum: 1 }),
+  activeProjectLastPushedWithinHours: Num({ minimum: 1 }),
+  perProjectMinRefreshIntervalMs: Num({ minimum: 1 }),
+  webhookSecretToken: Str({ minLength: 1 }),
+  webhookServerPort: Num({ minimum: 0, maximum: 65535 }),
+  registryServerPort: Num({ minimum: 0, maximum: 65535 }),
+  busyJobAnnotation: Str({ minLength: 1 }),
+  namespace: Opt(Str({ minLength: 1 })),
 };
 
-export type GitlabCicdRegistryParams = Static<TObject<typeof GitlabCicdRegistryParamsSchema>>;
+const GitlabCicdRegistryParamsSchemaObj = Obj(GitlabCicdRegistryParamsSchema);
+export type GitlabCicdRegistryParams = typeof GitlabCicdRegistryParamsSchemaObj.infer;
 
-export const GitlabWebhookBuildSchema = FlexObject({
-  object_kind: Type.Literal("build"),
-  project_id: Type.Number(),
-  project_name: Type.String({ minLength: 1 }),
+export const GitlabWebhookBuildSchema = PartObj({
+  object_kind: Lit("build"),
+  project_id: Num(),
+  project_name: Str({ minLength: 1 }),
 });
 
-export const GitlabProjectSchema = FlexObject({
-  id: Type.Number(),
-  name: Type.String({ minLength: 1 }),
-  last_activity_at: Type.String({ format: "date-time" }),
+export const GitlabProjectSchema = PartObj({
+  id: Num(),
+  name: Str({ minLength: 1 }),
+  last_activity_at: Str({ format: "date-time" }),
 });
 
-export type GitlabProject = Static<typeof GitlabProjectSchema>;
+export type GitlabProject = typeof GitlabProjectSchema.infer;
 
-export const GitlabProjectListSchema = Type.Array(GitlabProjectSchema);
+export const GitlabProjectListSchema = Arr(GitlabProjectSchema);
 
-export const GitlabJobSchema = FlexObject({
-  name: Type.String({ minLength: 1 }),
-  stage: Type.String({ minLength: 1 }),
-  status: Type.Union([
-    Type.Literal("created"),
-    Type.Literal("pending"),
-    Type.Literal("running"),
-    Type.Literal("failed"),
-    Type.Literal("success"),
-    Type.Literal("skipped"),
-    Type.Literal("waiting_for_resource"),
-    Type.Literal("manual"),
-    Type.Literal("canceled"),
+export const GitlabJobSchema = PartObj({
+  name: Str({ minLength: 1 }),
+  stage: Str({ minLength: 1 }),
+  status: Uni([
+    Lit("created"),
+    Lit("pending"),
+    Lit("running"),
+    Lit("failed"),
+    Lit("success"),
+    Lit("skipped"),
+    Lit("waiting_for_resource"),
+    Lit("manual"),
+    Lit("canceled"),
   ]),
-  tag_list: Type.Array(Type.String({ minLength: 1 })),
+  tag_list: Arr(Str({ minLength: 1 })),
 });
 
-export type GitlabJob = Static<typeof GitlabJobSchema>;
+export type GitlabJob = typeof GitlabJobSchema.infer;
 
-export const GitlabJobListSchema = Type.Array(GitlabJobSchema);
+export const GitlabJobListSchema = Arr(GitlabJobSchema);

@@ -1,9 +1,7 @@
 import type { StdInputBehavior } from "../../../deps/exec_utils.ts";
 import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
-import { validate } from "../../../deps/validation_utils.ts";
 import { memoize } from "@wok/utils/memoize";
-import type { Static, TSchema } from "../../../deps/typebox.ts";
-import { FlexObject, Type } from "../../../deps/typebox.ts";
+import { Arr, Num, PartObj, Str, typedParse, type TypedSchema } from "../../../deps/schema.ts";
 import type { FdbDatabaseConfig, FdbStatus } from "./types.ts";
 import { FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
@@ -92,7 +90,7 @@ export async function fetchStatus(
     }
   })();
 
-  const statusValidation = validate(FdbStatusSchema, parsed);
+  const statusValidation = typedParse(FdbStatusSchema, parsed);
 
   if (!statusValidation.isSuccess) {
     const errorMessage = "FDB status JSON payload failed schema validation";
@@ -136,7 +134,7 @@ export async function readClusterConfig(
 ): Promise<FdbDatabaseConfig> {
   const raw = await Deno.readTextFile(configFile);
   const configJson = JSON.parse(raw);
-  const configValidation = validate(
+  const configValidation = typedParse(
     FdbDatabaseConfigSchema,
     configJson,
   );
@@ -149,31 +147,31 @@ export async function readClusterConfig(
   return configValidation.value;
 }
 
-export const ServiceSpecSchema = FlexObject({
-  clusterIP: Type.String({ format: "ipv4" }),
-  ports: Type.Array(
-    FlexObject({
-      port: Type.Number(),
+export const ServiceSpecSchema = PartObj({
+  clusterIP: Str({ format: "ipv4" }),
+  ports: Arr(
+    PartObj({
+      port: Num(),
     }),
     { minItems: 1 },
   ),
 });
 
-export const ListOfServiceSpecSchema = FlexObject({
-  items: Type.Array(FlexObject({
+export const ListOfServiceSpecSchema = PartObj({
+  items: Arr(PartObj({
     spec: ServiceSpecSchema,
   })),
 });
 
-export const ListOfPodStatusSchema = FlexObject({
-  items: Type.Array(FlexObject({
-    status: FlexObject({
-      podIP: Type.String(),
+export const ListOfPodStatusSchema = PartObj({
+  items: Arr(PartObj({
+    status: PartObj({
+      podIP: Str(),
     }),
   })),
 });
 
-export type ServiceSpec = Static<typeof ServiceSpecSchema>;
+export type ServiceSpec = typeof ServiceSpecSchema.infer;
 
 export async function kubectlInherit({
   args,
@@ -211,15 +209,15 @@ export async function kubectlCapture({
   })).out;
 }
 
-export async function kubectlGetJson<T extends TSchema>({
+export async function kubectlGetJson<T>({
   args,
   schema,
   timeoutSeconds,
 }: {
   args: string[];
-  schema: T;
+  schema: TypedSchema<T, unknown>;
   timeoutSeconds?: number;
-}): Promise<Static<T>> {
+}): Promise<T> {
   const fullArgs = ["get", ...args];
 
   const output = await kubectlCapture({
@@ -228,7 +226,7 @@ export async function kubectlGetJson<T extends TSchema>({
   });
 
   const json = JSON.parse(output);
-  const validation = validate(schema, json);
+  const validation = typedParse(schema, json);
 
   if (!validation.isSuccess) {
     const errorMessage = `'kubectl ${fullArgs.join(" ")}' output failed schema validation`;

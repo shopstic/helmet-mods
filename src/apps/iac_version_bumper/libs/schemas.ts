@@ -1,25 +1,26 @@
-import { Type } from "../../../deps/typebox.ts";
-import type { Static, TObject } from "../../../deps/typebox.ts";
+import { Arr, Lit, Num, Obj, Str, Uni } from "../../../deps/schema.ts";
 
-export const VersionBumpTargetsSchema = Type.Array(Type.Object({
-  versionFilePath: Type.String(),
-  name: Type.String(),
-  image: Type.String(),
-  platform: Type.Union([
-    Type.Literal("all"),
-    Type.Literal("linux/amd64"),
-    Type.Literal("linux/arm64"),
+export const VersionBumpTargetsSchema = Arr(Obj({
+  versionFilePath: Str(),
+  name: Str(),
+  image: Str(),
+  platform: Uni([
+    Lit("all"),
+    Lit("linux/amd64"),
+    Lit("linux/arm64"),
   ]),
 }));
 
-export type VersionBumpTargets = Static<typeof VersionBumpTargetsSchema>;
+export type VersionBumpTargets = typeof VersionBumpTargetsSchema.infer;
 
 export const VersionBumpParamsSchema = {
-  gitRepoUri: Type.String({ minLength: 1 }),
-  gitBranch: Type.String({ minLength: 1 }),
-  checkIntervalSeconds: Type.Number({ minimum: 0 }),
-  groupingDelaySeconds: Type.Number({ minimum: 0 }),
-  targetsConfigFile: Type.String({ minLength: 1 }),
+  gitRepoUri: Str({ minLength: 1 }),
+  gitBranch: Str({ minLength: 1 }),
+  checkIntervalSeconds: Num({ minimum: 0 }),
+  groupingDelaySeconds: Num({ minimum: 0 }),
+  targetsConfigFile: Str({ minLength: 1 }),
 };
 
-export type VersionBumpParams = Static<TObject<typeof VersionBumpParamsSchema>>;
+const VersionBumpParamsSchemaObj = Obj(VersionBumpParamsSchema);
+
+export type VersionBumpParams = typeof VersionBumpParamsSchemaObj.infer;

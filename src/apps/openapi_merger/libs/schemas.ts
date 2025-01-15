@@ -1,52 +1,49 @@
-import type { Static, TObject } from "../../../deps/typebox.ts";
-import { Type, TypeCompiler } from "../../../deps/typebox.ts";
-import { NonEmptyString } from "../../../libs/utils.ts";
+import { Arr, Bool, NonEmpStr, Num, Obj, Opt, Rec, Str, Uni, Unk } from "../../../deps/schema.ts";
 
 export const OpenapiMergerParamsSchema = {
-  configFile: NonEmptyString,
-  staticRoot: NonEmptyString,
-  docsPath: NonEmptyString,
-  serverInterface: NonEmptyString,
-  serverPort: Type.Number({ minimum: 0, maximum: 65535 }),
+  configFile: NonEmpStr(),
+  staticRoot: NonEmpStr(),
+  docsPath: NonEmpStr(),
+  serverInterface: NonEmpStr(),
+  serverPort: Num({ minimum: 0, maximum: 65535 }),
 };
 
-export type OpenapiMergerParams = Static<TObject<typeof OpenapiMergerParamsSchema>>;
+const OpenapiMergerParamsSchemaObj = Obj(OpenapiMergerParamsSchema);
+export type OpenapiMergerParams = typeof OpenapiMergerParamsSchemaObj.infer;
 
-export const OpenapiMergerConfigSchema = Type.Object({
-  overrides: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  stripAllOperationSecurity: Type.Optional(Type.Boolean()),
-  sources: Type.Array(Type.Object({
-    url: Type.String(),
-    merge: Type.Optional(Type.Object({
-      dispute: Type.Optional(Type.Union([
-        Type.Object({
-          alwaysApply: Type.Boolean(),
-          prefix: Type.String(),
+export const OpenapiMergerConfigSchema = Obj({
+  overrides: Opt(Rec(Str(), Unk())),
+  stripAllOperationSecurity: Opt(Bool()),
+  sources: Arr(Obj({
+    url: Str(),
+    merge: Opt(Obj({
+      dispute: Opt(Uni([
+        Obj({
+          alwaysApply: Bool(),
+          prefix: Str(),
         }),
-        Type.Object({
-          alwaysApply: Type.Boolean(),
-          suffix: Type.String(),
+        Obj({
+          alwaysApply: Bool(),
+          suffix: Str(),
         }),
       ])),
-      pathModification: Type.Optional(Type.Object({
-        stripStart: Type.String(),
-        prepend: Type.String(),
+      pathModification: Opt(Obj({
+        stripStart: Str(),
+        prepend: Str(),
       })),
-      operationSelection: Type.Optional(Type.Object({
-        includeTags: Type.Optional(Type.Array(Type.String())),
-        excludeTags: Type.Optional(Type.Array(Type.String())),
+      operationSelection: Opt(Obj({
+        includeTags: Opt(Arr(Str())),
+        excludeTags: Opt(Arr(Str())),
       })),
-      description: Type.Optional(Type.Object({
-        append: Type.Boolean(),
-        title: Type.Optional(Type.Object({
-          value: Type.String(),
-          headingLevel: Type.Number(),
+      description: Opt(Obj({
+        append: Bool(),
+        title: Opt(Obj({
+          value: Str(),
+          headingLevel: Num(),
         })),
       })),
     })),
   })),
 });
 
-export const OpenapiMergerConfigCheck = TypeCompiler.Compile(OpenapiMergerConfigSchema);
-
-export type OpenapiMergerConfig = Static<typeof OpenapiMergerConfigSchema>;
+export type OpenapiMergerConfig = typeof OpenapiMergerConfigSchema.infer;

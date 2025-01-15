@@ -1,12 +1,12 @@
 import { captureExec, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
 import { dirname, joinPath } from "../../deps/std_path.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { validate } from "../../deps/validation_utils.ts";
 import type { VersionBumpTargets } from "./libs/schemas.ts";
 import { VersionBumpParamsSchema, VersionBumpTargetsSchema } from "./libs/schemas.ts";
 import { commandWithTimeout } from "../../libs/utils.ts";
 import { delay } from "../../deps/async_utils.ts";
 import { Logger } from "../../libs/logger.ts";
+import { typedParse } from "../../deps/schema.ts";
 
 async function updateDigests({ repoPath, targets }: {
   repoPath: string;
@@ -187,7 +187,7 @@ await new CliProgram()
 
           const targetsConfigRaw = JSON.parse(await Deno.readTextFile(targetsConfigFile));
 
-          const targetsConfigResult = validate(
+          const targetsConfigResult = typedParse(
             VersionBumpTargetsSchema,
             targetsConfigRaw,
           );

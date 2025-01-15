@@ -3,7 +3,6 @@ import type { RegistrySyncJob, RegistrySyncJobs } from "./libs/schemas.ts";
 import { RegistrySyncJobsSchema, RegistrySyncParamsSchema } from "./libs/schemas.ts";
 import { commandWithTimeout, withAbortSignal } from "../../libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { validate } from "../../deps/validation_utils.ts";
 import {
   catchError,
   concatMap,
@@ -23,6 +22,7 @@ import {
 } from "../../deps/rxjs.ts";
 import { deepEqual } from "../../deps/std_testing.ts";
 import { Logger } from "../../libs/logger.ts";
+import { typedParse } from "../../deps/schema.ts";
 
 function getElapsedSeconds(startTime: number) {
   return Math.round((performance.now() - startTime) * 100) / 100000;
@@ -142,7 +142,7 @@ async function loadConfig(configFile: string): Promise<RegistrySyncJobs> {
 
   const jobsConfigRaw = JSON.parse(await Deno.readTextFile(configFile));
 
-  const jobsConfigResult = validate(
+  const jobsConfigResult = typedParse(
     RegistrySyncJobsSchema,
     jobsConfigRaw,
   );

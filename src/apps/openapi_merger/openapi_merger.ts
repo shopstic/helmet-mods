@@ -1,5 +1,5 @@
 import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import { OpenapiMergerConfigCheck, OpenapiMergerParamsSchema } from "./libs/schemas.ts";
+import { OpenapiMergerConfigSchema, OpenapiMergerParamsSchema } from "./libs/schemas.ts";
 import { Logger } from "../../libs/logger.ts";
 import { serveDir } from "../../deps/std_http.ts";
 import { stripMargin } from "../../libs/utils.ts";
@@ -8,6 +8,7 @@ import { openapiMerge, openapiMergeIsErrorResult } from "../../deps/openapi_merg
 import { yamlParse, yamlStringify } from "../../deps/std_yaml.ts";
 import { deepMerge } from "../../deps/helmet.ts";
 import { immerProduce } from "../../deps/immer.ts";
+import { createTypedParser } from "../../deps/schema.ts";
 
 export class BackendRequestError extends Error {
   override readonly name = BackendRequestError.name;
@@ -29,6 +30,8 @@ function stripAllOperationSecurity<T>(swagger: T): T {
     }
   });
 }
+
+const parseOpenapiMergerConfig = createTypedParser(OpenapiMergerConfigSchema);
 
 await new CliProgram()
   .addAction(
@@ -66,15 +69,16 @@ await new CliProgram()
           }
         })();
 
-        if (!OpenapiMergerConfigCheck.Check(configJson)) {
+        const result = parseOpenapiMergerConfig(configJson);
+        if (!result.isSuccess) {
           logger.error({
             msg: "Failed validating config",
-            errors: Array.from(OpenapiMergerConfigCheck.Errors(configJson)),
+            errors: [...result.errors],
           });
           return ExitCode.One;
         }
 
-        const config = OpenapiMergerConfigCheck.Decode(configJson);
+        const config = result.value;
 
         async function mergeSpecs(abortSignal: AbortSignal) {
           const docs = await Promise.all(config.sources.map(async ({ url }) => {

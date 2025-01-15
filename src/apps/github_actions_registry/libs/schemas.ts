@@ -1,20 +1,20 @@
-import type { Static, TObject } from "../../../deps/typebox.ts";
-import { Type } from "../../../deps/typebox.ts";
+import { Int, Num, Obj, Opt, Str } from "../../../deps/schema.ts";
 
 export const GithubActionsRegistryParamsSchema = {
-  org: Type.String({ minLength: 1 }),
-  appId: Type.Integer(),
-  installationId: Type.Number(),
-  privateKeyPath: Type.String({ minLength: 1 }),
-  clientRefreshIntervalSeconds: Type.Number({ minimum: 1 }),
-  perRepoMinRefreshIntervalMs: Type.Number({ minimum: 1 }),
-  allReposRefreshIntervalSeconds: Type.Number({ minimum: 1 }),
-  activeReposLastPushedWithinHours: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
-  webhookSigningKeyPath: Type.String({ minLength: 1 }),
-  webhookServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
-  registryServerPort: Type.Number({ minimum: 0, maximum: 65535 }),
-  busyJobAnnotation: Type.String({ minLength: 1 }),
-  namespace: Type.Optional(Type.String({ minLength: 1 })),
+  org: Str({ minLength: 1 }),
+  appId: Int(),
+  installationId: Num(),
+  privateKeyPath: Str({ minLength: 1 }),
+  clientRefreshIntervalSeconds: Num({ minimum: 1 }),
+  perRepoMinRefreshIntervalMs: Num({ minimum: 1 }),
+  allReposRefreshIntervalSeconds: Num({ minimum: 1 }),
+  activeReposLastPushedWithinHours: Opt(Num({ minimum: 1 }), 1),
+  webhookSigningKeyPath: Str({ minLength: 1 }),
+  webhookServerPort: Num({ minimum: 0, maximum: 65535 }),
+  registryServerPort: Num({ minimum: 0, maximum: 65535 }),
+  busyJobAnnotation: Str({ minLength: 1 }),
+  namespace: Opt(Str({ minLength: 1 })),
 };
 
-export type GithubActionsRegistryParams = Static<TObject<typeof GithubActionsRegistryParamsSchema>>;
+const GithubActionsRegistryParamsSchemaObj = Obj(GithubActionsRegistryParamsSchema);
+export type GithubActionsRegistryParams = typeof GithubActionsRegistryParamsSchemaObj.infer;

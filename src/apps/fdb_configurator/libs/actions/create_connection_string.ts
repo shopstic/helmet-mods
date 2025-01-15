@@ -1,13 +1,12 @@
-import { Type } from "../../../../deps/typebox.ts";
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import {
   fetchCoordinatorEndpointsFromServiceNames,
   readCurrentNamespace,
   updateConnectionStringConfigMap,
 } from "../utils.ts";
-import { NonEmptyString } from "../types.ts";
 import { commandWithTimeout } from "../../../../libs/utils.ts";
 import { Logger } from "../../../../libs/logger.ts";
+import { Arr, NonEmpStr } from "../../../../deps/schema.ts";
 
 const logger = new Logger();
 
@@ -22,9 +21,9 @@ function generateString(length: number): string {
 
 export default createCliAction(
   {
-    configMapKey: NonEmptyString(),
-    configMapName: NonEmptyString(),
-    serviceNames: Type.Array(NonEmptyString()),
+    configMapKey: NonEmpStr(),
+    configMapName: NonEmpStr(),
+    serviceNames: Arr(NonEmpStr()),
   },
   async (
     {

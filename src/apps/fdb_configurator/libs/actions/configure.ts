@@ -2,7 +2,6 @@ import { memoize } from "@wok/utils/memoize";
 import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
 import { Logger } from "../../../../libs/logger.ts";
 import type { FdbDatabaseConfig, FdbStatus, FdbStatusProcess } from "../types.ts";
-import { NonEmptyString } from "../types.ts";
 
 import {
   fdbcliInheritExec,
@@ -13,6 +12,7 @@ import {
   fetchStatus,
   readClusterConfig,
 } from "../utils.ts";
+import { NonEmpStr } from "../../../../deps/schema.ts";
 
 const logger = new Logger();
 
@@ -222,7 +222,7 @@ async function determineProcessInclusionExclusion(
 
 export default createCliAction(
   {
-    configFile: NonEmptyString(),
+    configFile: NonEmpStr(),
   },
   async (
     {

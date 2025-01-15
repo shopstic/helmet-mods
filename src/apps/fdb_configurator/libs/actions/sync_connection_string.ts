@@ -1,8 +1,7 @@
 import { delay } from "../../../../deps/async_utils.ts";
 import { createCliAction } from "../../../../deps/cli_utils.ts";
-import { Type } from "../../../../deps/typebox.ts";
+import { NonEmpStr, Num } from "../../../../deps/schema.ts";
 import { Logger } from "../../../../libs/logger.ts";
-import { NonEmptyString } from "../types.ts";
 import { fdbcliCaptureExec, updateConnectionStringConfigMap } from "../utils.ts";
 
 const logger = new Logger();
@@ -11,9 +10,9 @@ const connectionStringResultRegex = /`\\xff\\xff\/connection_string' is `([^']+)
 
 export default createCliAction(
   {
-    configMapKey: NonEmptyString(),
-    configMapName: NonEmptyString(),
-    updateIntervalMs: Type.Number(),
+    configMapKey: NonEmpStr(),
+    configMapName: NonEmpStr(),
+    updateIntervalMs: Num(),
   },
   async (
     {

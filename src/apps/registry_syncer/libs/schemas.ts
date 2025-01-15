@@ -1,29 +1,29 @@
-import { Type } from "../../../deps/typebox.ts";
-import type { Static, TObject } from "../../../deps/typebox.ts";
-import { NonEmptyString } from "../../../libs/utils.ts";
+import { Arr, Lit, NonEmpStr, Num, Obj, Uni } from "../../../deps/schema.ts";
 
-export const RegistrySyncJobSchema = Type.Object({
-  name: NonEmptyString,
-  fromImage: NonEmptyString,
-  toImage: NonEmptyString,
-  tag: NonEmptyString,
-  platform: Type.Union([
-    Type.Literal("all"),
-    Type.Literal("linux/amd64"),
-    Type.Literal("linux/arm64"),
+export const RegistrySyncJobSchema = Obj({
+  name: NonEmpStr(),
+  fromImage: NonEmpStr(),
+  toImage: NonEmpStr(),
+  tag: NonEmpStr(),
+  platform: Uni([
+    Lit("all"),
+    Lit("linux/amd64"),
+    Lit("linux/arm64"),
   ]),
 });
 
-export type RegistrySyncJob = Static<typeof RegistrySyncJobSchema>;
+export type RegistrySyncJob = typeof RegistrySyncJobSchema.infer;
 
-export const RegistrySyncJobsSchema = Type.Array(RegistrySyncJobSchema);
+export const RegistrySyncJobsSchema = Arr(RegistrySyncJobSchema);
 
-export type RegistrySyncJobs = Static<typeof RegistrySyncJobsSchema>;
+export type RegistrySyncJobs = typeof RegistrySyncJobsSchema.infer;
 
 export const RegistrySyncParamsSchema = {
-  digestCheckIntervalSeconds: Type.Number({ minimum: 1 }),
-  configCheckIntervalSeconds: Type.Number({ minimum: 1 }),
-  configFile: NonEmptyString,
+  digestCheckIntervalSeconds: Num({ minimum: 1 }),
+  configCheckIntervalSeconds: Num({ minimum: 1 }),
+  configFile: NonEmpStr(),
 };
 
-export type RegistrySyncParams = Static<TObject<typeof RegistrySyncParamsSchema>>;
+const RegistrySyncParamsSchemaObj = Obj(RegistrySyncParamsSchema);
+
+export type RegistrySyncParams = typeof RegistrySyncParamsSchemaObj.infer;

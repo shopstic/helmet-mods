@@ -1,68 +1,81 @@
-import type { Static, TSchema, TypeCheck } from "../deps/typebox.ts";
-import { Type, TypeCompiler } from "../deps/typebox.ts";
+import {
+  type AnySchema,
+  Arr,
+  createTypedParser,
+  Lit,
+  Num,
+  Obj,
+  type ParseResult,
+  Rec,
+  Str,
+  Tup,
+  type TypedSchema,
+  Uni,
+  Unk,
+} from "../deps/schema.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");
 }
 
-export const promQueryErrorResponseSchema = Type.Object({
-  status: Type.Literal("error"),
-  errorType: Type.String(),
-  error: Type.String(),
+export const promQueryErrorResponseSchema = Obj({
+  status: Lit("error"),
+  errorType: Str(),
+  error: Str(),
 });
 
-export const promQuerySuccessResponseSchema = Type.Object({
-  status: Type.Literal("success"),
-  data: Type.Object({
-    resultType: Type.Literal("vector"),
-    result: Type.Any(),
+export const promQuerySuccessResponseSchema = Obj({
+  status: Lit("success"),
+  data: Obj({
+    resultType: Lit("vector"),
+    result: Unk(),
   }),
 });
 
-export const promLabelValuesSchema = Type.Union([
-  Type.Object({
-    status: Type.Literal("success"),
-    data: Type.Array(Type.String()),
+export const promLabelValuesSchema = Uni([
+  Obj({
+    status: Lit("success"),
+    data: Arr(Str()),
   }),
   promQueryErrorResponseSchema,
 ]);
 
-export const promQueryResponseSchema = Type.Union([
+export const promQueryResponseSchema = Uni([
   promQueryErrorResponseSchema,
   promQuerySuccessResponseSchema,
 ]);
 
-export const promVectorSchema = Type.Object({
-  metric: Type.Record(Type.String(), Type.String()),
-  value: Type.Tuple([Type.Number(), Type.String()]),
+export const promVectorSchema = Obj({
+  metric: Rec(Str(), Str()),
+  value: Tup([Num(), Str()]),
 });
 
-export const promMatrixSchema = Type.Object({
-  metric: Type.Record(Type.String(), Type.String()),
-  values: Type.Array(Type.Tuple([Type.Number(), Type.String()])),
+export const promMatrixSchema = Obj({
+  metric: Rec(Str(), Str()),
+  values: Arr(Tup([Num(), Str()])),
 });
 
-export type PromVector = Static<typeof promVectorSchema>;
-export type PromMatrix = Static<typeof promMatrixSchema>;
+export type PromVector = typeof promVectorSchema.infer;
+export type PromMatrix = typeof promMatrixSchema.infer;
 
-export const promQueryVectorResponseSchema = Type.Union([
+export const promQueryVectorResponseSchema = Uni([
   promQueryErrorResponseSchema,
-  Type.Object({
-    status: Type.Literal("success"),
-    data: Type.Object({
-      resultType: Type.Literal("vector"),
-      result: Type.Array(promVectorSchema),
+  Obj({
+    status: Lit("success"),
+    data: Obj({
+      resultType: Lit("vector"),
+      result: Arr(promVectorSchema),
     }),
   }),
 ]);
 
-export const promQueryMatrixResponseSchema = Type.Union([
+export const promQueryMatrixResponseSchema = Uni([
   promQueryErrorResponseSchema,
-  Type.Object({
-    status: Type.Literal("success"),
-    data: Type.Object({
-      resultType: Type.Literal("matrix"),
-      result: Type.Array(promMatrixSchema),
+  Obj({
+    status: Lit("success"),
+    data: Obj({
+      resultType: Lit("matrix"),
+      result: Arr(promMatrixSchema),
     }),
   }),
 ]);
@@ -95,13 +108,14 @@ export class PromApiError extends Error {
   }
 }
 
-const schemaCheckCache = new WeakMap<TSchema, TypeCheck<TSchema>>();
+// deno-lint-ignore no-explicit-any
+const schemaParserCache = new WeakMap<AnySchema, (value: unknown) => ParseResult<any>>();
 
-async function promFetch<T extends TSchema>(
-  schema: T,
+async function promFetch<T>(
+  schema: TypedSchema<T, unknown>,
   url: string,
   init: RequestInit = {},
-): Promise<Static<T>> {
+): Promise<T> {
   const response = await fetch(
     url,
     {
@@ -116,14 +130,20 @@ async function promFetch<T extends TSchema>(
   if (response.ok) {
     const json = await response.json();
 
-    let check = schemaCheckCache.get(schema);
+    let parse: ((value: unknown) => ParseResult<T>) | undefined = schemaParserCache.get(schema);
 
-    if (!check) {
-      check = TypeCompiler.Compile(schema) as unknown as TypeCheck<TSchema>;
-      schemaCheckCache.set(schema, check);
+    if (!parse) {
+      parse = createTypedParser(schema);
+      schemaParserCache.set(schema, parse);
     }
 
-    return check.Decode(json);
+    const result = parse(json);
+
+    if (!result.isSuccess) {
+      throw new Error(`Failed to parse response: ${JSON.stringify(result.errors.First(), null, 2)}`);
+    }
+
+    return result.value;
   } else {
     throw new PromApiError({
       ...response,
