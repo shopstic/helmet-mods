@@ -340,7 +340,9 @@ update_images() {
 }
 
 update_deps() {
-  deno run -A jsr:@wok/deup@2.1.0 update "$@"
+  local PKG
+  PKG=$(jq -er '.imports["@wok/deup"]' <deno.json) || exit $?
+  deno run -A "${PKG}" update "$@"
   "$0" update_lock
 }
 
