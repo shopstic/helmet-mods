@@ -83,11 +83,11 @@
         "npmlock2nixPkg": "npmlock2nixPkg"
       },
       "locked": {
-        "lastModified": 1736520048,
-        "narHash": "sha256-9fcwZ52J63Or4srCymuRW5r7Ce9+vk1w+V5D+9hDnYk=",
+        "lastModified": 1738403104,
+        "narHash": "sha256-ejdimQEtXYeZgl/mAnSBBg49x+9RQmZJk1j82uxJ1TE=",
         "owner": "shopstic",
         "repo": "nix-hot-pot",
-        "rev": "2d67e0e5b95e4d7857606b6312ce8d96cd564c7a",
+        "rev": "cf556e2bd16e009cd03bc5a4136824d94a1b948f",
         "type": "github"
       },
       "original": {
@@ -105,17 +105,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1730479402,
-        "narHash": "sha256-79NLeNjpCa4mSasmFsE3QA6obURezF0TUO5Pm+1daog=",
-        "owner": "nlewo",
+        "lastModified": 1738222190,
+        "narHash": "sha256-MRrL8IQ4NMM8NfOsL7BwBzz+TkN7VzJwKXTowYIHkg4=",
+        "owner": "nktpro",
         "repo": "nix2container",
-        "rev": "5fb215a1564baa74ce04ad7f903d94ad6617e17a",
+        "rev": "64ba2c169fd283fef92449d4cc3c881859f9a8d0",
         "type": "github"
       },
       "original": {
-        "owner": "nlewo",
+        "owner": "nktpro",
         "repo": "nix2container",
-        "rev": "5fb215a1564baa74ce04ad7f903d94ad6617e17a",
         "type": "github"
       }
     },
@@ -137,11 +136,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1736200483,
-        "narHash": "sha256-JO+lFN2HsCwSLMUWXHeOad6QUxOuwe9UOAF/iSl1J4I=",
+        "lastModified": 1738023785,
+        "narHash": "sha256-BPHmb3fUwdHkonHyHi1+x89eXB3kA1jffIpwPVJIVys=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "3f0a8ac25fb674611b98089ca3a5dd6480175751",
+        "rev": "2b4230bf03deb33103947e2528cac2ed516c5c89",
         "type": "github"
       },
       "original": {

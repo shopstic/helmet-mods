@@ -33,7 +33,7 @@
           inherit src;
           name = "helmet-mods";
         };
-        deno-vendor-dir = pkgs.callPackage hotPotLib.denoAppVendor {
+        deno-cache-dir = pkgs.callPackage hotPotLib.denoAppCache {
           inherit cache-entry-file;
           name = "helmet-mods";
           config-file = ./deno.json;
@@ -45,14 +45,10 @@
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
             compiled = pkgs.callPackage hotPotLib.denoAppCompile {
-              inherit name deno-vendor-dir src;
+              inherit name deno-cache-dir src;
               appSrcPath = tsPath;
               prefix-patch = ./src/patched_fetch.ts;
-              denoCompileFlags = (builtins.concatStringsSep " " [
-                "--cached-only"
-                "-A"
-                "--vendor"
-              ]);
+              denoCompileFlags = "-A --frozen";
             };
           in
           compiled;
@@ -137,7 +133,7 @@
         };
         packages = {
           inherit
-            deno-vendor-dir
+            deno-cache-dir
             fdb-configurator
             iac-version-bumper
             registry-authenticator
