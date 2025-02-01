@@ -48,7 +48,7 @@
               inherit name deno-cache-dir src;
               appSrcPath = tsPath;
               prefix-patch = ./src/patched_fetch.ts;
-              denoCompileFlags = "-A --frozen";
+              denoCompileFlags = "-A";
             };
           in
           compiled;
@@ -140,7 +140,9 @@
             registry-syncer
             k8s-job-autoscaler
             grafana-syncer
-            openapi-merger;
+            openapi-merger
+            github-actions-registry
+            ;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
             inherit (hotPotLib) nonRootShadowSetup;
