@@ -1,16 +1,11 @@
-import type { K8s, K8sCrd, K8sDeployment, K8sRole, K8sRoleBinding, K8sServiceAccount } from "../../deps/helmet.ts";
-import {
-  createK8sDeployment,
-  createK8sRole,
-  createK8sRoleBinding,
-  createK8sServiceAccount,
-} from "../../deps/helmet.ts";
+import type { K8s, K8sCrd, K8sDeployment, K8sRole, K8sRoleBinding, K8sServiceAccount } from "$deps/helmet.ts";
+import { createK8sDeployment, createK8sRole, createK8sRoleBinding, createK8sServiceAccount } from "$deps/helmet.ts";
 import { image as defaultGrafanaSyncerImage } from "../../apps/grafana_syncer/meta.ts";
 import crd from "./crd.ts";
 import type { GrafanaSyncerParams } from "../../apps/grafana_syncer/libs/schemas.ts";
 export type { GrafanaDashboard } from "../../apps/grafana_syncer/libs/types.ts";
 import images from "../../images.json" with { type: "json" };
-import { toParamCase } from "../../deps/case.ts";
+import { toParamCase } from "$deps/case.ts";
 
 export const defaultName = "grafana-syncer";
 

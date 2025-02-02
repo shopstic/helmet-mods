@@ -1,14 +1,14 @@
-import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
+import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import { OpenapiMergerConfigSchema, OpenapiMergerParamsSchema } from "./libs/schemas.ts";
-import { Logger } from "../../libs/logger.ts";
-import { serveDir } from "../../deps/std_http.ts";
-import { stripMargin } from "../../libs/utils.ts";
-import type { OpenapiMergeInput } from "../../deps/openapi_merge.ts";
-import { openapiMerge, openapiMergeIsErrorResult } from "../../deps/openapi_merge.ts";
-import { yamlParse, yamlStringify } from "../../deps/std_yaml.ts";
-import { deepMerge } from "../../deps/helmet.ts";
-import { immerProduce } from "../../deps/immer.ts";
-import { createValidator } from "../../deps/schema.ts";
+import { Logger } from "$libs/logger.ts";
+import { serveDir } from "$deps/std_http.ts";
+import { stripMargin } from "$libs/utils.ts";
+import type { OpenapiMergeInput } from "$deps/openapi_merge.ts";
+import { openapiMerge, openapiMergeIsErrorResult } from "$deps/openapi_merge.ts";
+import { yamlParse, yamlStringify } from "$deps/std_yaml.ts";
+import { deepMerge } from "$deps/helmet.ts";
+import { immerProduce } from "$deps/immer.ts";
+import { createValidator } from "$deps/schema.ts";
 
 export class BackendRequestError extends Error {
   override readonly name = BackendRequestError.name;

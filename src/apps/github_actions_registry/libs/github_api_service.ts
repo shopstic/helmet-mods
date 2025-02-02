@@ -1,5 +1,5 @@
-import type { OpenapiClient } from "../../../deps/k8s_openapi.ts";
-import { delay } from "../../../deps/async_utils.ts";
+import type { OpenapiClient } from "$deps/k8s_openapi.ts";
+import { delay } from "$deps/async_utils.ts";
 import type { GhComponents, GhPaths } from "./types.ts";
 import { importPKCS8, SignJWT } from "jose";
 

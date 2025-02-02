@@ -12,7 +12,7 @@ import {
   Uni,
   Unk,
   type ValidationResult,
-} from "../deps/schema.ts";
+} from "$deps/schema.ts";
 
 function exhaustiveMatchingGuard(_: never): never {
   throw new Error("Non exhaustive matching");

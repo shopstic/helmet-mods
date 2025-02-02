@@ -1,4 +1,4 @@
-import { Arr, Bool, Lit, Num, Opt, PartObj, Rec, Str, Uni } from "../../../deps/schema.ts";
+import { Arr, Bool, Lit, Num, Opt, PartObj, Rec, Str, Uni } from "$deps/schema.ts";
 
 export const FdbRedundancyModeSchema = Uni([
   Lit("single"),

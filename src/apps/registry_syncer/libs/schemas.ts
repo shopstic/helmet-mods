@@ -1,4 +1,4 @@
-import { Arr, Lit, NonEmpStr, Num, Obj, Uni } from "../../../deps/schema.ts";
+import { Arr, Lit, NonEmpStr, Num, Obj, Uni } from "$deps/schema.ts";
 
 export const RegistrySyncJobSchema = Obj({
   name: NonEmpStr(),

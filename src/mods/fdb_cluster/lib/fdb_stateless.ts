@@ -1,5 +1,5 @@
-import type { K8s, K8sDeployment, K8sImagePullPolicy } from "../../../deps/helmet.ts";
-import { createK8sDeployment } from "../../../deps/helmet.ts";
+import type { K8s, K8sDeployment, K8sImagePullPolicy } from "$deps/helmet.ts";
+import { createK8sDeployment } from "$deps/helmet.ts";
 import type { FdbLocalityMode } from "./fdb_container.ts";
 import { createFdbContainer } from "./fdb_container.ts";
 import { FDB_COMPONENT_LABEL } from "./fdb_stateful.ts";

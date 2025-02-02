@@ -1,4 +1,4 @@
-import { encodeHex } from "../deps/std_encoding.ts";
+import { encodeHex } from "$deps/std_encoding.ts";
 
 /**
  * Do a constant time string comparison. Always compare the complete strings

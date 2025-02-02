@@ -1,9 +1,9 @@
-import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
-import { commandWithTimeout, exhaustiveMatchingGuard, withAbortSignal } from "../../libs/utils.ts";
-import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
+import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "$deps/exec_utils.ts";
+import { commandWithTimeout, exhaustiveMatchingGuard } from "$libs/utils.ts";
+import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import type { RegistryAuth, RegistryAuthConfig } from "./libs/schemas.ts";
 import { RegistryAuthConfigSchema, RegistryAuthParamsSchema } from "./libs/schemas.ts";
-import type { Observable } from "../../deps/rxjs.ts";
+import type { Observable } from "$deps/rxjs.ts";
 import {
   catchError,
   combineLatest,
@@ -21,11 +21,12 @@ import {
   takeUntil,
   tap,
   throwError,
-} from "../../deps/rxjs.ts";
-import { deepEqual } from "../../deps/std_testing.ts";
-import { Logger } from "../../libs/logger.ts";
-import { createK8sSecret } from "../../deps/helmet.ts";
-import { validate } from "../../deps/schema.ts";
+} from "$deps/rxjs.ts";
+import { deepEqual } from "$deps/std_testing.ts";
+import { Logger } from "$libs/logger.ts";
+import { createK8sSecret } from "$deps/helmet.ts";
+import { validate } from "$deps/schema.ts";
+import { withAbortSignal } from "$libs/rxjs_utils.ts";
 
 interface AuthResult {
   auth: string;

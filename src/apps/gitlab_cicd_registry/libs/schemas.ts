@@ -1,4 +1,4 @@
-import { Arr, Lit, Num, Obj, Opt, PartObj, Str, Uni } from "../../../deps/schema.ts";
+import { Arr, Lit, Num, Obj, Opt, PartObj, Str, Uni } from "$deps/schema.ts";
 
 export const GitlabCicdRegistryParamsSchema = {
   groupId: Num(),

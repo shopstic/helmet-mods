@@ -1,18 +1,11 @@
-import type {
-  K8s,
-  K8sImagePullPolicy,
-  K8sJob,
-  K8sRole,
-  K8sRoleBinding,
-  K8sServiceAccount,
-} from "../../../../deps/helmet.ts";
+import type { K8s, K8sImagePullPolicy, K8sJob, K8sRole, K8sRoleBinding, K8sServiceAccount } from "$deps/helmet.ts";
 import {
   createK8sContainer,
   createK8sJob,
   createK8sRole,
   createK8sRoleBinding,
   createK8sServiceAccount,
-} from "../../../../deps/helmet.ts";
+} from "$deps/helmet.ts";
 
 export interface FdbCreateConnectionStringResources {
   job: K8sJob;

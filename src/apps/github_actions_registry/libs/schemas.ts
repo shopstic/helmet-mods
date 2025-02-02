@@ -1,4 +1,4 @@
-import { Int, Num, Obj, Opt, Str } from "../../../deps/schema.ts";
+import { Int, Num, Obj, Opt, Str } from "$deps/schema.ts";
 
 export const GithubActionsRegistryParamsSchema = {
   org: Str({ minLength: 1 }),

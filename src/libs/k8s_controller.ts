@@ -1,12 +1,12 @@
-import { deepMerge } from "../deps/helmet.ts";
+import { deepMerge } from "$deps/helmet.ts";
 import type {
   K8sApiExtractListItemType,
   K8sApiWatchEvent,
   OpenapiOperationApi,
   OpenapiOperationApiArgType,
   OpenapiOperationApiReturnType,
-} from "../deps/k8s_openapi.ts";
-import { TextLineStream } from "../deps/std_stream.ts";
+} from "$deps/k8s_openapi.ts";
+import { TextLineStream } from "$deps/std_stream.ts";
 
 export function k8sControllerStream<
   // deno-lint-ignore no-explicit-any

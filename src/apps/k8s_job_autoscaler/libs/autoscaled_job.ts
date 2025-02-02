@@ -1,10 +1,10 @@
-import { delay } from "../../../deps/async_utils.ts";
-import type { K8s, OpenapiClient } from "../../../deps/k8s_openapi.ts";
-import { deepEqual } from "../../../deps/std_testing.ts";
-import { k8sControllerStream } from "../../../libs/k8s_controller.ts";
-import type { Logger } from "../../../libs/logger.ts";
-import { createPromApiClient } from "../../../libs/prom_api_client.ts";
-import { exhaustiveMatchingGuard } from "../../../libs/utils.ts";
+import { delay } from "$deps/async_utils.ts";
+import type { K8s, OpenapiClient } from "$deps/k8s_openapi.ts";
+import { deepEqual } from "$deps/std_testing.ts";
+import { k8sControllerStream } from "$libs/k8s_controller.ts";
+import type { Logger } from "$libs/logger.ts";
+import { createPromApiClient } from "$libs/prom_api_client.ts";
+import { exhaustiveMatchingGuard } from "$libs/utils.ts";
 import type { AutoscaledJob, AutoscaledJobAutoscaling } from "./schemas.ts";
 import type { Paths } from "./types.ts";
 

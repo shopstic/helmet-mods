@@ -1,4 +1,4 @@
-import { Obj, Opt, Str } from "../../../deps/schema.ts";
+import { Obj, Opt, Str } from "$deps/schema.ts";
 
 export const GrafanaSyncerParamsSchema = {
   namespace: Opt(Str({ minLength: 1 })),

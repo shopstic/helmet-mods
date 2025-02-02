@@ -1,4 +1,4 @@
-import { Arr, Lit, NonEmpStr, Num, Obj, Opt, Uni } from "../../../deps/schema.ts";
+import { Arr, Lit, NonEmpStr, Num, Obj, Opt, Uni } from "$deps/schema.ts";
 
 export const RegistryAuthSchema = Uni([
   Obj({

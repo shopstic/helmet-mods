@@ -1,7 +1,7 @@
-import { inheritExec, NonZeroExitError } from "../../deps/exec_utils.ts";
+import { inheritExec, NonZeroExitError } from "$deps/exec_utils.ts";
 import type { GitlabCicdRegistryParams } from "./libs/schemas.ts";
-import { dirname, fromFileUrl } from "../../deps/std_path.ts";
-import { toParamCase } from "../../deps/case.ts";
+import { dirname, fromFileUrl } from "$deps/std_path.ts";
+import { toParamCase } from "$deps/case.ts";
 
 const accessToken = Deno.env.get("GITLAB_TEST_ACCESS_TOKEN");
 if (!accessToken) {

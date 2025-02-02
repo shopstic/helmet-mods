@@ -1,13 +1,13 @@
-import type { StdInputBehavior } from "../../../deps/exec_utils.ts";
-import { captureExec, inheritExec } from "../../../deps/exec_utils.ts";
+import type { StdInputBehavior } from "$deps/exec_utils.ts";
+import { captureExec, inheritExec } from "$deps/exec_utils.ts";
 import { memoize } from "@wok/utils/memoize";
-import { Arr, Num, PartObj, Str, type TypedSchema, validate } from "../../../deps/schema.ts";
+import { Arr, Num, PartObj, Str, type TypedSchema, validate } from "$deps/schema.ts";
 import type { FdbDatabaseConfig, FdbStatus } from "./types.ts";
 import { FdbStatusSchema } from "./types.ts";
 import { FdbDatabaseConfigSchema } from "./types.ts";
-import { commandWithTimeout } from "../../../libs/utils.ts";
-import { createK8sConfigMap } from "../../../deps/helmet.ts";
-import { Logger } from "../../../libs/logger.ts";
+import { commandWithTimeout } from "$libs/utils.ts";
+import { createK8sConfigMap } from "$deps/helmet.ts";
+import { Logger } from "$libs/logger.ts";
 
 const logger = new Logger({ ctx: "utils" });
 

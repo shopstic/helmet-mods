@@ -5,8 +5,8 @@ import {
   createK8sSecret,
   createK8sService,
   createK8sVolume,
-} from "../../deps/helmet.ts";
-import { assertEquals } from "../../deps/std_testing.ts";
+} from "$deps/helmet.ts";
+import { assertEquals } from "$deps/std_testing.ts";
 import { extractK8sResources } from "./resource_group.ts";
 
 Deno.test("resource_group extractK8sResources", () => {

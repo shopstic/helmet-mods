@@ -1,5 +1,5 @@
-import type { K8s } from "../../../deps/k8s_openapi.ts";
-import { Num, Obj, Opt, Str } from "../../../deps/schema.ts";
+import type { K8s } from "$deps/k8s_openapi.ts";
+import { Num, Obj, Opt, Str } from "$deps/schema.ts";
 
 export const K8sJobAutoscalerParamsSchema = {
   minReconcileIntervalMs: Num({ minimum: 1 }),

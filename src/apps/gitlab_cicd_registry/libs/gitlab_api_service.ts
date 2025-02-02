@@ -1,5 +1,5 @@
-import { validate } from "../../../deps/schema.ts";
-import type { Logger } from "../../../libs/logger.ts";
+import { validate } from "$deps/schema.ts";
+import type { Logger } from "$libs/logger.ts";
 import type { GitlabJob, GitlabProject } from "./schemas.ts";
 import { GitlabJobListSchema, GitlabProjectListSchema } from "./schemas.ts";
 

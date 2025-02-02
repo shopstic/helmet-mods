@@ -1,4 +1,4 @@
-import type { K8s } from "../deps/helmet.ts";
+import type { K8s } from "$deps/helmet.ts";
 
 export function createPodAntiAffinity({
   labels,

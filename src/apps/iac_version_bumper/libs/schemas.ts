@@ -1,4 +1,4 @@
-import { Arr, Lit, Num, Obj, Str, Uni } from "../../../deps/schema.ts";
+import { Arr, Lit, Num, Obj, Str, Uni } from "$deps/schema.ts";
 
 export const VersionBumpTargetsSchema = Arr(Obj({
   versionFilePath: Str(),

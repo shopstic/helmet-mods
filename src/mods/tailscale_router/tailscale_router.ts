@@ -1,4 +1,4 @@
-import type { K8s } from "../../deps/helmet.ts";
+import type { K8s } from "$deps/helmet.ts";
 import {
   createK8sCronJob,
   createK8sDeployment,
@@ -7,10 +7,10 @@ import {
   createK8sRoleBinding,
   createK8sSecret,
   createK8sServiceAccount,
-} from "../../deps/helmet.ts";
-import { stableHash } from "../../deps/stable_hash.ts";
-import { stripMargin } from "../../libs/utils.ts";
-import { createPodAntiAffinity } from "../../libs/k8s_utils.ts";
+} from "$deps/helmet.ts";
+import { stableHash } from "$deps/stable_hash.ts";
+import { stripMargin } from "$libs/utils.ts";
+import { createPodAntiAffinity } from "$libs/k8s_utils.ts";
 import images from "../../images.json" with { type: "json" };
 
 const defaultName = "tailscale-router";

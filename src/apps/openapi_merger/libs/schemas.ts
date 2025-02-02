@@ -1,4 +1,4 @@
-import { Arr, Bool, NonEmpStr, Num, Obj, Opt, Rec, Str, Uni, Unk } from "../../../deps/schema.ts";
+import { Arr, Bool, NonEmpStr, Num, Obj, Opt, Rec, Str, Uni, Unk } from "$deps/schema.ts";
 
 export const OpenapiMergerParamsSchema = {
   configFile: NonEmpStr(),

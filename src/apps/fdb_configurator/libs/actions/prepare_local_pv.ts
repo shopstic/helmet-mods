@@ -1,9 +1,9 @@
-import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
-import { joinPath } from "../../../../deps/std_path.ts";
-import { captureExec, inheritExec } from "../../../../deps/exec_utils.ts";
+import { createCliAction, ExitCode } from "$deps/cli_utils.ts";
+import { joinPath } from "$deps/std_path.ts";
+import { captureExec, inheritExec } from "$deps/exec_utils.ts";
 import { kubectlGetJson, kubectlInherit, toRootElevatedCommand } from "../utils.ts";
-import { Logger } from "../../../../libs/logger.ts";
-import { NonEmpStr, Rec, Str } from "../../../../deps/schema.ts";
+import { Logger } from "$libs/logger.ts";
+import { NonEmpStr, Rec, Str } from "$deps/schema.ts";
 
 const logger = new Logger();
 

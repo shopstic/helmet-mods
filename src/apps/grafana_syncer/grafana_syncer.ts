@@ -1,10 +1,10 @@
-import { CliProgram, createCliAction, ExitCode } from "../../deps/cli_utils.ts";
-import type { paths as GrafanaApiPaths } from "../../libs/grafana/openapi_types.ts";
-import type { OpenapiClient } from "../../deps/k8s_openapi.ts";
-import { createOpenapiClient, OpenapiOperationError } from "../../deps/k8s_openapi.ts";
-import { k8sControllerStream } from "../../libs/k8s_controller.ts";
-import { Logger } from "../../libs/logger.ts";
-import { exhaustiveMatchingGuard } from "../../libs/utils.ts";
+import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
+import type { paths as GrafanaApiPaths } from "$libs/grafana/openapi_types.ts";
+import type { OpenapiClient } from "$deps/k8s_openapi.ts";
+import { createOpenapiClient, OpenapiOperationError } from "$deps/k8s_openapi.ts";
+import { k8sControllerStream } from "$libs/k8s_controller.ts";
+import { Logger } from "$libs/logger.ts";
+import { exhaustiveMatchingGuard } from "$libs/utils.ts";
 import { GrafanaSyncerParamsSchema } from "./libs/schemas.ts";
 import type { GrafanaDashboard, Paths } from "./libs/types.ts";
 

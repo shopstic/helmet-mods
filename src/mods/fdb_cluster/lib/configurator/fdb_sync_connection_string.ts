@@ -5,14 +5,14 @@ import type {
   K8sRole,
   K8sRoleBinding,
   K8sServiceAccount,
-} from "../../../../deps/helmet.ts";
+} from "$deps/helmet.ts";
 import {
   createK8sContainer,
   createK8sDeployment,
   createK8sRole,
   createK8sRoleBinding,
   createK8sServiceAccount,
-} from "../../../../deps/helmet.ts";
+} from "$deps/helmet.ts";
 
 export interface FdbSyncConnectionStringResources {
   deployment: K8sDeployment;

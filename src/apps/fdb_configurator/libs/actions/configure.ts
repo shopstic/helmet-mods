@@ -1,6 +1,6 @@
 import { memoize } from "@wok/utils/memoize";
-import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
-import { Logger } from "../../../../libs/logger.ts";
+import { createCliAction, ExitCode } from "$deps/cli_utils.ts";
+import { Logger } from "$libs/logger.ts";
 import type { FdbDatabaseConfig, FdbStatus, FdbStatusProcess } from "../types.ts";
 
 import {
@@ -12,7 +12,7 @@ import {
   fetchStatus,
   readClusterConfig,
 } from "../utils.ts";
-import { NonEmpStr } from "../../../../deps/schema.ts";
+import { NonEmpStr } from "$deps/schema.ts";
 
 const logger = new Logger();
 

@@ -48,7 +48,6 @@
               inherit name deno-cache-dir src;
               appSrcPath = tsPath;
               prefix-patch = ./src/patched_fetch.ts;
-              denoCompileFlags = "-A";
             };
           in
           compiled;

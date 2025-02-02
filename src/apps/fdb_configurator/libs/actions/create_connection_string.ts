@@ -1,12 +1,12 @@
-import { createCliAction, ExitCode } from "../../../../deps/cli_utils.ts";
+import { createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import {
   fetchCoordinatorEndpointsFromServiceNames,
   readCurrentNamespace,
   updateConnectionStringConfigMap,
 } from "../utils.ts";
-import { commandWithTimeout } from "../../../../libs/utils.ts";
-import { Logger } from "../../../../libs/logger.ts";
-import { Arr, NonEmpStr } from "../../../../deps/schema.ts";
+import { commandWithTimeout } from "$libs/utils.ts";
+import { Logger } from "$libs/logger.ts";
+import { Arr, NonEmpStr } from "$deps/schema.ts";
 
 const logger = new Logger();
 
