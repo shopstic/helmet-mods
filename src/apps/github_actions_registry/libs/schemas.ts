@@ -17,4 +17,5 @@ export const GithubActionsRegistryParamsSchema = {
 };
 
 const GithubActionsRegistryParamsSchemaObj = Obj(GithubActionsRegistryParamsSchema);
+export type GithubActionsRegistryInputParams = typeof GithubActionsRegistryParamsSchemaObj.inferInput;
 export type GithubActionsRegistryParams = typeof GithubActionsRegistryParamsSchemaObj.infer;

@@ -16,7 +16,7 @@ import {
   createK8sServiceAccount,
 } from "$deps/helmet.ts";
 import { image as defaultGithubActionsRegistryImage } from "../../apps/github_actions_registry/meta.ts";
-import type { GithubActionsRegistryParams } from "../../apps/github_actions_registry/libs/schemas.ts";
+import type { GithubActionsRegistryInputParams } from "../../apps/github_actions_registry/libs/schemas.ts";
 import type { ServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 import { createServiceMonitorV1 } from "../prometheus_operator/prometheus_operator.ts";
 import { toParamCase } from "$deps/case.ts";
@@ -76,7 +76,7 @@ export function createGithubActionsRegistryResources({
     tolerations?: K8s["core.v1.Toleration"][];
   }
   & Pick<
-    GithubActionsRegistryParams,
+    GithubActionsRegistryInputParams,
     | "appId"
     | "installationId"
     | "org"
@@ -165,7 +165,7 @@ export function createGithubActionsRegistryResources({
   const privateKeyMountPath = `${secretsMountPath}/${privateKeyFileName}`;
   const webhookSigningKeyMountPath = `${secretsMountPath}/${webhookSigningKeyFileName}`;
 
-  const args: GithubActionsRegistryParams = {
+  const args = {
     appId,
     installationId,
     org,
@@ -182,7 +182,7 @@ export function createGithubActionsRegistryResources({
         webhookSigningKeyPath: webhookSigningKeyMountPath,
       }
       : {},
-  };
+  } satisfies GithubActionsRegistryInputParams;
 
   const serviceAccount = createK8sServiceAccount({
     metadata: {
