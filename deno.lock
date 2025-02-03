@@ -11,7 +11,6 @@
     "jsr:@std/encoding@^1.0.7": "1.0.7",
     "jsr:@std/fmt@^1.0.4": "1.0.5",
     "jsr:@std/fmt@^1.0.5": "1.0.5",
-    "jsr:@std/fs@^1.0.10": "1.0.11",
     "jsr:@std/fs@^1.0.11": "1.0.11",
     "jsr:@std/html@^1.0.3": "1.0.3",
     "jsr:@std/http@^1.0.13": "1.0.13",
@@ -24,14 +23,13 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@^2.0.6": "2.0.6",
+    "jsr:@wok/helmet@3": "3.0.0",
     "jsr:@wok/k8s@^1.32.0": "1.32.0",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.2",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@^2.2.0": "2.2.0",
     "jsr:@wok/typebox@^1.1.0": "1.1.0",
-    "jsr:@wok/utils@^4.2.6": "4.2.7",
-    "jsr:@wok/utils@^4.2.7": "4.2.7",
+    "jsr:@wok/utils@^4.2.9": "4.2.9",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.13": "0.34.15",
     "npm:immer@^10.1.1": "10.1.1",
@@ -119,16 +117,16 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@2.0.6": {
-      "integrity": "7719df7eec57106cba3f76c5e12fed2071a54ff03ae6ccb877985939758aab25",
+    "@wok/helmet@3.0.0": {
+      "integrity": "c77c8a21cb48a31ba9a87c86e95c8d899f607553d09d5f9b85dccef18405c160",
       "dependencies": [
-        "jsr:@std/fmt@^1.0.4",
-        "jsr:@std/fs@^1.0.10",
+        "jsr:@std/fmt@^1.0.5",
+        "jsr:@std/fs",
         "jsr:@std/path",
         "jsr:@std/semver",
         "jsr:@std/yaml",
         "jsr:@wok/schema",
-        "jsr:@wok/utils@^4.2.6"
+        "jsr:@wok/utils"
       ]
     },
     "@wok/k8s@1.32.0": {
@@ -158,8 +156,8 @@
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@4.2.7": {
-      "integrity": "fc248974992c1e3681133fc1481424ee05359e988633f40cc6b172a69893b2e7",
+    "@wok/utils@4.2.9": {
+      "integrity": "85e9c1df98474ad352199a4555c60235a34021bba5eb2844b32d3982de3f3019",
       "dependencies": [
         "jsr:@std/assert",
         "jsr:@std/cli@^1.0.11",
@@ -243,13 +241,13 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@^2.1.2",
-      "jsr:@wok/helmet@^2.0.6",
+      "jsr:@wok/helmet@3",
       "jsr:@wok/k8s@^1.32.0",
       "jsr:@wok/openapi-client@^1.0.2",
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@^2.2.0",
       "jsr:@wok/typebox@^1.1.0",
-      "jsr:@wok/utils@^4.2.7",
+      "jsr:@wok/utils@^4.2.9",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
       "npm:jose@^5.9.6",
