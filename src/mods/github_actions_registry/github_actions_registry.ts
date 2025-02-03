@@ -38,7 +38,6 @@ export function createGithubActionsRegistryResources({
   name = defaultName,
   image = defaultGithubActionsRegistryImage,
   namespace,
-  ingress: ingressConfig,
   appId,
   installationId,
   org,
@@ -47,10 +46,8 @@ export function createGithubActionsRegistryResources({
   allReposRefreshIntervalSeconds,
   activeReposLastPushedWithinHours,
   busyJobAnnotation,
-  secrets: {
-    privateKey,
-    webhookSigningKey,
-  },
+  privateKey,
+  webhook,
   createServiceMonitor,
   nodeSelector,
   tolerations,
@@ -59,19 +56,19 @@ export function createGithubActionsRegistryResources({
     name?: string;
     image?: string;
     namespace: string;
-    ingress?: {
-      hostname: string;
-      annotations?: Record<string, string>;
-      tlsSecretName?: string;
+    privateKey: {
+      key: string;
+      name: string;
     };
-    secrets: {
-      privateKey: {
+    webhook?: {
+      signingKey: {
         key: string;
         name: string;
       };
-      webhookSigningKey: {
-        key: string;
-        name: string;
+      ingress?: {
+        hostname: string;
+        annotations?: Record<string, string>;
+        tlsSecretName?: string;
       };
     };
     createServiceMonitor: boolean;
@@ -94,7 +91,7 @@ export function createGithubActionsRegistryResources({
     "app.kubernetes.io/instance": name,
   };
 
-  const webhookServerPort = 8080;
+  const webhookServerPort = webhook !== undefined ? 8080 : undefined;
   const registryServerPort = 8081;
 
   const service = createK8sService({
@@ -103,31 +100,36 @@ export function createGithubActionsRegistryResources({
       namespace,
     },
     spec: {
-      ports: [{
-        name: "webhook",
-        port: webhookServerPort,
-        protocol: "TCP",
-      }, {
-        name: "registry",
-        port: 80,
-        targetPort: registryServerPort,
-        protocol: "TCP",
-      }],
+      ports: [
+        ...(webhookServerPort !== undefined
+          ? [{
+            name: "webhook",
+            port: webhookServerPort,
+            protocol: "TCP",
+          }]
+          : []),
+        {
+          name: "registry",
+          port: 80,
+          targetPort: registryServerPort,
+          protocol: "TCP",
+        },
+      ],
       selector: labels,
     },
   });
 
-  const ingress = ingressConfig
+  const ingress = webhook?.ingress !== undefined
     ? createK8sIngress({
       metadata: {
         name,
         namespace,
-        annotations: ingressConfig.annotations,
+        annotations: webhook.ingress.annotations,
       },
       spec: {
         rules: [
           {
-            host: ingressConfig.hostname,
+            host: webhook.ingress.hostname,
             http: {
               paths: [
                 {
@@ -148,7 +150,8 @@ export function createGithubActionsRegistryResources({
         ],
         tls: [
           {
-            hosts: [ingressConfig.hostname],
+            hosts: [webhook.ingress.hostname],
+            secretName: webhook.ingress.tlsSecretName,
           },
         ],
       },
@@ -173,8 +176,12 @@ export function createGithubActionsRegistryResources({
     webhookServerPort,
     registryServerPort,
     privateKeyPath: privateKeyMountPath,
-    webhookSigningKeyPath: webhookSigningKeyMountPath,
     busyJobAnnotation,
+    ...webhook !== undefined
+      ? {
+        webhookSigningKeyPath: webhookSigningKeyMountPath,
+      }
+      : {},
   };
 
   const serviceAccount = createK8sServiceAccount({
@@ -246,39 +253,64 @@ export function createGithubActionsRegistryResources({
             {
               name: "registry",
               image,
-              args: Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) =>
-                `--${toParamCase(k)}=${v}`
-              ),
-              volumeMounts: [{
-                name: "private-key",
-                mountPath: privateKeyMountPath,
-                subPath: privateKeyFileName,
-              }, {
-                name: "webhook-signing-key",
-                mountPath: webhookSigningKeyMountPath,
-                subPath: webhookSigningKeyFileName,
-              }],
+              args: Object
+                .entries(args)
+                .filter(([_, v]) => v !== undefined)
+                .map(([k, v]) => `--${toParamCase(k)}=${v}`),
+              volumeMounts: [
+                {
+                  name: "private-key",
+                  mountPath: privateKeyMountPath,
+                  subPath: privateKeyFileName,
+                },
+                ...(webhook !== undefined
+                  ? [
+                    {
+                      name: "webhook-signing-key",
+                      mountPath: webhookSigningKeyMountPath,
+                      subPath: webhookSigningKeyFileName,
+                    },
+                  ]
+                  : []),
+              ],
+              ports: [
+                ...(webhookServerPort !== undefined
+                  ? [{
+                    containerPort: webhookServerPort,
+                    name: "webhook",
+                  }]
+                  : []),
+                {
+                  containerPort: registryServerPort,
+                  name: "registry",
+                },
+              ],
             },
           ],
-          volumes: [{
-            name: "private-key",
-            secret: {
-              secretName: privateKey.name,
-              items: [{
-                key: privateKey.key,
-                path: privateKeyFileName,
-              }],
+          volumes: [
+            {
+              name: "private-key",
+              secret: {
+                secretName: privateKey.name,
+                items: [{
+                  key: privateKey.key,
+                  path: privateKeyFileName,
+                }],
+              },
             },
-          }, {
-            name: "webhook-signing-key",
-            secret: {
-              secretName: webhookSigningKey.name,
-              items: [{
-                key: webhookSigningKey.key,
-                path: webhookSigningKeyFileName,
-              }],
-            },
-          }],
+            ...(webhook !== undefined
+              ? [{
+                name: "webhook-signing-key",
+                secret: {
+                  secretName: webhook.signingKey.name,
+                  items: [{
+                    key: webhook.signingKey.key,
+                    path: webhookSigningKeyFileName,
+                  }],
+                },
+              }]
+              : []),
+          ],
         },
       },
     },
