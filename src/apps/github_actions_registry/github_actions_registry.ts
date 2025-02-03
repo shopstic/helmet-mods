@@ -109,7 +109,7 @@ const program = new CliProgram()
           clientRefreshIntervalSeconds,
           perRepoMinRefreshIntervalMs,
           allReposRefreshIntervalSeconds,
-          activeReposLastPushedWithinHours = 1,
+          activeReposLastPushedWithinHours,
           webhookSigningKeyPath,
           webhookServerPort,
           registryServerPort,
@@ -120,7 +120,9 @@ const program = new CliProgram()
       ) => {
         const namespace = maybeNamespace ??
           (await Deno.readTextFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).trim();
-        const signWebhookRequest = await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath));
+        const signWebhookRequest = webhookSigningKeyPath !== undefined
+          ? await createWebhookSigner(await Deno.readTextFile(webhookSigningKeyPath))
+          : () => Promise.reject(new Error("Webhook signing key is not provided"));
 
         const periodicRateLimitLoggingPromise = (async () => {
           for await (const _ of agInterval(5000)) {
@@ -162,23 +164,25 @@ const program = new CliProgram()
           }
         })();
 
-        const periodicReposPollingPromise = (async () => {
-          for await (const _ of agInterval(allReposRefreshIntervalSeconds * 1000)) {
-            logger.info({ msg: "Polling from all active repos" });
+        const periodicReposPollingPromise = allReposRefreshIntervalSeconds !== undefined
+          ? (async () => {
+            for await (const _ of agInterval(allReposRefreshIntervalSeconds * 1000)) {
+              logger.info({ msg: "Polling from all active repos" });
 
-            const activeRepos = await getLastActiveRepoNames({
-              client: await accessClientPromise.promise,
-              org,
-              lastPushedWithinHours: activeReposLastPushedWithinHours,
-            });
+              const activeRepos = await getLastActiveRepoNames({
+                client: await accessClientPromise.promise,
+                org,
+                lastPushedWithinHours: activeReposLastPushedWithinHours,
+              });
 
-            logger.info({ msg: `Got ${activeRepos.length} active repos`, activeRepos });
+              logger.info({ msg: `Got ${activeRepos.length} active repos`, activeRepos });
 
-            activeRepos.forEach((repo) => {
-              requestReconciliation({ org, repo, id: `${org}/${repo}` });
-            });
-          }
-        })();
+              activeRepos.forEach((repo) => {
+                requestReconciliation({ org, repo, id: `${org}/${repo}` });
+              });
+            }
+          })()
+          : undefined;
 
         function requestReconciliation(request: ReconciliationRequest) {
           if (!reconciliationLoopByIdMap.has(request.id)) {
@@ -333,23 +337,29 @@ const program = new CliProgram()
           }).finished;
         })();
 
-        const webhookServerPromise = (async () => {
-          logger.info({ msg: `Starting webhook server on port ${webhookServerPort}` });
-          await Deno.serve({
-            port: webhookServerPort,
-            signal,
-            onListen({ hostname, port }) {
-              logger.info({ msg: `Webhook server is up at http://${hostname}:${port}` });
-            },
-          }, webhookHandler).finished;
-        })();
+        const webhookServerPromise = webhookServerPort !== undefined
+          ? (async () => {
+            logger.info({ msg: `Starting webhook server on port ${webhookServerPort}` });
+            await Deno.serve({
+              port: webhookServerPort,
+              signal,
+              onListen({ hostname, port }) {
+                logger.info({ msg: `Webhook server is up at http://${hostname}:${port}` });
+              },
+            }, webhookHandler).finished;
+          })()
+          : undefined;
+
+        if (!webhookServerPromise) {
+          logger.warn({ msg: "Webhook server is not enabled" });
+        }
 
         await Promise.race([
           periodicRateLimitLoggingPromise,
           periodicTokenRefreshPromise,
-          periodicReposPollingPromise,
           registryServerPromise,
-          webhookServerPromise,
+          ...(webhookServerPromise ? [webhookServerPromise] : []),
+          ...(periodicReposPollingPromise ? [periodicReposPollingPromise] : []),
         ]);
 
         return ExitCode.Zero;
