@@ -13,7 +13,7 @@ jobs:
       - self-hosted
       - nix
       - general
-      - arm64-linux
+      - amd64-linux
       - medium
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +60,11 @@ jobs:
           NIX_OUTPUT: .#defaultPackage.${{ matrix.runner.arch }}
         shell: nix develop -v -c bash {0}
         run: |
-          nix store sign "${NIX_OUTPUT}" -v -r -k ~/.secrets/nix-cache-private-key
+          NIX_CACHE_SIGNING_PRIVATE_KEY_PATH=${NIX_CACHE_SIGNING_PRIVATE_KEY_PATH:?"NIX_CACHE_SIGNING_PRIVATE_KEY_PATH env var is not set"}
+          NIX_CACHE_BUCKET_NAME=${NIX_CACHE_BUCKET_NAME:?"NIX_CACHE_BUCKET_NAME env var is not set"}
+          NIX_CACHE_BUCKET_REGION=${NIX_CACHE_BUCKET_REGION:?"NIX_CACHE_BUCKET_REGION env var is not set"}
+
+          nix store sign "${NIX_OUTPUT}" -v -r -k "${NIX_CACHE_SIGNING_PRIVATE_KEY_PATH}"
           nix copy -v --to "s3://${NIX_CACHE_BUCKET_NAME}/cache?region=${NIX_CACHE_BUCKET_REGION}&compression=zstd&parallel-compression=true" "${NIX_OUTPUT}"
 
   build-push-images:
@@ -95,7 +99,7 @@ jobs:
   push-manifests:
     name: Build and push multi-arch manifests
     timeout-minutes: 20
-    runs-on: [self-hosted, nix, general, arm64-linux, small]
+    runs-on: [self-hosted, nix, general, amd64-linux, small]
     needs: [build-push-images]
     # if: github.ref == 'refs/heads/main'
     steps:

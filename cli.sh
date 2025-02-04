@@ -138,7 +138,7 @@ push_all_single_arch_images() {
   local IMAGE_ARCH=${1:?"Arch is required (amd64 | arm64)"}
   readarray -t IMAGES < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
-  parallel -j8 --tagstring "[{}]" --line-buffer --retries=5 \
+  parallel -j6 --tagstring "[{}]" --line-buffer --retries=5 \
     "$0" push_single_arch {} "${IMAGE_ARCH}" ::: "${IMAGES[@]}"
 }
 
@@ -165,12 +165,24 @@ push_single_arch() {
   FILE_NAME=$(nix eval --raw ".#packages.${NIX_ARCH}-linux.image-${IMAGE}.name") || exit $?
 
   local TARGET_IMAGE="${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}-${ARCH}"
+  local LAST_IMAGE="${IMAGE_REPOSITORY}/${IMAGE}:latest-${ARCH}"
 
-  echo >&2 "Pushing ${TARGET_IMAGE}"
+  local NIX_STORE_PATH
+  NIX_STORE_PATH=$(realpath "./result/${FILE_NAME}")
 
-  skopeo --insecure-policy copy --dest-tls-verify=false --dest-compress-format="zstd:chunked" \
-    nix:"./result/${FILE_NAME}" \
-    "docker://${TARGET_IMAGE}"
+  local LAST_IMAGE_NIX_STORE_PATH
+  LAST_IMAGE_NIX_STORE_PATH=$(regctl manifest get --format='{{jsonPretty .}}' "${LAST_IMAGE}" | jq -r '.annotations["nix.store.path"]') || true
+
+  if [[ "${LAST_IMAGE_NIX_STORE_PATH}" == "${NIX_STORE_PATH}" ]]; then
+    echo "Last image ${LAST_IMAGE} already exists with nix.store.path annotation of ${NIX_STORE_PATH}"
+    regctl index create "${TARGET_IMAGE}" --ref "${LAST_IMAGE}" --annotation nix.store.path="${NIX_STORE_PATH}"
+  else
+    echo "Last image ${LAST_IMAGE} nix.store.path=${LAST_IMAGE_NIX_STORE_PATH} does not match ${NIX_STORE_PATH}"
+    echo "Pushing image ${TARGET_IMAGE}"
+    skopeo copy --dest-compress-format="zstd:chunked" --insecure-policy nix:"${NIX_STORE_PATH}" docker://"${TARGET_IMAGE}"
+    regctl index create "${TARGET_IMAGE}" --ref "${TARGET_IMAGE}" --annotation nix.store.path="${NIX_STORE_PATH}"
+    regctl index create "${LAST_IMAGE}" --ref "${TARGET_IMAGE}" --annotation nix.store.path="${NIX_STORE_PATH}"
+  fi
 }
 
 push_manifest() {
@@ -181,12 +193,10 @@ push_manifest() {
 
   local TARGET="${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}"
 
-  echo >&2 "Writing manifest for ${TARGET}"
-
-  manifest-tool push from-args \
-    --platforms linux/amd64,linux/arm64 \
-    --template "${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}-ARCH" \
-    --target "${TARGET}"
+  echo "Writing manifest for ${TARGET}"
+  regctl index create "${TARGET}" \
+    --ref "${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}-amd64" \
+    --ref "${IMAGE_REPOSITORY}/${IMAGE}:${IMAGE_TAG}-arm64"
 }
 
 release_image() {
@@ -300,9 +310,9 @@ update_images() {
     IMAGE_BASE=$(echo $IMAGE | cut -d '@' -f 1)
     echo "Updating digest for ${IMAGE_BASE}..."
     NEW_DIGEST=$(manifest-tool inspect --raw "$IMAGE_BASE" | jq -e -r .digest) || exit $?
-    
+
     UPDATED_IMAGE="${IMAGE_BASE}@${NEW_DIGEST}"
-    echo "$UPDATED_IMAGE" > "$TMP_RESULT"
+    echo "$UPDATED_IMAGE" >"$TMP_RESULT"
   }
 
   # Create a temporary directory to store individual results
@@ -332,7 +342,7 @@ update_images() {
   # Update the JSON file
   TMP_JSON=$(mktemp)
   for KEY in "${!IMAGES[@]}"; do
-    jq --arg KEY "$KEY" --arg VALUE "${IMAGES[$KEY]}" '.[$KEY] = $VALUE' "$JSON_FILE" > "$TMP_JSON"
+    jq --arg KEY "$KEY" --arg VALUE "${IMAGES[$KEY]}" '.[$KEY] = $VALUE' "$JSON_FILE" >"$TMP_JSON"
     mv "$TMP_JSON" "$JSON_FILE"
   done
 
