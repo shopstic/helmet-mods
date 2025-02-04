@@ -142,6 +142,7 @@
             grafana-syncer
             openapi-merger
             github-actions-registry
+            gitlab-cicd-registry
             ;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
