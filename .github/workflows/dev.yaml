@@ -33,7 +33,7 @@ jobs:
         run: |
           export DENO_DIR=$(mktemp -d)
           trap "rm -rf $DENO_DIR" EXIT
-          ./cli.sh populate_deno_dir_from_nix aarch64-linux "${DENO_DIR}"
+          ./cli.sh populate_deno_dir_from_nix x86_64-linux "${DENO_DIR}"
           ./cli.sh code_quality
           
   build-packages:

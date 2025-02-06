@@ -26,11 +26,13 @@ populate_deno_dir_from_nix() {
   local arch=${1:?"Arch is required"}
   local deno_dir=${2:?"Target path is required"}
   local cache_dir
-  nix build --no-link -v ".#packages.${arch}.deno-cache"
-  cache_dir=$(nix path-info ".#packages.${arch}.deno-cache") || exit $?
-  ln -s "${cache_dir}"/deps "${deno_dir}/deps"
-  ln -s "${cache_dir}"/npm "${deno_dir}/npm"
-  ln -s "${cache_dir}"/registries "${deno_dir}/registries"
+  nix build --no-link -v ".#packages.${arch}.deno-cache-dir"
+  cache_dir=$(nix path-info ".#packages.${arch}.deno-cache-dir") || exit $?
+  for dir in deps npm remote registries; do
+    if [ -d "${cache_dir}/${dir}" ]; then
+      ln -s "${cache_dir}/${dir}" "${deno_dir}/${dir}"
+    fi
+  done
 }
 
 code_quality() {
