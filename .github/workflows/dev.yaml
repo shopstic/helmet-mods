@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check code quality
-        shell: nix develop -v bash -euo pipefail {0}
+        shell: nix develop -v -c bash -euo pipefail {0}
         run: |
           export DENO_DIR=$(mktemp -d)
           trap "rm -rf $DENO_DIR" EXIT
@@ -68,7 +68,7 @@ jobs:
       - name: Cache all packages
         env:
           NIX_OUTPUT: .#defaultPackage.${{ matrix.runner.arch }}
-        shell: nix develop -v bash -euo pipefail {0}
+        shell: nix develop -v -c bash -euo pipefail {0}
         run: |
           nix store sign "${NIX_OUTPUT}" -v -r -k <(echo -n "${NIX_CACHE_SIGNING_PRIVATE_KEY}")
           nix copy -v --to "s3://${NIX_CACHE_BUCKET_NAME}/cache?region=${NIX_CACHE_BUCKET_REGION}&compression=zstd&parallel-compression=true" "${NIX_OUTPUT}"
@@ -92,13 +92,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build all images
-        shell: nix develop -v bash -euo pipefail {0}
+        shell: nix develop -v -c bash -euo pipefail {0}
         run: |
           ./cli.sh build_all_images ${{ matrix.imageArch }}
 
       - name: Push all images
         # if: github.ref == 'refs/heads/main'
-        shell: nix develop -v bash -euo pipefail {0}
+        shell: nix develop -v -c bash -euo pipefail {0}
         run: |
           ./cli.sh push_all_single_arch_images ${{ matrix.imageArch }}
 
@@ -112,6 +112,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build and push images
-        shell: nix develop -v bash -euo pipefail {0}
+        shell: nix develop -v -c bash -euo pipefail {0}
         run: |
           ./cli.sh push_all_manifests
