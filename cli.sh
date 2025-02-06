@@ -221,11 +221,18 @@ release_image() {
   local dev_tag=${2:?"Image dev tag is required"}
   local release_tag=${3:?"Image release tag is required"}
 
-  local digest
-  digest=$(regctl image digest "${image_repository}/${image}:${dev_tag}") || exit $?
+  local from_image
+  from_image="${image_repository}/${image}:${dev_tag}"
 
-  regctl index create "${image_repository}/${image}:${release_tag}" \
-    --ref "${image_repository}/${image}:${dev_tag}" \
+  echo "Fetching digest for ${from_image}" >&2
+  local digest
+  digest=$(regctl image digest "${from_image}") || exit $?
+
+  local to_image
+  to_image="${image_repository}/${image}:${release_tag}"
+  echo "Tagging ${to_image} with digest ${digest}" >&2
+  regctl index create "${to_image}" \
+    --ref "${from_image}" \
     --platform linux/amd64 \
     --platform linux/arm64
 
@@ -248,10 +255,8 @@ release() {
 
   readarray -t images < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
-  for image in "${images[@]}"; do
-    echo "Retagging ${image} from ${dev_tag} to ${release_version}"
-    "$0" release_image "${image}" "${dev_tag}" "${release_version}"
-  done
+  parallel -j6 --tagstring "[{}]" --line-buffer --retries=2 \
+    "$0" release_image {} "${dev_tag}" "${release_version}" ::: "${images[@]}"
 
   echo "export default \"${release_version}\";" >./src/version.ts
   local jsr_json
