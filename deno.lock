@@ -23,7 +23,7 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@3": "3.0.0",
+    "jsr:@wok/helmet@^3.0.3": "3.0.3",
     "jsr:@wok/k8s@^1.32.0": "1.32.0",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.2",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
@@ -117,8 +117,8 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@3.0.0": {
-      "integrity": "c77c8a21cb48a31ba9a87c86e95c8d899f607553d09d5f9b85dccef18405c160",
+    "@wok/helmet@3.0.3": {
+      "integrity": "fad447818640459f3bed32a4224260ccd484b14d52a0c447adb6eb23b401f11d",
       "dependencies": [
         "jsr:@std/fmt@^1.0.5",
         "jsr:@std/fs",
@@ -178,8 +178,8 @@
     "@sinclair/typebox@0.34.15": {
       "integrity": "sha512-xeIzl3h1Znn9w/LTITqpiwag0gXjA+ldi2ZkXIBxGEppGCW211Tza+eL6D4pKqs10bj5z2umBWk5WL6spQ2OCQ=="
     },
-    "atlassian-openapi@1.0.20": {
-      "integrity": "sha512-MgTMxa0MTCwUb4zIsh9EA2AcTXhGuDDibt7gUQ/VuudzMTJfKwzxU+uV2/F5ZjYkvAuFUQzIp10bgOIxRPRhTw==",
+    "atlassian-openapi@1.0.21": {
+      "integrity": "sha512-1OnnoY2CQYHgXrce/06BltL7fox+uVY7brHUInyFbMpTURjTNIGXfLQxVDRo/2On7ryyKzkX7FfNApYhXw7f+w==",
       "dependencies": [
         "jsonpointer",
         "urijs"
@@ -241,7 +241,7 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@^2.1.2",
-      "jsr:@wok/helmet@3",
+      "jsr:@wok/helmet@^3.0.3",
       "jsr:@wok/k8s@^1.32.0",
       "jsr:@wok/openapi-client@^1.0.2",
       "jsr:@wok/prometheus@^1.0.2",
