@@ -37,7 +37,7 @@ jobs:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ github.event.inputs.version }}
-        shell: nix develop -v -c "bash -c 'set -euo pipefail; {0}'"
+        shell: nix develop -v -c bash -c 'set -euo pipefail; {0}'
         run: |
           DEV_TAG=""
           if [[ "${REFERENCE_SHA}" != "" ]]; then
