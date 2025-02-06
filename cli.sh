@@ -224,8 +224,8 @@ release_image() {
   local digest
   digest=$(regctl image digest "${image_repository}/${image}:${dev_tag}") || exit $?
 
-  regctl index create "${image_repository}/${image}:${dev_tag}" \
-    --ref "${image_repository}/${image}:${release_tag}" \
+  regctl index create "${image_repository}/${image}:${release_tag}" \
+    --ref "${image_repository}/${image}:${dev_tag}" \
     --platform linux/amd64 \
     --platform linux/arm64
 
