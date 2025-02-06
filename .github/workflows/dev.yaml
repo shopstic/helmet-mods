@@ -5,6 +5,16 @@ on:
     branches-ignore:
       - release
       - 'releases/*'
+
+env:
+  IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
+  NIX_CACHE_BUCKET_NAME: ${{ vars.NIX_CACHE_BUCKET_NAME }}
+  NIX_CACHE_BUCKET_REGION: ${{ vars.NIX_CACHE_BUCKET_REGION }}
+  NIX_CACHE_SIGNING_PRIVATE_KEY: ${{ secrets.NIX_CACHE_SIGNING_PRIVATE_KEY }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.NIX_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.NIX_AWS_SECRET_ACCESS_KEY }}  
+
 jobs:
   check:
     name: Check code quality
@@ -60,11 +70,7 @@ jobs:
           NIX_OUTPUT: .#defaultPackage.${{ matrix.runner.arch }}
         shell: nix develop -v -c bash {0}
         run: |
-          NIX_CACHE_SIGNING_PRIVATE_KEY_PATH=${NIX_CACHE_SIGNING_PRIVATE_KEY_PATH:?"NIX_CACHE_SIGNING_PRIVATE_KEY_PATH env var is not set"}
-          NIX_CACHE_BUCKET_NAME=${NIX_CACHE_BUCKET_NAME:?"NIX_CACHE_BUCKET_NAME env var is not set"}
-          NIX_CACHE_BUCKET_REGION=${NIX_CACHE_BUCKET_REGION:?"NIX_CACHE_BUCKET_REGION env var is not set"}
-
-          nix store sign "${NIX_OUTPUT}" -v -r -k "${NIX_CACHE_SIGNING_PRIVATE_KEY_PATH}"
+          nix store sign "${NIX_OUTPUT}" -v -r -k <(echo -n "${NIX_CACHE_SIGNING_PRIVATE_KEY}")
           nix copy -v --to "s3://${NIX_CACHE_BUCKET_NAME}/cache?region=${NIX_CACHE_BUCKET_REGION}&compression=zstd&parallel-compression=true" "${NIX_OUTPUT}"
 
   build-push-images:

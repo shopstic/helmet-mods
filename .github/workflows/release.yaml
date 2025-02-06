@@ -10,6 +10,11 @@ on:
         description: "Reference commit"
         required: false
         default: ""
+env:
+  IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.NIX_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.NIX_AWS_SECRET_ACCESS_KEY }}  
 
 defaults:
   run:

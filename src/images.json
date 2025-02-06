@@ -3,6 +3,6 @@
   "fdbExporter": "public.ecr.aws/shopstic/fdb-prometheus-exporter:7.1.53@sha256:5aba29a8e52cbb2e11fad33cb89dda9c6e6af162b30f70e59b7b894a85e57df0",
   "dedupProxy": "public.ecr.aws/shopstic/dedup-proxy:2.0.1@sha256:bc87c6736d0fc1ce4ee57ec4a03839e77515ae323c6f123f5964acea1a799974",
   "kubectl": "public.ecr.aws/shopstic/kubectl:1.28.7@sha256:eac5e237ae8a765130b264b7df189f15230d95621b473479e6da470e7169efe4",
-  "tailscaleRouterInit": "public.ecr.aws/z8i7w3s6/tailscale-router-init:2.19.0@sha256:bd309acd0112494ba33877ed58e1dc4d802c6fb9aabd17939762ac399c787715",
+  "tailscaleRouterInit": "public.ecr.aws/z8i7w3s6/tailscale-router-init:2.19.0@sha256:030d6847c22a445030ae543bd3a3bba5f82286183ea5d668705530efcc5616ad",
   "tailscale": "ghcr.io/tailscale/tailscale:v1.78.1@sha256:d00e735ed066b4e8a2d0acace57a5fcd8e04d2e26493275bc9df2c1f59732167"
 }
