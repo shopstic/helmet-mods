@@ -39,6 +39,10 @@ jobs:
           RELEASE_VERSION: ${{ github.event.inputs.version }}
         shell: nix develop -v -c bash -euo pipefail {0}
         run: |
+          export DENO_DIR=$(mktemp -d)
+          trap "rm -rf $DENO_DIR" EXIT
+          ./cli.sh populate_deno_dir_from_nix x86_64-linux "${DENO_DIR}"
+
           DEV_TAG=""
           if [[ "${REFERENCE_SHA}" != "" ]]; then
             DEV_TAG="dev-${REFERENCE_SHA}"
