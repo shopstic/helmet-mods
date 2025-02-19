@@ -18,7 +18,7 @@ env:
 
 defaults:
   run:
-    shell: bash
+    shell: nix develop -v -c bash -euo pipefail {0}
 
 jobs:
   release:
@@ -37,7 +37,6 @@ jobs:
           REFERENCE_SHA: ${{ github.event.inputs.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ github.event.inputs.version }}
-        shell: nix develop -v -c bash -euo pipefail {0}
         run: |
           export DENO_DIR=$(mktemp -d)
           trap "rm -rf $DENO_DIR" EXIT

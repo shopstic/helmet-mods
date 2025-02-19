@@ -36,7 +36,7 @@ export async function createWebhookSigner(signingKey: string) {
     ["sign", "verify"],
   );
 
-  return async (payload: ArrayBufferLike) => {
+  return async (payload: BufferSource) => {
     const signature = new Uint8Array(
       await crypto.subtle.sign("HMAC", key, payload),
     );
