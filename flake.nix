@@ -39,8 +39,8 @@
           config-file = ./deno.json;
           lock-file = ./deno.lock;
         };
-        deno = hotPotPkgs.deno_2_2_x;
-        denort = hotPotPkgs.denort_2_2_x;
+        deno = hotPotPkgs.deno;
+        denort = hotPotPkgs.denort;
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
