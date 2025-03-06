@@ -22,14 +22,14 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@^4.0.3": "4.0.3",
+    "jsr:@wok/helmet@^4.0.4": "4.0.4",
     "jsr:@wok/k8s-api@^1.32.2": "1.32.2",
     "jsr:@wok/k8s-utils@^2.0.1": "2.0.1",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.2",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@3": "3.0.0",
     "jsr:@wok/typebox@2": "2.0.0",
-    "jsr:@wok/utils@^5.0.3": "5.0.3",
+    "jsr:@wok/utils@^5.0.5": "5.0.5",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.28": "0.34.28",
     "npm:immer@^10.1.1": "10.1.1",
@@ -116,8 +116,8 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@4.0.3": {
-      "integrity": "301d9c67bd51a3187b51b105abff0c7459e92bf16dfda2445d1554ff955d4cf7",
+    "@wok/helmet@4.0.4": {
+      "integrity": "7b7880c588238dfcbeb5566100acc65836af64d3c8f2813b7ed36d93629bc457",
       "dependencies": [
         "jsr:@std/fmt@^1.0.6",
         "jsr:@std/fs",
@@ -162,8 +162,8 @@
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@5.0.3": {
-      "integrity": "234279d9f338a7da0434397ac342b8b480499c0f29cc801a98ad5aac2e4ae71b",
+    "@wok/utils@5.0.5": {
+      "integrity": "127a8900d6c333161caf3b087c632ea160c9239b5251ac205a3ec4bed84877dc",
       "dependencies": [
         "jsr:@std/assert",
         "jsr:@std/async",
@@ -249,14 +249,14 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@3",
-      "jsr:@wok/helmet@^4.0.3",
+      "jsr:@wok/helmet@^4.0.4",
       "jsr:@wok/k8s-api@^1.32.2",
       "jsr:@wok/k8s-utils@^2.0.1",
       "jsr:@wok/openapi-client@^1.0.2",
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@3",
       "jsr:@wok/typebox@2",
-      "jsr:@wok/utils@^5.0.3",
+      "jsr:@wok/utils@^5.0.5",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
       "npm:jose@^6.0.8",
