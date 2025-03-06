@@ -1,5 +1,5 @@
 import { captureExec, ExecAbortedError, inheritExec, NonZeroExitError } from "$deps/exec_utils.ts";
-import { commandWithTimeout, exhaustiveMatchingGuard } from "$libs/utils.ts";
+import { assertUnreachable, commandWithTimeout } from "$libs/utils.ts";
 import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import type { RegistryAuth, RegistryAuthConfig } from "./libs/schemas.ts";
 import { RegistryAuthConfigSchema, RegistryAuthParamsSchema } from "./libs/schemas.ts";
@@ -69,7 +69,7 @@ export function authenticate(auth: RegistryAuth): Observable<AuthResult> {
     );
   }
 
-  return exhaustiveMatchingGuard(auth);
+  return assertUnreachable(auth);
 }
 
 async function loadConfig(configFile: string): Promise<RegistryAuthConfig> {

@@ -1,4 +1,4 @@
-import type { K8s } from "$deps/k8s_openapi.ts";
+import type { K8s } from "@wok/k8s-utils";
 import { Num, Obj, Opt, Str } from "$deps/schema.ts";
 
 export const K8sJobAutoscalerParamsSchema = {

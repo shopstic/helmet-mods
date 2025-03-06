@@ -1,4 +1,4 @@
-import { exhaustiveMatchingGuard } from "./utils.ts";
+import { assertUnreachable } from "./utils.ts";
 
 function serializeLog(event: unknown) {
   return JSON.stringify(event, (_, value) => {
@@ -40,7 +40,7 @@ export class Logger {
         console.error(out);
         break;
       default:
-        exhaustiveMatchingGuard(level);
+        assertUnreachable(level);
     }
 
     return this;

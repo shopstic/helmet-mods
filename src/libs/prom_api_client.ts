@@ -14,7 +14,7 @@ import {
   type ValidationResult,
 } from "$deps/schema.ts";
 
-function exhaustiveMatchingGuard(_: never): never {
+function assertUnreachable(_: never): never {
   throw new Error("Non exhaustive matching");
 }
 
@@ -175,7 +175,7 @@ export function createPromApiClient(baseUrl: string) {
         throw new PromQueryError(result.error, result.errorType);
       }
 
-      return exhaustiveMatchingGuard(result);
+      return assertUnreachable(result);
     },
     async matrixQuery({ query, time }: { query: string; time: Date }, init?: RequestInit): Promise<PromMatrix[]> {
       const params = {
@@ -197,7 +197,7 @@ export function createPromApiClient(baseUrl: string) {
         throw new PromQueryError(result.error, result.errorType);
       }
 
-      return exhaustiveMatchingGuard(result);
+      return assertUnreachable(result);
     },
     async rangeQuery({
       query,
@@ -231,7 +231,7 @@ export function createPromApiClient(baseUrl: string) {
         throw new PromQueryError(result.error, result.errorType);
       }
 
-      return exhaustiveMatchingGuard(result);
+      return assertUnreachable(result);
     },
   };
 }

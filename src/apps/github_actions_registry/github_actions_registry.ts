@@ -1,6 +1,4 @@
 import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
-import type { OpenapiClient } from "$deps/k8s_openapi.ts";
-import { createOpenapiClient } from "$deps/k8s_openapi.ts";
 import { constantTimeCompare, createWebhookSigner } from "$libs/crypto_utils.ts";
 import { Logger } from "$libs/logger.ts";
 import type { ReconciliationLoop } from "$libs/utils.ts";
@@ -18,6 +16,7 @@ import { captureExec } from "$deps/exec_utils.ts";
 import { deferred } from "$deps/async_utils.ts";
 import type { GhComponents, GhPaths } from "./libs/types.ts";
 import type { WorkflowJobEvent } from "$deps/github_webhooks.ts";
+import { createOpenapiClient, type OpenapiClient } from "$deps/k8s_openapi.ts";
 
 interface ReconciliationRequest {
   id: string;

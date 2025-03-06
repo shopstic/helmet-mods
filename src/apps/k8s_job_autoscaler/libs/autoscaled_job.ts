@@ -1,13 +1,13 @@
 import { delay } from "$deps/async_utils.ts";
-import type { K8s, OpenapiClient } from "$deps/k8s_openapi.ts";
+import type { K8s } from "@wok/k8s-utils";
 import { deepEqual } from "$deps/std_testing.ts";
-import { k8sControllerStream } from "$libs/k8s_controller.ts";
+import { k8sControllerWatch } from "@wok/k8s-utils/controller";
 import type { Logger } from "$libs/logger.ts";
 import { createPromApiClient } from "$libs/prom_api_client.ts";
-import { exhaustiveMatchingGuard } from "$libs/utils.ts";
 import type { AutoscaledJob, AutoscaledJobAutoscaling } from "./schemas.ts";
 import type { Paths } from "./types.ts";
-
+import type { OpenapiClient } from "$deps/k8s_openapi.ts";
+import { assertUnreachable } from "@wok/utils/assertion";
 export const jobReplicaIndexLabel = "autoscaledjob.shopstic.com/index";
 
 export interface MetricSnapshot {
@@ -87,7 +87,7 @@ export async function* watchJobs(
     namespace: string;
   },
 ) {
-  const events = k8sControllerStream(
+  const events = k8sControllerWatch(
     client.endpoint("/apis/batch/v1/namespaces/{namespace}/jobs").method("get"),
   )({
     path: {
@@ -114,8 +114,10 @@ export async function* watchJobs(
       }
     } else if (event.type === "DELETED") {
       yield event;
+    } else if (event.type === "INITIAL_LIST_END") {
+      // Ignore
     } else {
-      exhaustiveMatchingGuard(event.type);
+      assertUnreachable(event.type);
     }
   }
 }
@@ -125,7 +127,7 @@ export async function* watchJobGroups(
 ): AsyncGenerator<Map<string, AutoscaledJob>> {
   const map: Map<string, AutoscaledJob> = new Map();
 
-  const events = k8sControllerStream(
+  const events = k8sControllerWatch(
     client.endpoint("/apis/shopstic.com/v1/namespaces/{namespace}/autoscaledjobs").method("get"),
   )({
     path: {
@@ -143,10 +145,10 @@ export async function* watchJobGroups(
       map.set(event.object.metadata!.uid!, event.object);
     } else if (event.type === "DELETED") {
       map.delete(event.object.metadata!.uid!);
-    } else if (event.type === "BOOKMARK") {
+    } else if (event.type === "BOOKMARK" || event.type === "INITIAL_LIST_END") {
       // Ignore
     } else {
-      exhaustiveMatchingGuard(event.type);
+      assertUnreachable(event.type);
     }
 
     yield map;

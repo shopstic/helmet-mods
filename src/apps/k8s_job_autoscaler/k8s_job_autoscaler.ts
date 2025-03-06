@@ -7,8 +7,8 @@ import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import type { AutoscaledJob, AutoscaledJobAutoscaling } from "./libs/schemas.ts";
 import { K8sJobAutoscalerParamsSchema } from "./libs/schemas.ts";
 import { Logger } from "$libs/logger.ts";
-import type { K8s } from "$deps/k8s_openapi.ts";
-import { createOpenapiClient } from "$deps/k8s_openapi.ts";
+import type { K8s } from "@wok/k8s-utils";
+import { createOpenapiClient } from "@wok/openapi-client";
 import { createReconciliationLoop } from "$libs/utils.ts";
 import type { Paths } from "./libs/types.ts";
 

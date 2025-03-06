@@ -4,7 +4,8 @@ import { deferred, delay } from "$deps/async_utils.ts";
 export function commandWithTimeout(command: string[], timeoutSeconds: number): string[] {
   return ["timeout", "-k", "0", `${timeoutSeconds}s`, ...command];
 }
-export function exhaustiveMatchingGuard(_: never): never {
+
+export function assertUnreachable(_: never): never {
   throw new Error("Non exhaustive matching");
 }
 

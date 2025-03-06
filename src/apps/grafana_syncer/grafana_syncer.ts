@@ -1,12 +1,11 @@
 import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import type { paths as GrafanaApiPaths } from "$libs/grafana/openapi_types.ts";
-import type { OpenapiClient } from "$deps/k8s_openapi.ts";
-import { createOpenapiClient, OpenapiOperationError } from "$deps/k8s_openapi.ts";
-import { k8sControllerStream } from "$libs/k8s_controller.ts";
 import { Logger } from "$libs/logger.ts";
-import { exhaustiveMatchingGuard } from "$libs/utils.ts";
+import { assertUnreachable } from "$libs/utils.ts";
+import { createOpenapiClient, type OpenapiClient, OpenapiOperationError } from "$deps/k8s_openapi.ts";
 import { GrafanaSyncerParamsSchema } from "./libs/schemas.ts";
 import type { GrafanaDashboard, Paths } from "./libs/types.ts";
+import { k8sControllerWatch } from "@wok/k8s-utils/controller";
 
 interface UpsertDashboard {
   action: "upsert";
@@ -67,7 +66,7 @@ export async function* watchDashboards(
     fieldSelector?: string;
   },
 ): AsyncGenerator<DashboardEvent> {
-  const events = k8sControllerStream(
+  const events = k8sControllerWatch(
     client.endpoint("/apis/shopstic.com/v1/namespaces/{namespace}/grafanadashboards").method("get"),
   )({
     path: {
@@ -85,10 +84,10 @@ export async function* watchDashboards(
   for await (const event of events) {
     if (event.type === "ADDED" || event.type === "MODIFIED") {
       yield toDashboardEvent(event.object);
-    } else if (event.type === "DELETED" || event.type === "BOOKMARK") {
+    } else if (event.type === "DELETED" || event.type === "BOOKMARK" || event.type === "INITIAL_LIST_END") {
       // Ignore
     } else {
-      exhaustiveMatchingGuard(event.type);
+      assertUnreachable(event.type);
     }
   }
 }
@@ -254,7 +253,7 @@ await new CliProgram()
                 },
               });
           } else {
-            exhaustiveMatchingGuard(event);
+            assertUnreachable(event);
           }
         }
 

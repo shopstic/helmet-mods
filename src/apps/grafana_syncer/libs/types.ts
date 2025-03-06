@@ -1,4 +1,5 @@
-import type { K8sApiPaths, K8sApiPathsWithCrd } from "$deps/k8s_openapi.ts";
+import type { K8sApiPaths } from "@wok/k8s-api";
+import type { K8sApiPathsWithCrd } from "@wok/k8s-utils/crd";
 
 export type GrafanaDashboard = {
   apiVersion: "shopstic.com/v1";
