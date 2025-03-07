@@ -22,9 +22,10 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@^4.0.4": "4.0.4",
+    "jsr:@wok/helmet@^4.0.5": "4.0.5",
     "jsr:@wok/k8s-api@^1.32.2": "1.32.2",
-    "jsr:@wok/k8s-utils@^2.0.1": "2.0.1",
+    "jsr:@wok/k8s-utils@^2.0.1": "2.0.2",
+    "jsr:@wok/k8s-utils@^2.0.2": "2.0.2",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.2",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@3": "3.0.0",
@@ -116,15 +117,15 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@4.0.4": {
-      "integrity": "7b7880c588238dfcbeb5566100acc65836af64d3c8f2813b7ed36d93629bc457",
+    "@wok/helmet@4.0.5": {
+      "integrity": "f79c379665e2a9665aaa345f84fbc292ec636f045c6187f8dbe51180598c3329",
       "dependencies": [
         "jsr:@std/fmt@^1.0.6",
         "jsr:@std/fs",
         "jsr:@std/path",
         "jsr:@std/semver",
         "jsr:@std/yaml",
-        "jsr:@wok/k8s-utils",
+        "jsr:@wok/k8s-utils@^2.0.1",
         "jsr:@wok/schema",
         "jsr:@wok/utils"
       ]
@@ -132,8 +133,8 @@
     "@wok/k8s-api@1.32.2": {
       "integrity": "3e56aa0784fd0cd21a761399022546369fef7faaf15c6ad12dd73092549cebe9"
     },
-    "@wok/k8s-utils@2.0.1": {
-      "integrity": "b6a12c46e685a67d167f74a169c68b889d7271f0699efd4d609df802d07f1c38",
+    "@wok/k8s-utils@2.0.2": {
+      "integrity": "8ea25860188f60cb77f1903f28b50d8f5d4ebd176efd8c7e3424160135f6fc83",
       "dependencies": [
         "jsr:@std/async",
         "jsr:@std/collections",
@@ -249,9 +250,9 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@3",
-      "jsr:@wok/helmet@^4.0.4",
+      "jsr:@wok/helmet@^4.0.5",
       "jsr:@wok/k8s-api@^1.32.2",
-      "jsr:@wok/k8s-utils@^2.0.1",
+      "jsr:@wok/k8s-utils@^2.0.2",
       "jsr:@wok/openapi-client@^1.0.2",
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@3",
