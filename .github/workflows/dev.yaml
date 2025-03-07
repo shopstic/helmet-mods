@@ -5,8 +5,14 @@ on:
     branches-ignore:
       - release
       - 'releases/*'
-
+  workflow_dispatch:
+    inputs:
+      force_push_images:
+        description: "Skip diffing images on push"
+        required: false
+        default: ""
 env:
+  IMAGE_PUSH_SKIP_DIFFING: ${{ github.event.inputs.force_push_images }}
   IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
   NIX_CACHE_BUCKET_NAME: ${{ vars.NIX_CACHE_BUCKET_NAME }}
   NIX_CACHE_BUCKET_REGION: ${{ vars.NIX_CACHE_BUCKET_REGION }}
