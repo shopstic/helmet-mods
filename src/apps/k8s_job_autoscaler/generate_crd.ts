@@ -12,7 +12,7 @@ function* traverse(
   }
 }
 
-const schemaUrl = "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.1/api/openapi-spec/swagger.json";
+const schemaUrl = "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.32.2/api/openapi-spec/swagger.json";
 const schema = await (await fetch(schemaUrl)).json();
 const strippedKeys = [
   "x-kubernetes-patch-merge-key",
@@ -129,6 +129,12 @@ const crd = {
                         },
                       },
                       required: ["volumeName", "claimPrefix"],
+                    },
+                  },
+                  nodeSelectorPrefixes: {
+                    type: "object",
+                    additionalProperties: {
+                      type: "string",
                     },
                   },
                   jobTemplate: k8sJobSchema,

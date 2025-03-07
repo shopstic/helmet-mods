@@ -41,6 +41,7 @@ export type AutoscaledJob = {
       volumeName: string;
       claimPrefix: string;
     }>;
+    nodeSelectorPrefixes?: Record<string, string>;
     jobTemplate: K8s["batch.v1.Job"];
   };
 };

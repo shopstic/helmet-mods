@@ -172,14 +172,26 @@ await new CliProgram()
                       if (!templateSpec.volumes) {
                         templateSpec.volumes = [];
                       }
-                      autoscaledJob.spec.persistentVolumes.forEach((pv) => {
+
+                      for (const pv of autoscaledJob.spec.persistentVolumes) {
                         templateSpec.volumes!.push({
                           name: pv.volumeName,
                           persistentVolumeClaim: {
                             claimName: `${pv.claimPrefix}${index}`,
                           },
                         });
-                      });
+                      }
+                    }
+
+                    if (autoscaledJob.spec.nodeSelectorPrefixes) {
+                      const templateSpec = draft.spec!.template!.spec!;
+                      if (!templateSpec.nodeSelector) {
+                        templateSpec.nodeSelector = {};
+                      }
+
+                      for (const [key, value] of Object.entries(autoscaledJob.spec.nodeSelectorPrefixes)) {
+                        templateSpec.nodeSelector[key] = `${value}${index}`;
+                      }
                     }
                   });
 
