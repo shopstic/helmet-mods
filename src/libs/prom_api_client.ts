@@ -151,7 +151,10 @@ async function promFetch<T>(
 
 export function createPromApiClient(baseUrl: string) {
   return {
-    async vectorQuery({ query, time }: { query: string; time?: Date }, init?: RequestInit): Promise<PromVector[]> {
+    async vectorQuery(
+      { query, extraParams, time }: { query: string; extraParams?: Record<string, string>; time?: Date },
+      init?: RequestInit,
+    ): Promise<PromVector[]> {
       const params = {
         query,
         ...(typeof time !== "undefined"
@@ -159,6 +162,7 @@ export function createPromApiClient(baseUrl: string) {
             time: String(time.getTime() / 1000),
           }
           : {}),
+        ...extraParams,
       };
 
       const result = await promFetch(
@@ -177,10 +181,14 @@ export function createPromApiClient(baseUrl: string) {
 
       return assertUnreachable(result);
     },
-    async matrixQuery({ query, time }: { query: string; time: Date }, init?: RequestInit): Promise<PromMatrix[]> {
+    async matrixQuery(
+      { query, extraParams, time }: { query: string; extraParams?: Record<string, string>; time: Date },
+      init?: RequestInit,
+    ): Promise<PromMatrix[]> {
       const params = {
         query,
         time: String(time.getTime() / 1000),
+        ...extraParams,
       };
 
       const result = await promFetch(
@@ -201,11 +209,13 @@ export function createPromApiClient(baseUrl: string) {
     },
     async rangeQuery({
       query,
+      extraParams,
       fromTime,
       toTime,
       stepSeconds,
     }: {
       query: string;
+      extraParams?: Record<string, string>;
       fromTime: Date;
       toTime: Date;
       stepSeconds: number;
@@ -215,6 +225,7 @@ export function createPromApiClient(baseUrl: string) {
         start: String(fromTime.getTime() / 1000),
         end: String(toTime.getTime() / 1000),
         step: String(stepSeconds),
+        ...extraParams,
       };
 
       const result = await promFetch(

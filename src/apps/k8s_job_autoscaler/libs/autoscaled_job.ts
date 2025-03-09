@@ -16,7 +16,11 @@ export interface MetricSnapshot {
 }
 
 export async function* watchMetric(
-  { autoscaling: { query, pendingMetric = {}, inProgressMetric, intervalSeconds, metricServerUrl }, signal, logger }: {
+  {
+    autoscaling: { query, extraRequestParams, pendingMetric = {}, inProgressMetric, intervalSeconds, metricServerUrl },
+    signal,
+    logger,
+  }: {
     autoscaling: AutoscaledJobAutoscaling;
     signal: AbortSignal;
     logger: Logger;
@@ -30,6 +34,7 @@ export async function* watchMetric(
     try {
       const metrics = await promClient.vectorQuery({
         query,
+        extraParams: extraRequestParams,
       }, {
         signal,
       });

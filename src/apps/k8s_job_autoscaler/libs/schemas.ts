@@ -13,6 +13,7 @@ export type K8sJobAutoscalerParams = typeof K8sJobAutoscalerParamsSchemaObj.infe
 
 export type AutoscaledJobAutoscaling = {
   query: string;
+  extraRequestParams?: Record<string, string>;
   pendingMetric?: unknown;
   inProgressMetric?: unknown;
   intervalSeconds: number;

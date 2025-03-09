@@ -93,6 +93,10 @@ const crd = {
                         type: "object",
                         "x-kubernetes-preserve-unknown-fields": true,
                       },
+                      extraRequestParams: {
+                        type: "object",
+                        "x-kubernetes-preserve-unknown-fields": true,
+                      },
                       intervalSeconds: {
                         type: "number",
                       },
