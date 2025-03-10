@@ -119,6 +119,7 @@
                 regclient
                 typescript-eslint
                 openapi-ts-gen
+                deno-ship
                 ;
             };
           shellHook = ''

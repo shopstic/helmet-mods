@@ -2,9 +2,9 @@ import type { K8s, K8sDeployment, K8sIngress, K8sSecret, K8sService } from "$dep
 import { createK8sDeployment, createK8sIngress, createK8sSecret, createK8sService } from "$deps/helmet.ts";
 import { image as defaultOpenapiMergerImage } from "../../apps/openapi_merger/meta.ts";
 import type { OpenapiMergerConfig, OpenapiMergerParams } from "../../apps/openapi_merger/libs/schemas.ts";
-import { stableHash } from "$deps/stable_hash.ts";
 import { toParamCase } from "$deps/case.ts";
 export * from "../../apps/openapi_merger/libs/schemas.ts";
+import { stableDigest } from "@wok/utils/stable-digest";
 
 export const defaultName = "gitlab-cicd-registry";
 
@@ -15,7 +15,7 @@ export interface OpenapiMergerResources {
   secret: K8sSecret;
 }
 
-export function createOpenapiMergerResources({
+export async function createOpenapiMergerResources({
   name = defaultName,
   image = defaultOpenapiMergerImage,
   replicas = 1,
@@ -43,7 +43,7 @@ export function createOpenapiMergerResources({
   & Pick<
     OpenapiMergerParams,
     "docsPath"
-  >): OpenapiMergerResources {
+  >): Promise<OpenapiMergerResources> {
   const labels = {
     "app.kubernetes.io/name": defaultName,
     "app.kubernetes.io/instance": name,
@@ -165,7 +165,7 @@ export function createOpenapiMergerResources({
               }],
               env: [{
                 name: "__CONFIG_HASH__",
-                value: stableHash(secret),
+                value: await stableDigest(secret),
               }],
               args: Object
                 .entries(args)

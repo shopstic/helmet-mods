@@ -67,12 +67,18 @@ compile_app() {
   local app=${1:?"App path is required"}
   local out=${2:?"Output path is required"}
 
-  # local temp_dir
-  # temp_dir=$(mktemp -d) || exit $?
   deno check "${app}"
   # local app_ret
   # app_ret=$(deno-app-build --allow-npm-specifier --app-path="${app}" --out-path="${temp_dir}") || exit $?
-  deno compile --cached-only -A --output="${out}" "${app}"
+
+
+  local temp_dir
+  temp_dir=$(mktemp -d)
+  # shellcheck disable=SC2064
+  trap "rm -Rf ${temp_dir}" EXIT
+
+  deno-ship trim-lock --config deno.json --lock deno.lock "${app}" > "${temp_dir}/deno.lock"
+  deno compile --lock="${temp_dir}/deno.lock" --cached-only -A --output="${out}" "${app}"
 }
 
 smoke_test() {

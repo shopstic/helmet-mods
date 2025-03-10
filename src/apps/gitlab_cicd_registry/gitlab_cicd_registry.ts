@@ -1,6 +1,5 @@
 import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import { captureExec } from "$deps/exec_utils.ts";
-import { stableHash } from "$deps/stable_hash.ts";
 import { constantTimeCompare } from "$libs/crypto_utils.ts";
 import { Logger } from "$libs/logger.ts";
 import type { ReconciliationLoop } from "$libs/utils.ts";
@@ -9,6 +8,7 @@ import type { GitlabJob } from "./libs/schemas.ts";
 import { GitlabCicdRegistryParamsSchema, GitlabWebhookBuildSchema } from "./libs/schemas.ts";
 import { fetchLastActiveProjects, fetchProjectPendingJobs } from "./libs/gitlab_api_service.ts";
 import { validate } from "$deps/schema.ts";
+import { stableJsonStringify } from "@wok/utils/stable-json-stringify";
 
 const GITLAB_WEBHOOK_TOKEN_HEADER = "X-Gitlab-Token";
 const logger = new Logger();
@@ -55,7 +55,7 @@ function renderQueueJobsMetrics() {
         status: job.status,
       };
 
-      const hash = stableHash(item);
+      const hash = stableJsonStringify(item);
 
       if (!map.has(hash)) {
         map.set(hash, { item, count: 1 });

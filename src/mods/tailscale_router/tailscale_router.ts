@@ -8,17 +8,17 @@ import {
   createK8sSecret,
   createK8sServiceAccount,
 } from "$deps/helmet.ts";
-import { stableHash } from "$deps/stable_hash.ts";
 import { stripMargin } from "$libs/utils.ts";
 import { createPodAntiAffinity } from "$libs/k8s_utils.ts";
 import images from "../../images.json" with { type: "json" };
+import { stableDigest } from "@wok/utils/stable-digest";
 
 const defaultName = "tailscale-router";
 
 export const defaultHelperImage = images.tailscaleRouterInit;
 export const defaultImage = images.tailscale;
 
-export function createTailscaleRouterResources(
+export async function createTailscaleRouterResources(
   {
     replicas = 1,
     name = defaultName,
@@ -294,7 +294,7 @@ export function createTailscaleRouterResources(
         metadata: {
           labels,
           annotations: {
-            "helmet.run/dependencies-hash": stableHash(secret),
+            "helmet.run/dependencies-hash": await stableDigest(secret),
           },
         },
         spec: {

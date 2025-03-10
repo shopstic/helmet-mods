@@ -10,13 +10,13 @@ import {
   getRepoPendingJobs,
 } from "./libs/github_api_service.ts";
 import { GithubActionsRegistryParamsSchema } from "./libs/schemas.ts";
-import { stableHash } from "$deps/stable_hash.ts";
 import { Gauge, Registry } from "$deps/prometheus.ts";
 import { captureExec } from "$deps/exec_utils.ts";
 import { deferred } from "$deps/async_utils.ts";
 import type { GhComponents, GhPaths } from "./libs/types.ts";
 import type { WorkflowJobEvent } from "$deps/github_webhooks.ts";
 import { createOpenapiClient, type OpenapiClient } from "$deps/k8s_openapi.ts";
+import { stableJsonStringify } from "@wok/utils/stable-json-stringify";
 
 interface ReconciliationRequest {
   id: string;
@@ -57,7 +57,7 @@ function renderQueueJobsMetrics() {
         status: job.status,
       };
 
-      const hash = stableHash(item);
+      const hash = stableJsonStringify(item);
 
       if (!map.has(hash)) {
         map.set(hash, { item, count: 1 });
