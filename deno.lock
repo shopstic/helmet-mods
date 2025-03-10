@@ -30,8 +30,8 @@
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@3": "3.0.0",
     "jsr:@wok/typebox@2": "2.0.0",
-    "jsr:@wok/utils@^5.0.5": "5.1.0",
-    "jsr:@wok/utils@^5.1.0": "5.1.0",
+    "jsr:@wok/utils@^5.0.5": "5.1.1",
+    "jsr:@wok/utils@^5.1.1": "5.1.1",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.28": "0.34.29",
     "npm:immer@^10.1.1": "10.1.1",
@@ -163,8 +163,8 @@
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@5.1.0": {
-      "integrity": "9a936f9ec24169eb5c7fd4c793b4453f5ac5d09b66ba8bc087d140c9109f1b42",
+    "@wok/utils@5.1.1": {
+      "integrity": "963b4db7eca399760fe306aed091a3e49dbe5a6d13e4367b1d9ecf9009c3ad14",
       "dependencies": [
         "jsr:@std/assert",
         "jsr:@std/async",
@@ -256,7 +256,7 @@
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@3",
       "jsr:@wok/typebox@2",
-      "jsr:@wok/utils@^5.1.0",
+      "jsr:@wok/utils@^5.1.1",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
       "npm:jose@^6.0.8",
