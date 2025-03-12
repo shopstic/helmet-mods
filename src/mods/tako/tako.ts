@@ -26,6 +26,7 @@ import type { TakoRunParams } from "$apps/tako/run.ts";
 import type { OmitDeep } from "type-fest";
 import { stableDigest } from "@wok/utils/stable-digest";
 import { stripMargin } from "@wok/utils/strip-margin";
+export * from "$apps/tako/lib/openapi_clients.ts";
 
 const defaultName = deriveName(import.meta);
 
