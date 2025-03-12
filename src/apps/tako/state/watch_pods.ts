@@ -1,7 +1,8 @@
 import { assertUnreachable } from "@wok/utils/assertion";
 import type { K8s } from "@wok/k8s-api";
 import type { TakoK8sClient } from "../lib/controller.ts";
-import { k8sControllerWatch, takoManagedLabelSelector } from "../lib/controller.ts";
+import { takoManagedLabelSelector } from "../lib/controller.ts";
+import { k8sControllerWatch } from "@wok/k8s-utils/controller";
 
 type ManagedPodMap = Map<string, K8s["core.v1.Pod"]>;
 
