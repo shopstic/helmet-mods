@@ -72,14 +72,14 @@
             "deno.suggest.imports.hosts" = {
               "https://deno.land" = false;
             };
-            "editor.inlayHints.enabled" = "offUnlessPressed";
-            "deno.inlayHints.enumMemberValues.enabled" = true;
-            "deno.inlayHints.functionLikeReturnTypes.enabled" = true;
-            "deno.inlayHints.parameterNames.enabled" = "all";
-            "deno.inlayHints.parameterNames.suppressWhenArgumentMatchesName" = true;
-            "deno.inlayHints.parameterTypes.enabled" = true;
-            "deno.inlayHints.propertyDeclarationTypes.enabled" = true;
-            "deno.inlayHints.variableTypes.enabled" = true;
+            # "editor.inlayHints.enabled" = "offUnlessPressed";
+            # "deno.inlayHints.enumMemberValues.enabled" = true;
+            # "deno.inlayHints.functionLikeReturnTypes.enabled" = true;
+            # "deno.inlayHints.parameterNames.enabled" = "all";
+            # "deno.inlayHints.parameterNames.suppressWhenArgumentMatchesName" = true;
+            # "deno.inlayHints.parameterTypes.enabled" = true;
+            # "deno.inlayHints.propertyDeclarationTypes.enabled" = true;
+            # "deno.inlayHints.variableTypes.enabled" = true;
             "editor.tabSize" = 2;
             "[typescript]" = {
               "editor.defaultFormatter" = "denoland.vscode-deno";

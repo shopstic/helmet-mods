@@ -131,6 +131,7 @@ kube-apiserver-arg:
   - default-not-ready-toleration-seconds=15
   - default-unreachable-toleration-seconds=15
 flannel-conf: /etc/rancher/k3s/flannel.json
+egress-selector-mode: disabled
 disable:
   - coredns
   - traefik
@@ -206,7 +207,7 @@ node-external-ip: ${tailscale_ipv4}
 kubelet-arg:
   - node-status-update-frequency=5s
   - kube-reserved=cpu=250m,memory=256Mi,ephemeral-storage=5Gi
-  - system-reserved=cpu=250m,memory=256Mi,ephemeral-storage=5Gi  
+  - system-reserved=cpu=250m,memory=256Mi,ephemeral-storage=5Gi
 flannel-conf: /etc/rancher/k3s/flannel.json
 server: https://${K3S_KUBE_APISERVER_IP}:${K3S_KUBE_APISERVER_PORT}
 disable-apiserver-lb: true
@@ -214,10 +215,12 @@ $([ -n "$K3S_NODE_LABEL" ] && echo "node-label:" && echo "$K3S_NODE_LABEL" | tr 
 $([ -n "$K3S_NODE_TAINT" ] && echo "node-taint:" && echo "$K3S_NODE_TAINT" | tr ' ' '\n' | sed 's/^/  - /')
 EOL
 
-  if [ -e /etc/systemd/system/k3s-agent.service ]; then
-    echo "k3s-agent service already exists, restarting it." >&2
-    systemctl stop k3s-agent
-    systemctl start k3s-agent
+  if [[ -e /etc/systemd/system/k3s-agent.service && "$(k3s --version | grep 'k3s version' | awk '{print $3}' || echo '')" == "${K3S_VERSION}" ]]; then
+    echo "k3s-agent service already exists at version ${K3S_VERSION}, restarting it." >&2
+    echo "stopping k3s-agent" >&2
+    time systemctl stop k3s-agent
+    echo "starting k3s-agent" >&2
+    time systemctl start k3s-agent
   else
     echo "Installing k3s agent..." >&2
     curl -sfL "https://raw.githubusercontent.com/k3s-io/k3s/refs/tags/${K3S_VERSION}/install.sh" \

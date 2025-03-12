@@ -73,7 +73,19 @@ export function takoReconcile(
   const desiredRunningNodeNames = new Set<string>();
 
   for (const pod of managedPods) {
-    const nodeName = pod.spec?.nodeName ?? pod.spec?.nodeSelector?.["kubernetes.io/hostname"];
+    const nodeName = pod.spec?.nodeName ??
+      pod.spec?.nodeSelector?.["kubernetes.io/hostname"] ??
+      pod.spec
+        ?.affinity
+        ?.nodeAffinity
+        ?.requiredDuringSchedulingIgnoredDuringExecution
+        ?.nodeSelectorTerms?.[0]
+        ?.matchExpressions
+        ?.find((expr) =>
+          expr.key === "kubernetes.io/hostname" && expr.operator === "In" && Array.isArray(expr.values) &&
+          expr.values.length === 1
+        )
+        ?.values?.[0];
     if (nodeName !== undefined) {
       desiredRunningNodeNames.add(nodeName);
     }
