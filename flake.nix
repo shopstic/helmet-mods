@@ -61,6 +61,7 @@
         github-actions-registry = denoCompile "src/apps/github_actions_registry/github_actions_registry.ts";
         gitlab-cicd-registry = denoCompile "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
         openapi-merger = denoCompile "src/apps/openapi_merger/openapi_merger.ts";
+        tako = denoCompile "src/apps/tako/tako.ts";
         vscode-settings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -144,6 +145,7 @@
             openapi-merger
             github-actions-registry
             gitlab-cicd-registry
+            tako
             ;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
@@ -178,6 +180,10 @@
               };
               image-openapi-merger = pkgs.callPackage ./nix/images/openapi-merger {
                 inherit nonRootShadowSetup nix2container openapi-merger;
+              };
+              image-tako = pkgs.callPackage ./nix/images/tako {
+                inherit nonRootShadowSetup nix2container tako;
+                cloud-init-script = ./src/apps/tako/helper/cloud_init.sh;
               };
             };
           in
