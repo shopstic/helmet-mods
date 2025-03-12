@@ -62,7 +62,6 @@
         gitlab-cicd-registry = denoCompile "src/apps/gitlab_cicd_registry/gitlab_cicd_registry.ts";
         openapi-merger = denoCompile "src/apps/openapi_merger/openapi_merger.ts";
         tako = denoCompile "src/apps/tako/tako.ts";
-        tako-cloud-init = ./src/apps/tako/helper/cloud_init.sh;
         vscode-settings = pkgs.writeTextFile {
           name = "vscode-settings.json";
           text = builtins.toJSON {
@@ -147,7 +146,6 @@
             github-actions-registry
             gitlab-cicd-registry
             tako
-            tako-cloud-init
             ;
         } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
           let
