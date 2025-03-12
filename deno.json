@@ -15,6 +15,7 @@
     "./resource-group": "./src/mods/resource_group/resource_group.ts",
     "./tailscale-router": "./src/mods/tailscale_router/tailscale_router.ts",
     "./tako": "./src/mods/tako/tako.ts",
+    "./apps/tako": "./src/apps/tako/tako.ts",
     "./deps/async-utils": "./src/deps/async_utils.ts",
     "./deps/case": "./src/deps/case.ts",
     "./deps/cli-utils": "./src/deps/cli_utils.ts",
