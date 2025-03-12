@@ -18,7 +18,6 @@ import {
   createK8sStatefulSet,
   createK8sVolume,
   createK8sVolumeMount,
-  deriveName,
 } from "@wok/helmet";
 import { image as defaultImage } from "$apps/tako/meta.ts";
 import { takoWarmEc2NodeCrd } from "$apps/tako/crd.ts";
@@ -28,7 +27,7 @@ import { stableDigest } from "@wok/utils/stable-digest";
 import { stripMargin } from "@wok/utils/strip-margin";
 export * from "$apps/tako/lib/openapi_clients.ts";
 
-const defaultName = deriveName(import.meta);
+const defaultName = "tako";
 
 type TakoConfig = OmitDeep<
   typeof TakoRunParams.inferInput,
