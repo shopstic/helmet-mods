@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euox pipefail
 
 TS_ARGS=(--accept-routes --ssh --snat-subnet-routes=false)
 
@@ -14,6 +14,7 @@ net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1
 EOF
   sysctl -p /etc/sysctl.d/99-tailscale.conf
+  chattr -i /etc/resolv.conf || true
 
   # Install tailscale
   if systemctl list-units --type=service --all --no-pager --no-legend | grep -qF "tailscaled.service"; then
@@ -21,10 +22,10 @@ EOF
   else
     echo "Installing Tailscale..." >&2
     curl -fsSL https://tailscale.com/install.sh | sh
-    tailscale up --reset "${TS_ARGS[@]}" --auth-key="${TS_AUTH_KEY}"
+    tailscale up --auth-key="${TS_AUTH_KEY}"
   fi
 
-  chattr -i /etc/resolv.conf || true
+  tailscale set "${TS_ARGS[@]}" --auto-update
 
   local public_if
   public_if=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ") || (echo "Failed obtaining public interface" && exit 1)
@@ -107,14 +108,13 @@ EOL
   "IPv6Network": "::/0",
   "Backend": {
     "Type": "extension",
-    "PostStartupCommand": "tailscale set ${TS_ARGS[@]} --auto-update --advertise-routes=\$SUBNET,${K3S_SERVICE_NETWORK_CIDR}",
-    "ShutdownCommand": "tailscale down"
+    "PostStartupCommand": "tailscale set --advertise-routes=\$SUBNET,${K3S_SERVICE_NETWORK_CIDR}",
+    "ShutdownCommand": ""
   }
 }
 EOL
 
   cat <<EOL >/etc/rancher/k3s/config.yaml
-vpn-auth: name=tailscale,joinKey=${TS_AUTH_KEY},extraArgs=${TS_ARGS[@]}
 cluster-cidr: ${K3S_POD_NETWORK_CIDR}
 service-cidr: ${K3S_SERVICE_NETWORK_CIDR}
 node-ip: ${tailscale_ipv4}
@@ -194,14 +194,13 @@ install_k3s_agent() {
   "IPv6Network": "::/0",
   "Backend": {
     "Type": "extension",
-    "PostStartupCommand": "tailscale set ${TS_ARGS[@]} --auto-update --advertise-routes=\$SUBNET",
-    "ShutdownCommand": "tailscale down"
+    "PostStartupCommand": "tailscale set --advertise-routes=\$SUBNET",
+    "ShutdownCommand": ""
   }
 }
 EOL
 
   cat <<EOL >/etc/rancher/k3s/config.yaml
-vpn-auth: name=tailscale,joinKey=${TS_AUTH_KEY},extraArgs=${TS_ARGS[@]}
 node-ip: ${tailscale_ipv4}
 node-external-ip: ${tailscale_ipv4}
 kubelet-arg:
@@ -215,17 +214,9 @@ $([ -n "$K3S_NODE_LABEL" ] && echo "node-label:" && echo "$K3S_NODE_LABEL" | tr 
 $([ -n "$K3S_NODE_TAINT" ] && echo "node-taint:" && echo "$K3S_NODE_TAINT" | tr ' ' '\n' | sed 's/^/  - /')
 EOL
 
-  if [[ -e /etc/systemd/system/k3s-agent.service && "$(k3s --version | grep 'k3s version' | awk '{print $3}' || echo '')" == "${K3S_VERSION}" ]]; then
-    echo "k3s-agent service already exists at version ${K3S_VERSION}, restarting it." >&2
-    echo "stopping k3s-agent" >&2
-    time systemctl stop k3s-agent
-    echo "starting k3s-agent" >&2
-    time systemctl start k3s-agent
-  else
-    echo "Installing k3s agent..." >&2
-    curl -sfL "https://raw.githubusercontent.com/k3s-io/k3s/refs/tags/${K3S_VERSION}/install.sh" \
-      | INSTALL_K3S_VERSION="${K3S_VERSION}" INSTALL_K3S_EXEC="agent" K3S_TOKEN="${K3S_TOKEN}" sh -s -
-  fi
+  echo "Installing k3s agent..." >&2
+  curl -sfL "https://raw.githubusercontent.com/k3s-io/k3s/refs/tags/${K3S_VERSION}/install.sh" |
+    INSTALL_K3S_VERSION="${K3S_VERSION}" INSTALL_K3S_EXEC="agent" K3S_TOKEN="${K3S_TOKEN}" sh -s -
 }
 
 setup_ufw() {
@@ -236,6 +227,7 @@ setup_ufw() {
   public_if=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ") || (echo "Failed obtaining public interface" && exit 1)
 
   echo "Configuring ufw..." >&2
+  ufw disable
   ufw --force reset
 
   ufw enable
