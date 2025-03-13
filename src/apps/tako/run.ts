@@ -617,6 +617,7 @@ export const takoRun = createCliAction(takoRunParamSchemas, async ({
   ];
 
   try {
+    mainLogger.info?.("started");
     await Promise.race([usingLease.completion, ...promises]);
   } catch (e) {
     if (e === "SIGINT" || e === "SIGTERM") {
