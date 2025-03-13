@@ -3,7 +3,6 @@ import { DescribeInstancesCommand, DescribeVolumesCommand } from "@aws-sdk/clien
 import { assertExists } from "@std/assert/exists";
 import { assert } from "@std/assert/assert";
 import { delay } from "@std/async/delay";
-import { equal } from "@std/assert/equal";
 import type { Logger } from "@wok/utils/logger";
 import type { TakoWarmEc2Instance } from "../lib/controller.ts";
 import {
@@ -23,16 +22,6 @@ export async function* takoWatchManagedEc2Instances(
     tagValue: string;
   },
 ): AsyncGenerator<TakoWarmEc2Instance[]> {
-  let lastYield: TakoWarmEc2Instance[] | null = null;
-
-  const shouldYield = (value: TakoWarmEc2Instance[]) => {
-    if (!equal(value, lastYield)) {
-      lastYield = value;
-      return lastYield;
-    }
-    return null;
-  };
-
   while (!signal.aborted) {
     const res = await ec2Client.send(
       new DescribeInstancesCommand({
@@ -120,10 +109,7 @@ export async function* takoWatchManagedEc2Instances(
     );
 
     if (instances.length === 0) {
-      const maybeYield = shouldYield([]);
-      if (maybeYield !== null) {
-        yield maybeYield;
-      }
+      yield [];
     } else {
       for (const [id, list] of Object.entries(Object.groupBy(instances, (i) => i.id))) {
         if (list && list.length > 1) {
@@ -167,24 +153,18 @@ export async function* takoWatchManagedEc2Instances(
         }
       }
 
-      const maybeYield = shouldYield(
-        instances.map(({ meta, ...rest }) => ({
-          meta: (meta !== undefined && volumeSizeByVolumeId.has(meta.spec.rootVolumeId))
-            ? {
-              ...meta,
-              spec: {
-                ...meta.spec,
-                rootVolumeSizeGibs: volumeSizeByVolumeId.get(meta.spec.rootVolumeId)!,
-              },
-            }
-            : undefined,
-          ...rest,
-        } satisfies TakoWarmEc2Instance)),
-      );
-
-      if (maybeYield !== null) {
-        yield maybeYield;
-      }
+      yield instances.map(({ meta, ...rest }) => ({
+        meta: (meta !== undefined && volumeSizeByVolumeId.has(meta.spec.rootVolumeId))
+          ? {
+            ...meta,
+            spec: {
+              ...meta.spec,
+              rootVolumeSizeGibs: volumeSizeByVolumeId.get(meta.spec.rootVolumeId)!,
+            },
+          }
+          : undefined,
+        ...rest,
+      } satisfies TakoWarmEc2Instance));
     }
 
     await delay(pollIntervalMs, { signal });

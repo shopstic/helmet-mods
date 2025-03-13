@@ -114,7 +114,7 @@ EOL
 EOL
 
   cat <<EOL >/etc/rancher/k3s/config.yaml
-vpn-auth: name=tailscale,joinKey=dummy,extraArgs=${TS_ARGS[@]}
+vpn-auth: name=tailscale,joinKey=${TS_AUTH_KEY},extraArgs=${TS_ARGS[@]}
 cluster-cidr: ${K3S_POD_NETWORK_CIDR}
 service-cidr: ${K3S_SERVICE_NETWORK_CIDR}
 node-ip: ${tailscale_ipv4}
@@ -201,7 +201,7 @@ install_k3s_agent() {
 EOL
 
   cat <<EOL >/etc/rancher/k3s/config.yaml
-vpn-auth: name=tailscale,joinKey=dummy,extraArgs=${TS_ARGS[@]}
+vpn-auth: name=tailscale,joinKey=${TS_AUTH_KEY},extraArgs=${TS_ARGS[@]}
 node-ip: ${tailscale_ipv4}
 node-external-ip: ${tailscale_ipv4}
 kubelet-arg:
