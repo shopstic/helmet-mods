@@ -26,6 +26,7 @@ import type { OmitDeep } from "type-fest";
 import { stableDigest } from "@wok/utils/stable-digest";
 import { stripMargin } from "@wok/utils/strip-margin";
 export * from "$apps/tako/lib/openapi_clients.ts";
+export * from "$apps/tako/crd.ts";
 
 const defaultName = "tako";
 

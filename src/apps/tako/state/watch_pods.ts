@@ -1,13 +1,17 @@
 import { assertUnreachable } from "@wok/utils/assertion";
 import type { K8s } from "@wok/k8s-api";
 import type { TakoK8sClient } from "../lib/controller.ts";
-import { takoManagedLabelSelector } from "../lib/controller.ts";
 import { k8sControllerWatch } from "@wok/k8s-utils/controller";
 
 type ManagedPodMap = Map<string, K8s["core.v1.Pod"]>;
 
 export async function* takoWatchManagedPods(
-  { client, signal }: { client: TakoK8sClient; signal: AbortSignal },
+  { client, signal, labelSelector, fieldSelector }: {
+    client: TakoK8sClient;
+    signal: AbortSignal;
+    labelSelector?: string;
+    fieldSelector?: string;
+  },
 ): AsyncGenerator<ManagedPodMap> {
   let initialListEnded = false;
   const map: ManagedPodMap = new Map();
@@ -17,7 +21,8 @@ export async function* takoWatchManagedPods(
   )({
     query: {
       timeoutSeconds: 30,
-      labelSelector: takoManagedLabelSelector,
+      labelSelector,
+      fieldSelector,
     },
   }, {
     signal,

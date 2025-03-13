@@ -11,16 +11,16 @@ import {
   takoExecutionIdLabel,
   takoInstalledLabel,
   takoInstalledValue,
-  takoManagedLabel,
-  takoManagedValue,
 } from "../lib/controller.ts";
 
 export async function* takoWatchManagedEc2Instances(
-  { ec2Client, signal, pollIntervalMs = 1000, logger }: {
+  { ec2Client, signal, pollIntervalMs = 1000, tagName, tagValue, logger }: {
     ec2Client: EC2Client;
     signal: AbortSignal;
     pollIntervalMs?: number;
     logger: Logger;
+    tagName: string;
+    tagValue: string;
   },
 ): AsyncGenerator<TakoWarmEc2Instance[]> {
   let lastYield: TakoWarmEc2Instance[] | null = null;
@@ -38,8 +38,8 @@ export async function* takoWatchManagedEc2Instances(
       new DescribeInstancesCommand({
         Filters: [
           {
-            Name: `tag:${takoManagedLabel}`,
-            Values: [takoManagedValue],
+            Name: `tag:${tagName}`,
+            Values: [tagValue],
           },
           {
             Name: "instance-state-name",

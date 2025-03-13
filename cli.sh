@@ -71,13 +71,12 @@ compile_app() {
   # local app_ret
   # app_ret=$(deno-app-build --allow-npm-specifier --app-path="${app}" --out-path="${temp_dir}") || exit $?
 
-
   local temp_dir
   temp_dir=$(mktemp -d)
   # shellcheck disable=SC2064
   trap "rm -Rf ${temp_dir}" EXIT
 
-  deno-ship trim-lock --config deno.json --lock deno.lock "${app}" > "${temp_dir}/deno.lock"
+  deno-ship trim-lock --config deno.json --lock deno.lock "${app}" >"${temp_dir}/deno.lock"
   deno compile --lock="${temp_dir}/deno.lock" --cached-only -A --output="${out}" "${app}"
 }
 
@@ -318,6 +317,19 @@ gen_grafana_openapi_types() {
 EOF
   openapi-ts-gen <(curl -sf "${spec_url}") >>"${out}"
   deno fmt "${out}"
+}
+
+gen_tailscale_api_types() {
+  local dir
+  dir="$(dirname "$(realpath "$0")")"
+  local out_file="${dir}"/src/apps/tako/gen/tailscale_api.ts
+
+  mkdir -p "$(dirname "${out_file}")"
+  {
+    echo "// deno-lint-ignore-file no-empty-interface"
+    openapi-ts-gen <(curl -sL "https://api.tailscale.com/api/v2?outputOpenapiSchema=true")
+  } >"${out_file}"
+  deno fmt "${out_file}"
 }
 
 jsr_publish() {

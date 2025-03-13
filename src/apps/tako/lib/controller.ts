@@ -7,13 +7,13 @@ export type TakoK8sPaths = K8sApiPathsWithGlobalCrd<K8sApiPaths, TakoWarmEc2Node
 export type TakoK8sClient = OpenapiClient<TakoK8sPaths>;
 
 export const ec2RootVolumeDeviceName = "/dev/xvda";
-export const takoManagedLabel = "wok.run/managed-by";
-export const takoManagedValue = "tako";
+// export const takoManagedLabel = "wok.run/managed-by";
+// export const takoManagedValue = "tako";
 
 export const takoExecutionIdLabel = "wok.run/tako-execution-id";
 export const takoInstalledLabel = "wok.run/tako-installed";
 export const takoInstalledValue = "yes";
-export const takoManagedLabelSelector = `${takoManagedLabel}=${takoManagedValue}`;
+// export const takoManagedLabelSelector = `${takoManagedLabel}=${takoManagedValue}`;
 
 export type TakoWarmEc2ServerSpec = TakoWarmEc2NodeSpec["server"];
 export type WarmEc2ServerSpecKey = keyof TakoWarmEc2ServerSpec;

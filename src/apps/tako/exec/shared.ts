@@ -86,6 +86,7 @@ export async function deleteTailscaleDevicesIfExists(
         path: {
           deviceId: String(device.id),
         },
+        query: {},
       }, { signal });
     }
   }

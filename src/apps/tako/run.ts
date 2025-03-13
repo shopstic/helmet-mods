@@ -83,6 +83,10 @@ function createTaskName(task: TakoTask) {
 }
 
 export const takoRunParamSchemas = {
+  managedLabel: Obj({
+    key: NonEmpStr(),
+    value: NonEmpStr(),
+  }),
   lease: Obj({
     identity: NonEmpStr(),
     name: NonEmpStr(),
@@ -115,6 +119,7 @@ export const TakoRunParams = Obj(takoRunParamSchemas);
 
 export const takoRun = createCliAction(takoRunParamSchemas, async ({
   lease: { identityFile: leaseIdentityFile, ...lease },
+  managedLabel,
   ec2: {
     cloudInitScriptPath,
     sshPrivateKeyPath,
@@ -292,6 +297,8 @@ export const takoRun = createCliAction(takoRunParamSchemas, async ({
             },
             cloudInitScript,
             executionId,
+            tagName: managedLabel.key,
+            tagValue: managedLabel.value,
           });
 
           await logger.monitor(`waiting for instance ${instanceId} to be confirmed installed`, async () => {
@@ -573,7 +580,13 @@ export const takoRun = createCliAction(takoRunParamSchemas, async ({
   })();
 
   const watchPodsPromise = (async () => {
-    for await (const pods of takoWatchManagedPods({ client: k8sClient, signal: mainSignal })) {
+    for await (
+      const pods of takoWatchManagedPods({
+        client: k8sClient,
+        signal: mainSignal,
+        labelSelector: `${managedLabel.key}=${managedLabel.value}`,
+      })
+    ) {
       await reconcileQueue.enqueue({
         managedPods: [...pods.values()],
       });
@@ -586,6 +599,8 @@ export const takoRun = createCliAction(takoRunParamSchemas, async ({
         ec2Client,
         signal: mainSignal,
         logger: mainLogger.prefixed(gray("watch-ec2-instances")),
+        tagName: managedLabel.key,
+        tagValue: managedLabel.value,
       })
     ) {
       await reconcileQueue.enqueue({

@@ -71,7 +71,7 @@ export interface paths {
          *
          * If the `fields` parameter is not supplied, then the default (limited fields) option is used.
          */
-        fields?: "all" | "default";
+        fields?: components["parameters"]["fields"];
       };
     };
   };
@@ -94,6 +94,39 @@ export interface paths {
       path: {
         /** ID of the device. Using the device's `nodeId` is preferred, but its numeric `id` value can also be used. */
         deviceId: components["parameters"]["deviceId"];
+      };
+      query: {
+        /**
+         * Optionally controls whether the response returns **all** fields or only a predefined subset of fields.
+         * Currently, there are two supported options:
+         *
+         * - **`all`:** return all fields in the response
+         * - **`default`:** return the following fields
+         *   - `addresses`
+         *   - `id`
+         *   - `nodeId`
+         *   - `user`
+         *   - `name`
+         *   - `hostname`
+         *   - `clientVersion`
+         *   - `updateAvailable`
+         *   - `os`
+         *   - `created`
+         *   - `lastSeen`
+         *   - `keyExpiryDisabled`
+         *   - `expires`
+         *   - `authorized`
+         *   - `isExternal`
+         *   - `machineKey`
+         *   - `nodeKey`
+         *   - `blocksIncomingConnections`
+         *   - `tailnetLockKey`
+         *   - `tailnetLockError`
+         *   - `tags`
+         *
+         * If the `fields` parameter is not supplied, then the default (limited fields) option is used.
+         */
+        fields?: components["parameters"]["fields"];
       };
     };
   };
@@ -2661,6 +2694,17 @@ export interface components {
        */
       user?: string;
       /**
+       * @description An optional number of minutes to wait in between uploading new logs. If the quantity of logs does not fit within a single upload, multiple uploads will be made.
+       * @example 5
+       */
+      uploadPeriodMinutes?: number;
+      /**
+       * @description The compression algorithm with which to compress logs. `none` disables compression. Defaults to `none`.
+       * @example zstd
+       * @enum {string}
+       */
+      compressionFormat?: "zstd" | "gzip" | "none";
+      /**
        * @description The token/password with which log streams to this endpoint should be authenticated.
        * @example mytoken
        */
@@ -3293,6 +3337,37 @@ export interface components {
      *   Learn more about [tailnet organization names](https://tailscale.com/kb/1217/tailnet-name#organization-name).
      */
     tailnet: string;
+    /**
+     * @description Optionally controls whether the response returns **all** fields or only a predefined subset of fields.
+     * Currently, there are two supported options:
+     *
+     * - **`all`:** return all fields in the response
+     * - **`default`:** return the following fields
+     *   - `addresses`
+     *   - `id`
+     *   - `nodeId`
+     *   - `user`
+     *   - `name`
+     *   - `hostname`
+     *   - `clientVersion`
+     *   - `updateAvailable`
+     *   - `os`
+     *   - `created`
+     *   - `lastSeen`
+     *   - `keyExpiryDisabled`
+     *   - `expires`
+     *   - `authorized`
+     *   - `isExternal`
+     *   - `machineKey`
+     *   - `nodeKey`
+     *   - `blocksIncomingConnections`
+     *   - `tailnetLockKey`
+     *   - `tailnetLockError`
+     *   - `tags`
+     *
+     * If the `fields` parameter is not supplied, then the default (limited fields) option is used.
+     */
+    fields: "all" | "default";
     /** @description ID of the device. Using the device's `nodeId` is preferred, but its numeric `id` value can also be used. */
     deviceId: string;
     /**
@@ -3528,7 +3603,7 @@ export interface operations {
          *
          * If the `fields` parameter is not supplied, then the default (limited fields) option is used.
          */
-        fields?: "all" | "default";
+        fields?: components["parameters"]["fields"];
       };
     };
     responses: {
@@ -3555,6 +3630,39 @@ export interface operations {
       path: {
         /** ID of the device. Using the device's `nodeId` is preferred, but its numeric `id` value can also be used. */
         deviceId: components["parameters"]["deviceId"];
+      };
+      query: {
+        /**
+         * Optionally controls whether the response returns **all** fields or only a predefined subset of fields.
+         * Currently, there are two supported options:
+         *
+         * - **`all`:** return all fields in the response
+         * - **`default`:** return the following fields
+         *   - `addresses`
+         *   - `id`
+         *   - `nodeId`
+         *   - `user`
+         *   - `name`
+         *   - `hostname`
+         *   - `clientVersion`
+         *   - `updateAvailable`
+         *   - `os`
+         *   - `created`
+         *   - `lastSeen`
+         *   - `keyExpiryDisabled`
+         *   - `expires`
+         *   - `authorized`
+         *   - `isExternal`
+         *   - `machineKey`
+         *   - `nodeKey`
+         *   - `blocksIncomingConnections`
+         *   - `tailnetLockKey`
+         *   - `tailnetLockError`
+         *   - `tags`
+         *
+         * If the `fields` parameter is not supplied, then the default (limited fields) option is used.
+         */
+        fields?: components["parameters"]["fields"];
       };
     };
     responses: {
@@ -3583,6 +3691,39 @@ export interface operations {
       path: {
         /** ID of the device. Using the device's `nodeId` is preferred, but its numeric `id` value can also be used. */
         deviceId: components["parameters"]["deviceId"];
+      };
+      query: {
+        /**
+         * Optionally controls whether the response returns **all** fields or only a predefined subset of fields.
+         * Currently, there are two supported options:
+         *
+         * - **`all`:** return all fields in the response
+         * - **`default`:** return the following fields
+         *   - `addresses`
+         *   - `id`
+         *   - `nodeId`
+         *   - `user`
+         *   - `name`
+         *   - `hostname`
+         *   - `clientVersion`
+         *   - `updateAvailable`
+         *   - `os`
+         *   - `created`
+         *   - `lastSeen`
+         *   - `keyExpiryDisabled`
+         *   - `expires`
+         *   - `authorized`
+         *   - `isExternal`
+         *   - `machineKey`
+         *   - `nodeKey`
+         *   - `blocksIncomingConnections`
+         *   - `tailnetLockKey`
+         *   - `tailnetLockError`
+         *   - `tags`
+         *
+         * If the `fields` parameter is not supplied, then the default (limited fields) option is used.
+         */
+        fields?: components["parameters"]["fields"];
       };
     };
     responses: {

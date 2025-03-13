@@ -16,8 +16,6 @@ import {
   takoExecutionIdLabel,
   takoInstalledLabel,
   takoInstalledValue,
-  takoManagedLabel,
-  takoManagedValue,
 } from "../lib/controller.ts";
 
 export interface TakoCreateOptions {
@@ -28,6 +26,8 @@ export interface TakoCreateOptions {
   signal: AbortSignal;
   keyName: string;
   privateKeyPath: string;
+  tagName: string;
+  tagValue: string;
   tailscale: {
     authKey: string;
     tag: string;
@@ -58,6 +58,8 @@ export async function takoCreate(
     privateKeyPath,
     ec2Client,
     batchInstancesEc2Client,
+    tagName,
+    tagValue,
     tailscale,
     k8s,
     cloudInitScript,
@@ -98,7 +100,7 @@ export async function takoCreate(
           ResourceType: "instance",
           Tags: [
             { Key: "Name", Value: spec.name },
-            { Key: takoManagedLabel, Value: takoManagedValue },
+            { Key: tagName, Value: tagValue },
             { Key: takoExecutionIdLabel, Value: executionId },
           ],
         },
