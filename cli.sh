@@ -142,7 +142,11 @@ build_all_images() {
   local nix_arch
   nix_arch=$("$0" image_arch_to_nix_arch "${arch}") || exit $?
 
-  nix build -L -v ".#packages.${nix_arch}-linux.all-images"
+  time nix build -L -v --no-link ".#packages.${nix_arch}-linux.all-images"
+  
+  local result
+  result=$(time nix store make-content-addressed ".#packages.${nix_arch}-linux.all-images" --json | jq -re '.rewrites | .[keys[0]]')
+  ln -s "${result}" ./result
 }
 
 push_all_single_arch_images() {
