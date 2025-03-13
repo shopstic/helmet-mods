@@ -29,10 +29,7 @@ export * from "$apps/tako/crd.ts";
 
 const defaultName = "tako";
 
-type TakoConfig = OmitDeep<
-  typeof TakoRunParams.inferInput,
-  "lease" | "ec2.sshPrivateKeyPath" | "ec2.cloudInitScriptPath"
->;
+export type TakoRunInputParams = typeof TakoRunParams.inferInput;
 
 export interface TakoResources {
   crd: typeof takoWarmEc2NodeCrd;
@@ -67,7 +64,10 @@ export async function createTakoResources(
     image?: string;
     replicas?: number;
     sshPrivateKey: string;
-    args: TakoConfig;
+    args: OmitDeep<
+      TakoRunInputParams,
+      "lease" | "ec2.sshPrivateKeyPath" | "ec2.cloudInitScriptPath"
+    >;
     namespace: string;
     nodeSelector?: Record<string, string>;
     tolerations?: K8s["core.v1.Toleration"][];
