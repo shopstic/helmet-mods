@@ -52,6 +52,7 @@
             };
             ca-path = pkgs.runCommandLocal "${name}-ca-path"
               {
+                __noChroot = true;
                 nativeBuildInputs = [ pkgs.nix pkgs.jq ];
               }
               ''nix store make-content-addressed "${compiled}" --json | jq -jre '.rewrites | .[keys[0]]' > $out'';
