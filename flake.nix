@@ -50,25 +50,8 @@
               prefix-patch = ./src/patched_fetch.ts;
               denoCompileFlags = "-A --frozen --no-code-cache";
             };
-            content-addressed = pkgs.runCommandLocal "${name}-ca"
-              {
-                outputHashMode = "flat";
-                outputHashAlgo = "sha256";
-                __structuredAttrs = true;
-                unsafeDiscardReferences.out = true;
-                outputHash = builtins.hashFile "sha256" "${compiled}/bin/${name}";
-              }
-              ''
-                cp ${compiled}/bin/${name} $out
-                chmod a-x $out
-              '';
-            out = pkgs.runCommandLocal name { } ''
-              mkdir -p $out/bin
-              cp ${content-addressed} $out/bin/${name}
-              chmod a+x $out/bin/${name}
-            '';
           in
-          out;
+          compiled;
 
         fdb-configurator = denoCompile "src/apps/fdb_configurator/fdb_configurator.ts";
         iac-version-bumper = denoCompile "src/apps/iac_version_bumper/iac_version_bumper.ts";

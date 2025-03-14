@@ -142,7 +142,7 @@ build_all_images() {
   local nix_arch
   nix_arch=$("$0" image_arch_to_nix_arch "${arch}") || exit $?
 
-  time nix build --no-pure-eval -L -v ".#packages.${nix_arch}-linux.all-images"
+  time nix build -L -v ".#packages.${nix_arch}-linux.all-images"
 }
 
 push_all_single_arch_images() {
