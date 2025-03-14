@@ -152,7 +152,7 @@ const sample: GrafanaDashboard = {
       // "version": 1,
       "weekStart": "",
     },
-    folderUid: "SrwRZNfVzAbCdjek",
+    folderUid: "SrwRZNfVzAbCdjekhs746",
   },
 };
 
