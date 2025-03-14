@@ -50,8 +50,15 @@
               prefix-patch = ./src/patched_fetch.ts;
               denoCompileFlags = "-A --frozen --no-code-cache";
             };
+            ca-path = pkgs.runCommandLocal "${name}-ca-path"
+              {
+                nativeBuildInputs = [ pkgs.nix pkgs.jq ];
+              }
+              ''nix store make-content-addressed "${compiled}" --json | jq -jre '.rewrites | .[keys[0]]' > $out'';
+            ca = builtins.storePath (builtins.readFile ca-path);
           in
-          compiled;
+          ca;
+
         fdb-configurator = denoCompile "src/apps/fdb_configurator/fdb_configurator.ts";
         iac-version-bumper = denoCompile "src/apps/iac_version_bumper/iac_version_bumper.ts";
         registry-authenticator = denoCompile "src/apps/registry_authenticator/registry_authenticator.ts";
