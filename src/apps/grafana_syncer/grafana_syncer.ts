@@ -1,11 +1,11 @@
 import { CliProgram, createCliAction, ExitCode } from "$deps/cli_utils.ts";
 import type { paths as GrafanaApiPaths } from "$libs/grafana/openapi_types.ts";
-import { Logger } from "$libs/logger.ts";
 import { assertUnreachable } from "$libs/utils.ts";
 import { createOpenapiClient, type OpenapiClient, OpenapiOperationError } from "$deps/k8s_openapi.ts";
 import { GrafanaSyncerParamsSchema } from "./libs/schemas.ts";
 import type { GrafanaDashboard, Paths } from "./libs/types.ts";
 import { k8sControllerWatch } from "@wok/k8s-utils/controller";
+import { getDefaultLogger } from "@wok/utils/logger";
 
 interface UpsertDashboard {
   action: "upsert";
@@ -30,7 +30,7 @@ interface DeleteDashboard {
 type DashboardEvent = UpsertDashboard | DeleteDashboard;
 
 const FINALIZER_NAME = "grafanasyncer.shopstic.com";
-const logger = new Logger();
+const logger = getDefaultLogger();
 
 function toDashboardEvent(dashboard: GrafanaDashboard): DashboardEvent {
   const { name, namespace, resourceVersion, uid, finalizers } = dashboard.metadata;
@@ -134,14 +134,19 @@ await new CliProgram()
             };
           });
 
-        logger.info({
-          msg: "Starting reconcile loop",
+        logger.info?.(
+          "Starting reconcile loop",
+          "namespace:",
           namespace,
+          "labelSelector:",
           labelSelector,
+          "fieldSelector:",
           fieldSelector,
+          "grafanaApiServerBaseUrl:",
           grafanaApiServerBaseUrl,
+          "k8sApiServerBaseUrl:",
           k8sApiServerBaseUrl,
-        });
+        );
 
         for await (
           const event of watchDashboards({
@@ -155,16 +160,23 @@ await new CliProgram()
           if (event.action === "upsert") {
             const { name, namespace, uid, folderId, folderUid, resourceVersion, isFirstSync, message } = event;
 
-            logger.info({
-              msg: "Got upsert event",
+            logger.info?.(
+              "Got upsert event",
+              "name:",
               name,
+              "namespace:",
               namespace,
+              "uid:",
               uid,
+              "folderId:",
               folderId,
+              "folderUid:",
               folderUid,
+              "resourceVersion:",
               resourceVersion,
+              "isFirstSync:",
               isFirstSync,
-            });
+            );
 
             if (isFirstSync) {
               await mergePatchK8sClient
@@ -182,7 +194,7 @@ await new CliProgram()
                   },
                 });
 
-              logger.info({ msg: "Patched CRD with finalizer", name, namespace });
+              logger.info?.("Patched CRD with finalizer", "name:", name, "namespace:", namespace);
             } else {
               const existingDashboard = await (async () => {
                 try {
@@ -215,15 +227,39 @@ await new CliProgram()
                   },
                 });
 
-                logger.info({ msg: "Synced dashboard to Grafana", name, namespace, resourceVersion });
+                logger.info?.(
+                  "Synced dashboard to Grafana",
+                  "name:",
+                  name,
+                  "namespace:",
+                  namespace,
+                  "resourceVersion:",
+                  resourceVersion,
+                );
               } else {
-                logger.info({ msg: "No change since last sync, nothing to do", name, namespace, resourceVersion });
+                logger.info?.(
+                  "No change since last sync, nothing to do",
+                  "name:",
+                  name,
+                  "namespace:",
+                  namespace,
+                  "resourceVersion:",
+                  resourceVersion,
+                );
               }
             }
           } else if (event.action === "delete") {
             const { name, namespace, uid } = event;
 
-            logger.info({ msg: "Got delete event", name, namespace, uid });
+            logger.info?.(
+              "Got delete event",
+              "name:",
+              name,
+              "namespace:",
+              namespace,
+              "uid:",
+              uid,
+            );
 
             try {
               await grafanaClient.endpoint("/dashboards/uid/{uid}").method("delete")({
@@ -232,10 +268,18 @@ await new CliProgram()
                 },
               });
 
-              logger.info({ msg: "Deleted dashboard", name, namespace, uid });
+              logger.info?.("Deleted dashboard", "name:", name, "namespace:", namespace, "uid:", uid);
             } catch (e) {
               if (e instanceof OpenapiOperationError && e.status === 404) {
-                logger.info({ msg: "Dashboard doesn't exist, nothing to do", name, namespace, uid });
+                logger.info?.(
+                  "Dashboard doesn't exist, nothing to do",
+                  "name:",
+                  name,
+                  "namespace:",
+                  namespace,
+                  "uid:",
+                  uid,
+                );
               } else {
                 throw e;
               }
