@@ -149,10 +149,8 @@ push_all_single_arch_images() {
   local image_arch=${1:?"Arch is required (amd64 | arm64)"}
   readarray -t images < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
-  for image in "${images[@]}"; do
-    echo "Pusing ${image} - ${image_arch}" >&2
-    "$0" push_single_arch "${image}" "${image_arch}"
-  done
+  parallel -j4 --tagstring "[{}]" --line-buffer \
+    "$0" push_single_arch {} "${image_arch}" ::: "${images[@]}"
 }
 
 push_all_manifests() {
@@ -197,7 +195,7 @@ push_single_arch() {
   else
     echo "Last image ${last_image} nix.store.path=${last_image_nix_store_path} does not match ${nix_store_path}"
     echo "Pushing image ${target_image}"
-    skopeo copy --dest-compress-format="zstd:chunked" --insecure-policy --image-parallel-copies 30 --retry-times 5 nix:"${nix_store_path}" docker://"${target_image}"
+    skopeo copy --dest-compress-format="zstd:chunked" --insecure-policy --image-parallel-copies 4 --retry-times 5 nix:"${nix_store_path}" docker://"${target_image}"
     regctl index create "${target_image}" --ref "${target_image}" --annotation nix.store.path="${nix_store_path}" --platform linux/"${arch}"
     regctl index create "${last_image}" --ref "${target_image}" --annotation nix.store.path="${nix_store_path}" --platform linux/"${arch}"
   fi
