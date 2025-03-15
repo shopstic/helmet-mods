@@ -44,12 +44,14 @@
         denoCompile = tsPath:
           let
             name = pkgs.lib.removeSuffix ".ts" (builtins.baseNameOf tsPath);
-            compiled = pkgs.callPackage hotPotLib.denoAppCompile {
+            compiled = (pkgs.callPackage hotPotLib.denoAppCompile {
               inherit name deno-cache-dir src;
               appSrcPath = tsPath;
               prefix-patch = ./src/patched_fetch.ts;
               denoCompileFlags = "-A --frozen --no-code-cache";
-            };
+            }).overrideAttrs (old: {
+              __contentAddressed = true;
+            });
           in
           compiled;
 
