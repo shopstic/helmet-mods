@@ -149,8 +149,10 @@ push_all_single_arch_images() {
   local image_arch=${1:?"Arch is required (amd64 | arm64)"}
   readarray -t images < <(find ./nix/images -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
 
-  parallel -j2 --tagstring "[{}]" --line-buffer \
-    "$0" push_single_arch {} "${image_arch}" ::: "${images[@]}"
+  for image in "${images[@]}"; do
+    echo "Pusing ${image} - ${image_arch}" >&2
+    "$0" push_single_arch "${image}" "${image_arch}"
+  done
 }
 
 push_all_manifests() {
