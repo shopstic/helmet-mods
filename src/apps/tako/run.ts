@@ -59,7 +59,7 @@ async function ignoreAbortError(promise: Promise<void>) {
   try {
     return await promise;
   } catch (e) {
-    if (e instanceof Error && e.name === "AbortError") {
+    if (Error.isError(e) && e.name === "AbortError") {
       // Ignore
     } else {
       throw e;
@@ -506,7 +506,7 @@ export const takoRun = createCliAction(takoRunParamSchemas, async ({
       const remainingNodes: TakoWarmEc2Node[] = [];
 
       for (const node of nodes.values()) {
-        if (node.metadata.deletionTimestamp !== undefined) {
+        if (node.metadata.deletionTimestamp !== undefined && node.metadata.deletionTimestamp.length > 0) {
           if (node.metadata.finalizers?.includes(takoWarmEc2NodeCrdFinalizer)) {
             finalizingNodes.push(node);
           }

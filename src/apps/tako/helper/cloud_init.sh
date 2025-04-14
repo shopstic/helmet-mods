@@ -11,7 +11,9 @@ install_tailscale() {
 
   cat <<EOF >/etc/sysctl.d/99-tailscale.conf
 net.ipv4.ip_forward = 1
-net.ipv6.conf.all.forwarding = 1
+net.ipv6.conf.all.disable_ipv6 = 1
+fs.inotify.max_user_instances = 8192
+fs.inotify.max_user_watches = 524288
 EOF
   sysctl -p /etc/sysctl.d/99-tailscale.conf
   chattr -i /etc/resolv.conf || true
@@ -245,6 +247,57 @@ setup_ufw() {
 
   systemctl disable --now ssh.socket
   systemctl disable --now ssh
+}
+
+install_keepalived() {
+  K3S_KUBE_APISERVER_IP=${K3S_KUBE_APISERVER_IP:?"K3S_KUBE_APISERVER_IP env var is not set"}
+
+  local node_ip
+  node_ip="$(ip -o route get 8.8.8.8 | cut -f 7 -d " ")"
+
+  local if_name
+  if_name="$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")"
+  
+  local priority
+  priority=$((255 - (${node_ip##*.} % 10)))
+
+  mkdir -p /etc/keepalived/
+
+  cat <<EOL >/etc/keepalived/check-k3s-api-server.sh
+#!/usr/bin/env bash
+set -euo pipefail
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+test "\$(timeout 2 kubectl get --raw=/readyz)" == "ok"
+EOL
+
+  chmod +x /etc/keepalived/check-k3s-api-server.sh
+
+  cat <<EOL >/etc/keepalived/keepalived.conf
+global_defs {
+  enable_script_security
+  script_user root
+}
+vrrp_script check_k3s_api_server {
+    script "/etc/keepalived/check-k3s-api-server.sh"
+    interval 2
+    rise 1
+    fall 2
+}
+vrrp_instance k3s_api_server_vip {
+    interface ${if_name}
+    state BACKUP
+    priority ${priority}
+    virtual_router_id 51
+    virtual_ipaddress {
+        ${K3S_KUBE_APISERVER_IP}/24
+    }
+    track_script {
+        check_k3s_api_server
+    }
+}
+EOL
+
+  apt install -y keepalived
 }
 
 "$@"

@@ -46,7 +46,7 @@ export async function fdbcliCaptureExec(
 
     return trimFdbCliOutput(captured);
   } catch (e) {
-    if (e instanceof Error && e.message.indexOf("Command return non-zero status of: 124") !== -1) {
+    if (Error.isError(e) && e.message.indexOf("Command return non-zero status of: 124") !== -1) {
       throw new Error(
         `Timed out executing fdbcli with '${command}' after ${timeoutSeconds}s`,
       );
@@ -66,7 +66,7 @@ export async function fdbcliInheritExec(
       cmd: isFinite(timeoutSeconds) ? commandWithTimeout(fdbcliCmd, timeoutSeconds) : fdbcliCmd,
     });
   } catch (e) {
-    if (e instanceof Error && e.message.indexOf("Command return non-zero status of: 124") !== -1) {
+    if (Error.isError(e) && e.message.indexOf("Command return non-zero status of: 124") !== -1) {
       throw new Error(
         `Timed out executing fdbcli with '${command}' after ${timeoutSeconds}s`,
       );

@@ -83,11 +83,11 @@
         "npmlock2nixPkg": "npmlock2nixPkg"
       },
       "locked": {
-        "lastModified": 1742003720,
-        "narHash": "sha256-eCjBBoDgoRl8MTx8WNSyZ5HylUmE0HXSRiRzjwxnFE4=",
+        "lastModified": 1744654126,
+        "narHash": "sha256-AnzOU4+6W8Bt5xH8yqLK/ZoT/LHDvjG6aGAkrzxesss=",
         "owner": "shopstic",
         "repo": "nix-hot-pot",
-        "rev": "7c3f4ddbf4566ef7ecf97ca4c45d8aab92c856fe",
+        "rev": "93077623b2a1e0bc44c4c53ccf57c3f9ad4c32b8",
         "type": "github"
       },
       "original": {
@@ -136,11 +136,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1738023785,
-        "narHash": "sha256-BPHmb3fUwdHkonHyHi1+x89eXB3kA1jffIpwPVJIVys=",
+        "lastModified": 1744168086,
+        "narHash": "sha256-S9M4HddBCxbbX1CKSyDYgZ8NCVyHcbKnBfoUXeRu2jQ=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "2b4230bf03deb33103947e2528cac2ed516c5c89",
+        "rev": "60e405b241edb6f0573f3d9f944617fe33ac4a73",
         "type": "github"
       },
       "original": {

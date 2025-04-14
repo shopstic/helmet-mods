@@ -2,7 +2,7 @@ import { assertUnreachable } from "./utils.ts";
 
 function serializeLog(event: unknown) {
   return JSON.stringify(event, (_, value) => {
-    if (value instanceof Error) {
+    if (Error.isError(value)) {
       // deno-lint-ignore no-explicit-any
       return Object.fromEntries(Object.getOwnPropertyNames(value).map((k) => [k, (value as any)[k]]));
     }

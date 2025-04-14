@@ -134,19 +134,13 @@ await new CliProgram()
             };
           });
 
-        logger.info?.(
-          "Starting reconcile loop",
-          "namespace:",
+        logger.info?.ctx({
           namespace,
-          "labelSelector:",
           labelSelector,
-          "fieldSelector:",
           fieldSelector,
-          "grafanaApiServerBaseUrl:",
           grafanaApiServerBaseUrl,
-          "k8sApiServerBaseUrl:",
           k8sApiServerBaseUrl,
-        );
+        }, "Starting reconcile loop");
 
         for await (
           const event of watchDashboards({
@@ -160,23 +154,15 @@ await new CliProgram()
           if (event.action === "upsert") {
             const { name, namespace, uid, folderId, folderUid, resourceVersion, isFirstSync, message } = event;
 
-            logger.info?.(
-              "Got upsert event",
-              "name:",
+            logger.info?.ctx({
               name,
-              "namespace:",
               namespace,
-              "uid:",
               uid,
-              "folderId:",
               folderId,
-              "folderUid:",
               folderUid,
-              "resourceVersion:",
               resourceVersion,
-              "isFirstSync:",
               isFirstSync,
-            );
+            }, "Got upsert event");
 
             if (isFirstSync) {
               await mergePatchK8sClient
@@ -194,7 +180,10 @@ await new CliProgram()
                   },
                 });
 
-              logger.info?.("Patched CRD with finalizer", "name:", name, "namespace:", namespace);
+              logger.info?.ctx({
+                name,
+                namespace,
+              }, "Patched CRD with finalizer");
             } else {
               const existingDashboard = await (async () => {
                 try {
@@ -227,39 +216,27 @@ await new CliProgram()
                   },
                 });
 
-                logger.info?.(
-                  "Synced dashboard to Grafana",
-                  "name:",
+                logger.info?.ctx({
                   name,
-                  "namespace:",
                   namespace,
-                  "resourceVersion:",
                   resourceVersion,
-                );
+                }, "Synced dashboard to Grafana");
               } else {
-                logger.info?.(
-                  "No change since last sync, nothing to do",
-                  "name:",
+                logger.info?.ctx({
                   name,
-                  "namespace:",
                   namespace,
-                  "resourceVersion:",
                   resourceVersion,
-                );
+                }, "No change since last sync, nothing to do");
               }
             }
           } else if (event.action === "delete") {
             const { name, namespace, uid } = event;
 
-            logger.info?.(
-              "Got delete event",
-              "name:",
+            logger.info?.ctx({
               name,
-              "namespace:",
               namespace,
-              "uid:",
               uid,
-            );
+            }, "Got delete event");
 
             try {
               await grafanaClient.endpoint("/dashboards/uid/{uid}").method("delete")({
@@ -268,18 +245,18 @@ await new CliProgram()
                 },
               });
 
-              logger.info?.("Deleted dashboard", "name:", name, "namespace:", namespace, "uid:", uid);
+              logger.info?.ctx({
+                name,
+                namespace,
+                uid,
+              }, "Deleted dashboard");
             } catch (e) {
               if (e instanceof OpenapiOperationError && e.status === 404) {
-                logger.info?.(
-                  "Dashboard doesn't exist, nothing to do",
-                  "name:",
+                logger.info?.ctx({
                   name,
-                  "namespace:",
                   namespace,
-                  "uid:",
                   uid,
-                );
+                }, "Dashboard doesn't exist, nothing to do");
               } else {
                 throw e;
               }
