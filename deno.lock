@@ -6,12 +6,10 @@
     "jsr:@std/async@^1.0.11": "1.0.12",
     "jsr:@std/async@^1.0.12": "1.0.12",
     "jsr:@std/bytes@^1.0.5": "1.0.5",
-    "jsr:@std/cli@^1.0.15": "1.0.16",
     "jsr:@std/cli@^1.0.16": "1.0.16",
     "jsr:@std/collections@^1.0.10": "1.0.10",
     "jsr:@std/crypto@^1.0.4": "1.0.4",
     "jsr:@std/data-structures@^1.0.6": "1.0.6",
-    "jsr:@std/encoding@^1.0.8": "1.0.9",
     "jsr:@std/encoding@^1.0.9": "1.0.9",
     "jsr:@std/fmt@^1.0.6": "1.0.6",
     "jsr:@std/fs@^1.0.16": "1.0.16",
@@ -25,7 +23,7 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@^4.0.7": "4.0.7",
+    "jsr:@wok/helmet@^4.0.8": "4.0.8",
     "jsr:@wok/k8s-api@^1.32.2": "1.32.2",
     "jsr:@wok/k8s-utils@^2.2.1": "2.2.1",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.4",
@@ -33,8 +31,8 @@
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@3": "3.0.0",
     "jsr:@wok/typebox@2": "2.0.0",
-    "jsr:@wok/utils@^5.1.2": "5.2.2",
-    "jsr:@wok/utils@^5.2.2": "5.2.2",
+    "jsr:@wok/utils@^5.1.2": "5.2.3",
+    "jsr:@wok/utils@^5.2.3": "5.2.3",
     "npm:@aws-sdk/client-ec2@^3.787.0": "3.787.0",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.28": "0.34.33",
@@ -43,7 +41,7 @@
     "npm:openapi-merge@^1.3.3": "1.3.3",
     "npm:rxjs@^7.8.2": "7.8.2",
     "npm:type-fest@^4.37.0": "4.40.0",
-    "npm:type-fest@^4.38.0": "4.40.0",
+    "npm:type-fest@^4.39.1": "4.40.0",
     "npm:type-fest@^4.40.0": "4.40.0"
   },
   "jsr": {
@@ -89,8 +87,8 @@
     "@std/http@1.0.14": {
       "integrity": "bfc4329d975dff2abd8170e83e37deb454fbc678fec3fdd2ef5b03d92768a4ef",
       "dependencies": [
-        "jsr:@std/cli@^1.0.16",
-        "jsr:@std/encoding@^1.0.9",
+        "jsr:@std/cli",
+        "jsr:@std/encoding",
         "jsr:@std/fmt",
         "jsr:@std/html",
         "jsr:@std/media-types",
@@ -126,8 +124,8 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@4.0.7": {
-      "integrity": "ee1a35d6234a5abed51fa6195bfc05aeecefbb349ff135d4d81a5f465da8ec49",
+    "@wok/helmet@4.0.8": {
+      "integrity": "9a9ad5dc524ff26b5b4629ae99e5bfa9161e9d9c389eb7c337fb778a0128dad4",
       "dependencies": [
         "jsr:@std/fmt",
         "jsr:@std/fs",
@@ -136,7 +134,7 @@
         "jsr:@std/yaml",
         "jsr:@wok/k8s-utils",
         "jsr:@wok/schema",
-        "jsr:@wok/utils@^5.2.2"
+        "jsr:@wok/utils@^5.2.3"
       ]
     },
     "@wok/k8s-api@1.32.2": {
@@ -174,15 +172,15 @@
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@5.2.2": {
-      "integrity": "c84c3308a39e4628eeebd9d8bee697e1aa7002419f087fabe84ff38d91e37944",
+    "@wok/utils@5.2.3": {
+      "integrity": "14eee02f005da613b25f8642749a244a26af293a492fe327a219f21100cb7869",
       "dependencies": [
         "jsr:@std/assert@^1.0.12",
         "jsr:@std/async@^1.0.12",
-        "jsr:@std/cli@^1.0.15",
+        "jsr:@std/cli",
         "jsr:@std/crypto",
         "jsr:@std/data-structures",
-        "jsr:@std/encoding@^1.0.8",
+        "jsr:@std/encoding",
         "jsr:@std/fmt",
         "jsr:@std/internal",
         "jsr:@std/streams",
@@ -190,7 +188,7 @@
         "jsr:@wok/case",
         "jsr:@wok/schema",
         "jsr:@wok/typebox",
-        "npm:type-fest@^4.38.0"
+        "npm:type-fest@^4.39.1"
       ]
     }
   },
@@ -1041,14 +1039,14 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@3",
-      "jsr:@wok/helmet@^4.0.7",
+      "jsr:@wok/helmet@^4.0.8",
       "jsr:@wok/k8s-api@^1.32.2",
       "jsr:@wok/k8s-utils@^2.2.1",
       "jsr:@wok/openapi-client@^1.0.4",
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@3",
       "jsr:@wok/typebox@2",
-      "jsr:@wok/utils@^5.2.2",
+      "jsr:@wok/utils@^5.2.3",
       "npm:@aws-sdk/client-ec2@^3.787.0",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
