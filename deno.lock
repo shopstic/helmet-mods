@@ -25,7 +25,7 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@^4.0.6": "4.0.6",
+    "jsr:@wok/helmet@^4.0.7": "4.0.7",
     "jsr:@wok/k8s-api@^1.32.2": "1.32.2",
     "jsr:@wok/k8s-utils@^2.2.1": "2.2.1",
     "jsr:@wok/openapi-client@^1.0.2": "1.0.4",
@@ -42,9 +42,9 @@
     "npm:jose@^6.0.10": "6.0.10",
     "npm:openapi-merge@^1.3.3": "1.3.3",
     "npm:rxjs@^7.8.2": "7.8.2",
-    "npm:type-fest@^4.37.0": "4.39.1",
-    "npm:type-fest@^4.38.0": "4.39.1",
-    "npm:type-fest@^4.39.1": "4.39.1"
+    "npm:type-fest@^4.37.0": "4.40.0",
+    "npm:type-fest@^4.38.0": "4.40.0",
+    "npm:type-fest@^4.40.0": "4.40.0"
   },
   "jsr": {
     "@std/assert@1.0.12": {
@@ -126,8 +126,8 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@4.0.6": {
-      "integrity": "58ea0893a455da0cf75d699a58e101a67983a8c3efde1ae0dca09fcbd853af4d",
+    "@wok/helmet@4.0.7": {
+      "integrity": "ee1a35d6234a5abed51fa6195bfc05aeecefbb349ff135d4d81a5f465da8ec49",
       "dependencies": [
         "jsr:@std/fmt",
         "jsr:@std/fs",
@@ -1016,8 +1016,8 @@
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
-    "type-fest@4.39.1": {
-      "integrity": "sha512-uW9qzd66uyHYxwyVBYiwS4Oi0qZyUqwjU+Oevr6ZogYiXt99EOYtwvzMSLw1c3lYo2HzJsep/NB23iEVEgjG/w=="
+    "type-fest@4.40.0": {
+      "integrity": "sha512-ABHZ2/tS2JkvH1PEjxFDTUWC8dB5OsIGZP4IFLhR293GqT5Y5qB1WwL2kMPYhQW9DVgVD8Hd7I8gjwPIf5GFkw=="
     },
     "urijs@1.19.11": {
       "integrity": "sha512-HXgFDgDommxn5/bIv0cnQZsPhHDA90NPHD6+c/v21U5+Sx5hoP8+dP9IZXBU1gIfvdRfhG8cel9QNPeionfcCQ=="
@@ -1041,7 +1041,7 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@3",
-      "jsr:@wok/helmet@^4.0.6",
+      "jsr:@wok/helmet@^4.0.7",
       "jsr:@wok/k8s-api@^1.32.2",
       "jsr:@wok/k8s-utils@^2.2.1",
       "jsr:@wok/openapi-client@^1.0.4",
@@ -1055,7 +1055,7 @@
       "npm:jose@^6.0.10",
       "npm:openapi-merge@^1.3.3",
       "npm:rxjs@^7.8.2",
-      "npm:type-fest@^4.39.1"
+      "npm:type-fest@^4.40.0"
     ]
   }
 }
