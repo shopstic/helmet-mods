@@ -23,17 +23,17 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@wok/case@^1.0.2": "1.0.2",
-    "jsr:@wok/helmet@^4.0.8": "4.0.8",
+    "jsr:@wok/helmet@^4.0.9": "4.0.9",
     "jsr:@wok/k8s-api@^1.32.2": "1.32.2",
     "jsr:@wok/k8s-utils@^2.2.1": "2.2.1",
-    "jsr:@wok/openapi-client@^1.0.2": "1.0.4",
-    "jsr:@wok/openapi-client@^1.0.4": "1.0.4",
+    "jsr:@wok/openapi-client@^1.0.2": "1.0.6",
+    "jsr:@wok/openapi-client@^1.0.6": "1.0.6",
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@3": "3.0.0",
     "jsr:@wok/typebox@2": "2.0.0",
-    "jsr:@wok/utils@^5.1.2": "5.2.3",
-    "jsr:@wok/utils@^5.2.3": "5.2.3",
-    "npm:@aws-sdk/client-ec2@^3.787.0": "3.787.0",
+    "jsr:@wok/utils@^5.1.2": "5.2.4",
+    "jsr:@wok/utils@^5.2.4": "5.2.4",
+    "npm:@aws-sdk/client-ec2@^3.794.0": "3.794.0",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.28": "0.34.33",
     "npm:immer@^10.1.1": "10.1.1",
@@ -124,8 +124,8 @@
     "@wok/case@1.0.2": {
       "integrity": "5d7c4da6ac87a372d603c6ab6fb0e07ec74d4a712c3cb9051961a0892b1f3090"
     },
-    "@wok/helmet@4.0.8": {
-      "integrity": "9a9ad5dc524ff26b5b4629ae99e5bfa9161e9d9c389eb7c337fb778a0128dad4",
+    "@wok/helmet@4.0.9": {
+      "integrity": "b9a4a57779fcb20759c1868221b547a1ebb719a1da9e33f4692c69293bfb7c49",
       "dependencies": [
         "jsr:@std/fmt",
         "jsr:@std/fs",
@@ -134,7 +134,7 @@
         "jsr:@std/yaml",
         "jsr:@wok/k8s-utils",
         "jsr:@wok/schema",
-        "jsr:@wok/utils@^5.2.3"
+        "jsr:@wok/utils@^5.2.4"
       ]
     },
     "@wok/k8s-api@1.32.2": {
@@ -153,8 +153,8 @@
         "jsr:@wok/utils@^5.1.2"
       ]
     },
-    "@wok/openapi-client@1.0.4": {
-      "integrity": "1a7198d5b438e1207305eb0fe9ef938f732c27b224da00a44a0630865716719b"
+    "@wok/openapi-client@1.0.6": {
+      "integrity": "083543f06b9229a788150331b3339128d6a9ed3751adef8fe7e8c791e5788014"
     },
     "@wok/prometheus@1.0.2": {
       "integrity": "8b172f048b7e67a95e9bd77814267ee035bb0cdcc361675ffd697f9463675349"
@@ -172,8 +172,8 @@
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@5.2.3": {
-      "integrity": "14eee02f005da613b25f8642749a244a26af293a492fe327a219f21100cb7869",
+    "@wok/utils@5.2.4": {
+      "integrity": "110339864ca8ef47a7baa4014e6033010d277348de52936498445253b8398c57",
       "dependencies": [
         "jsr:@std/assert@^1.0.12",
         "jsr:@std/async@^1.0.12",
@@ -227,8 +227,8 @@
         "tslib"
       ]
     },
-    "@aws-sdk/client-ec2@3.787.0": {
-      "integrity": "sha512-JerdyOzUiUlu8MFJI+QOW/5QA+kL3myeNO/Bk5G9f69dDX7tb4HRwnQW5wWO74xtZOOlIAEjmtoJ9sGVmbtB/w==",
+    "@aws-sdk/client-ec2@3.794.0": {
+      "integrity": "sha512-gFJbpL6qBH+UEIso+4v9KHFa9E7dOyNjEU87n8pxSBqkQsL4fKP841U1B/TvkkpW0H3nmGSBSbfsDWxr2mbkVQ==",
       "dependencies": [
         "@aws-crypto/sha256-browser",
         "@aws-crypto/sha256-js",
@@ -1039,15 +1039,15 @@
       "jsr:@std/yaml@^1.0.5",
       "jsr:@wok/case@^1.0.2",
       "jsr:@wok/deup@3",
-      "jsr:@wok/helmet@^4.0.8",
+      "jsr:@wok/helmet@^4.0.9",
       "jsr:@wok/k8s-api@^1.32.2",
       "jsr:@wok/k8s-utils@^2.2.1",
-      "jsr:@wok/openapi-client@^1.0.4",
+      "jsr:@wok/openapi-client@^1.0.6",
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@3",
       "jsr:@wok/typebox@2",
-      "jsr:@wok/utils@^5.2.3",
-      "npm:@aws-sdk/client-ec2@^3.787.0",
+      "jsr:@wok/utils@^5.2.4",
+      "npm:@aws-sdk/client-ec2@^3.794.0",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
       "npm:jose@^6.0.10",
