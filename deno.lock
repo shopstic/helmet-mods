@@ -31,8 +31,9 @@
     "jsr:@wok/prometheus@^1.0.2": "1.0.2",
     "jsr:@wok/schema@3": "3.0.0",
     "jsr:@wok/typebox@2": "2.0.0",
-    "jsr:@wok/utils@^5.1.2": "5.2.4",
-    "jsr:@wok/utils@^5.2.4": "5.2.4",
+    "jsr:@wok/utils@^5.1.2": "5.2.5",
+    "jsr:@wok/utils@^5.2.4": "5.2.5",
+    "jsr:@wok/utils@^5.2.5": "5.2.5",
     "npm:@aws-sdk/client-ec2@^3.794.0": "3.794.0",
     "npm:@octokit/webhooks-types@^7.6.1": "7.6.1",
     "npm:@sinclair/typebox@~0.34.28": "0.34.33",
@@ -172,8 +173,8 @@
         "npm:@sinclair/typebox"
       ]
     },
-    "@wok/utils@5.2.4": {
-      "integrity": "110339864ca8ef47a7baa4014e6033010d277348de52936498445253b8398c57",
+    "@wok/utils@5.2.5": {
+      "integrity": "90591130caf006660c027873d2b45fb891771109adfb490e30222e6056af5121",
       "dependencies": [
         "jsr:@std/assert@^1.0.12",
         "jsr:@std/async@^1.0.12",
@@ -789,8 +790,8 @@
         "tslib"
       ]
     },
-    "@smithy/signature-v4@5.0.2": {
-      "integrity": "sha512-Mz+mc7okA73Lyz8zQKJNyr7lIcHLiPYp0+oiqiMNc/t7/Kf2BENs5d63pEj7oPqdjaum6g0Fc8wC78dY1TgtXw==",
+    "@smithy/signature-v4@5.1.0": {
+      "integrity": "sha512-4t5WX60sL3zGJF/CtZsUQTs3UrZEDO2P7pEaElrekbLqkWPYkgqNW1oeiNYC6xXifBnT9dVBOnNQRvOE9riU9w==",
       "dependencies": [
         "@smithy/is-array-buffer@4.0.0",
         "@smithy/protocol-http",
@@ -1046,7 +1047,7 @@
       "jsr:@wok/prometheus@^1.0.2",
       "jsr:@wok/schema@3",
       "jsr:@wok/typebox@2",
-      "jsr:@wok/utils@^5.2.4",
+      "jsr:@wok/utils@^5.2.5",
       "npm:@aws-sdk/client-ec2@^3.794.0",
       "npm:@octokit/webhooks-types@^7.6.1",
       "npm:immer@^10.1.1",
