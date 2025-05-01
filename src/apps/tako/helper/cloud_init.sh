@@ -5,9 +5,17 @@ TS_ARGS=(--accept-routes --ssh --snat-subnet-routes=false)
 
 install_tailscale() {
   TS_AUTH_KEY=${TS_AUTH_KEY:?"TS_AUTH_KEY env var is not set"}
+  TIMEZONE=${TIMEZONE:-""}
   PRIVATE_IF=${PRIVATE_IF:-""}
 
-  timedatectl set-timezone "$(curl -s https://ipinfo.io/timezone | sed 's/^;//' || echo 'America/New_York')"
+  if [[ -n "${TIMEZONE}" ]]; then
+    timedatectl set-timezone "${TIMEZONE}"
+  else
+    # Set timezone to the one returned by ipinfo.io, or default to America/New_York
+    # if the request fails.
+    # Note: This requires curl and sed to be installed.
+    timedatectl set-timezone "$(curl -s https://ipinfo.io/timezone | sed 's/^;//' || echo 'America/New_York')"
+  fi
 
   cat <<EOF >/etc/sysctl.d/99-tailscale.conf
 net.ipv4.ip_forward = 1
@@ -30,7 +38,7 @@ EOF
   tailscale set "${TS_ARGS[@]}" --auto-update
 
   local public_if
-  public_if=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ") || (echo "Failed obtaining public interface" && exit 1)
+  public_if=$(ip -o -4 route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}') || { echo "Failed to obtain public interface" >&2; exit 1; }
 
   # Check if /sbin/ethtool exists, if not, install it
   if ! command -v ethtool &>/dev/null; then
@@ -78,6 +86,7 @@ EOF
 }
 
 install_k3s_server() {
+  PRIVATE_NET_ID=${PRIVATE_NET_ID:-""}
   TS_AUTH_KEY=${TS_AUTH_KEY:?"TS_AUTH_KEY env var is not set"}
   K3S_TOKEN=${K3S_TOKEN:?"K3S_TOKEN env var is not set"}
   K3S_CLUSTER_INIT=${K3S_CLUSTER_INIT:?"K3S_CLUSTER_INIT env var is not set"}
@@ -92,6 +101,9 @@ install_k3s_server() {
 
   local tailscale_ipv4
   tailscale_ipv4=$(tailscale ip -4) || (echo "Failed obtaining tailscale IPv4" && exit 1)
+
+  local public_ipv4
+  public_ipv4=$(ip -o -4 route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}') || (echo "Failed obtaining public IP" && exit 1)
 
   mkdir -p /etc/systemd/resolved.conf.d/
   cat <<EOL >/etc/systemd/resolved.conf.d/k3s-server.conf
@@ -139,7 +151,10 @@ disable:
   - traefik
   - metrics-server
   - local-storage
-$([ -n "$K3S_NODE_LABEL" ] && echo "node-label:" && echo "$K3S_NODE_LABEL" | tr ' ' '\n' | sed 's/^/  - /')
+node-label:
+$([ -n "$K3S_NODE_LABEL" ] && echo "$K3S_NODE_LABEL" | tr ' ' '\n' | sed 's/^/  - /')
+  - net.helmet.run/public-ipv4=${public_ipv4}
+$([ -n "$PRIVATE_NET_ID" ] && echo "  - net.helmet.run/private-id=${PRIVATE_NET_ID}")  
 $([ -n "$K3S_NODE_TAINT" ] && echo "node-taint:" && echo "$K3S_NODE_TAINT" | tr ' ' '\n' | sed 's/^/  - /')
 EOL
 
@@ -175,6 +190,7 @@ EOL
 }
 
 install_k3s_agent() {
+  PRIVATE_NET_ID=${PRIVATE_NET_ID:-""}
   TS_AUTH_KEY=${TS_AUTH_KEY:?"TS_AUTH_KEY env var is not set"}
   K3S_TOKEN=${K3S_TOKEN:?"K3S_TOKEN env var is not set"}
   K3S_KUBE_APISERVER_IP=${K3S_KUBE_APISERVER_IP:?"K3S_KUBE_APISERVER_IP env var is not set"}
@@ -186,6 +202,9 @@ install_k3s_agent() {
 
   local tailscale_ipv4
   tailscale_ipv4=$(tailscale ip --4) || (echo "Failed obtaining tailscale IPv4" && exit 1)
+
+  local public_ipv4
+  public_ipv4=$(ip -o -4 route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}') || (echo "Failed obtaining public IP" && exit 1)
 
   mkdir -p /etc/rancher/k3s
   cat <<EOL >/etc/rancher/k3s/flannel.json
@@ -212,7 +231,10 @@ kubelet-arg:
 flannel-conf: /etc/rancher/k3s/flannel.json
 server: https://${K3S_KUBE_APISERVER_IP}:${K3S_KUBE_APISERVER_PORT}
 disable-apiserver-lb: true
-$([ -n "$K3S_NODE_LABEL" ] && echo "node-label:" && echo "$K3S_NODE_LABEL" | tr ' ' '\n' | sed 's/^/  - /')
+node-label:
+$([ -n "$K3S_NODE_LABEL" ] && echo "$K3S_NODE_LABEL" | tr ' ' '\n' | sed 's/^/  - /')
+  - net.helmet.run/public-ipv4=${public_ipv4}
+$([ -n "$PRIVATE_NET_ID" ] && echo "  - net.helmet.run/private-id=${PRIVATE_NET_ID}")  
 $([ -n "$K3S_NODE_TAINT" ] && echo "node-taint:" && echo "$K3S_NODE_TAINT" | tr ' ' '\n' | sed 's/^/  - /')
 EOL
 
