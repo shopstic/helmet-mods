@@ -30,7 +30,8 @@ populate_deno_dir_from_nix() {
   cache_dir=$(nix path-info ".#packages.${arch}.deno-cache-dir") || exit $?
   for dir in deps npm remote registries; do
     if [ -d "${cache_dir}/${dir}" ]; then
-      ln -s "${cache_dir}/${dir}" "${deno_dir}/${dir}"
+      cp -R "${cache_dir}/${dir}" "${deno_dir}/"
+      chmod -R 0755 "${deno_dir}/${dir}"
     fi
   done
 }
