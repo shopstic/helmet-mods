@@ -61,7 +61,7 @@
     "$deps/": "./src/deps/",
     "$libs/": "./src/libs/",
     "$apps/": "./src/apps/",
-    "@aws-sdk/client-ec2": "npm:@aws-sdk/client-ec2@^3.810.0",
+    "@aws-sdk/client-ec2": "npm:@aws-sdk/client-ec2@^3.814.0",
     "@octokit/webhooks-types": "npm:@octokit/webhooks-types@^7.6.1",
     "@std/assert": "jsr:@std/assert@^1.0.13",
     "@std/async": "jsr:@std/async@^1.0.13",
