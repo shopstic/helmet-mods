@@ -26,6 +26,19 @@ EOF
   sysctl -p /etc/sysctl.d/99-tailscale.conf
   chattr -i /etc/resolv.conf || true
 
+  # Check if jq exists, if not, install it
+  if ! command -v jq &>/dev/null; then
+    echo "jq not found, installing..." >&2
+    if command -v apt-get &>/dev/null; then
+      apt-get install -y jq
+    elif command -v yum &>/dev/null; then
+      yum install -y jq
+    else
+      echo "Neither apt-get or yum was available to install jq" >&2
+      exit 1
+    fi
+  fi
+
   # Install tailscale
   if systemctl list-units --type=service --all --no-pager --no-legend | grep -qF "tailscaled.service"; then
     echo "tailscaled service already exists, skipping installation" >&2
@@ -33,25 +46,51 @@ EOF
     echo "Installing Tailscale..." >&2
     curl -fsSL https://tailscale.com/install.sh | sh
     tailscale up --auth-key="${TS_AUTH_KEY}"
+
+  cat >/usr/local/bin/selfheal-tailscale.sh <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+ts_state=$(tailscale status --peers=false --json | jq -re '.BackendState' || echo "NoState")
+if [[ "$ts_state" != "NoState" ]]; then
+  echo "Tailscale is in state: $ts_state"
+  exit 0
+fi
+
+echo "Tailscale stuck in NoState, restarting tailscaled..." >&2
+systemctl restart tailscaled
+exit 1
+EOF
+
+  chmod 755 /usr/local/bin/selfheal-tailscale.sh
+
+  cat >/etc/systemd/system/tailscale-selfheal.service <<'EOF'
+[Unit]
+Description=Self-heal Tailscale if stuck in NoState at boot
+After=network-online.target tailscaled.service
+Wants=network-online.target tailscaled.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/selfheal-tailscale.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable --now tailscale-selfheal.service
   fi
 
   tailscale set "${TS_ARGS[@]}" --auto-update
 
   local public_if
-  public_if=$(ip -o -4 route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}') || { echo "Failed to obtain public interface" >&2; exit 1; }
-
-  # Check if /sbin/ethtool exists, if not, install it
-  if ! command -v ethtool &>/dev/null; then
-    echo "ethtool not found, installing..." >&2
-    if command -v apt-get &>/dev/null; then
-      apt-get install -y ethtool
-    elif command -v yum &>/dev/null; then
-      yum install -y ethtool
-    else
-      echo "Neither apt-get or yum was available to install ethtool" >&2
-      exit 1
-    fi
-  fi
+  public_if=$(ip -o -4 route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}') || {
+    echo "Failed to obtain public interface" >&2
+    exit 1
+  }
 
   cat <<EOF >/bin/k3s-post-network-init.sh
 #!/bin/bash
@@ -279,7 +318,7 @@ install_keepalived() {
 
   local if_name
   if_name="$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")"
-  
+
   local priority
   priority=$((255 - (${node_ip##*.} % 10)))
 
