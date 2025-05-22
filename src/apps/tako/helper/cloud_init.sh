@@ -86,6 +86,19 @@ EOF
 
   tailscale set "${TS_ARGS[@]}" --auto-update
 
+  # Check if /sbin/ethtool exists, if not, install it
+  if ! command -v ethtool &>/dev/null; then
+    echo "ethtool not found, installing..." >&2
+    if command -v apt-get &>/dev/null; then
+      apt-get install -y ethtool
+    elif command -v yum &>/dev/null; then
+      yum install -y ethtool
+    else
+      echo "Neither apt-get or yum was available to install ethtool" >&2
+      exit 1
+    fi
+  fi
+  
   local public_if
   public_if=$(ip -o -4 route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}') || {
     echo "Failed to obtain public interface" >&2
