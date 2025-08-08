@@ -76,7 +76,7 @@
     "@std/yaml": "jsr:@std/yaml@^1.0.9",
     "@wok/case": "jsr:@wok/case@^1.0.2",
     "@wok/deup": "jsr:@wok/deup@^3.0.0",
-    "@wok/helmet": "jsr:@wok/helmet@^4.0.14",
+    "@wok/helmet": "jsr:@wok/helmet@^4.0.15",
     "@wok/k8s-api": "jsr:@wok/k8s-api@^1.32.2",
     "@wok/k8s-utils": "jsr:@wok/k8s-utils@^2.2.1",
     "@wok/openapi-client": "jsr:@wok/openapi-client@^1.0.6",
