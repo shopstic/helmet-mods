@@ -29,15 +29,17 @@
               hasSuffix "/deno.lock" path
             );
           };
-        cache-entry-file = pkgs.callPackage hotPotLib.denoAppCacheEntry {
-          inherit src;
-          name = "helmet-mods";
-        };
-        deno-cache-dir = pkgs.callPackage hotPotLib.denoAppCache {
-          inherit cache-entry-file;
-          name = "helmet-mods";
-          config-file = ./deno.json;
-          lock-file = ./deno.lock;
+        deno-cache-dir = pkgs.callPackage hotPotLib.denoAppDeps {
+          name = "helmet-mods-cache";
+          denoInstallFlags = "";
+          src = builtins.path
+            {
+              path = ./.;
+              filter = with pkgs.lib; (path: /* type */_:
+                hasSuffix "/deno.lock" path ||
+                hasSuffix "/deno.json" path
+              );
+            };
         };
         deno = hotPotPkgs.deno;
         denort = hotPotPkgs.denort;
