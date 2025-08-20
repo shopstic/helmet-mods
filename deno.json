@@ -36,7 +36,8 @@
     "./deps/std-yaml": "./src/deps/std_yaml.ts",
     "./deps/prometheus": "./src/deps/prometheus.ts",
     "./deps/schema": "./src/deps/schema.ts",
-    "./deps/validation-utils": "./src/deps/validation_utils.ts"
+    "./deps/validation-utils": "./src/deps/validation_utils.ts",
+    "./cloud-init": "./src/apps/tako/helper/cloud_init.ts"
   },
   "publish": {
     "include": ["./src", "./deno.json", "./README.md", "./LICENSE"]
@@ -57,11 +58,12 @@
       "exclude": ["no-slow-types"]
     }
   },
+  "unstable": ["raw-imports"],
   "imports": {
     "$deps/": "./src/deps/",
     "$libs/": "./src/libs/",
     "$apps/": "./src/apps/",
-    "@aws-sdk/client-ec2": "npm:@aws-sdk/client-ec2@^3.868.0",
+    "@aws-sdk/client-ec2": "npm:@aws-sdk/client-ec2@^3.871.0",
     "@octokit/webhooks-types": "npm:@octokit/webhooks-types@^7.6.1",
     "@std/assert": "jsr:@std/assert@^1.0.14",
     "@std/async": "jsr:@std/async@^1.0.14",
@@ -76,7 +78,7 @@
     "@std/yaml": "jsr:@std/yaml@^1.0.9",
     "@wok/case": "jsr:@wok/case@^1.0.2",
     "@wok/deup": "jsr:@wok/deup@^3.0.0",
-    "@wok/helmet": "jsr:@wok/helmet@^4.0.17",
+    "@wok/helmet": "jsr:@wok/helmet@^4.0.18",
     "@wok/k8s-api": "jsr:@wok/k8s-api@^1.32.2",
     "@wok/k8s-utils": "jsr:@wok/k8s-utils@^2.2.1",
     "@wok/openapi-client": "jsr:@wok/openapi-client@^1.0.6",
