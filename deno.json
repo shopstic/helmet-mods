@@ -36,8 +36,7 @@
     "./deps/std-yaml": "./src/deps/std_yaml.ts",
     "./deps/prometheus": "./src/deps/prometheus.ts",
     "./deps/schema": "./src/deps/schema.ts",
-    "./deps/validation-utils": "./src/deps/validation_utils.ts",
-    "./cloud-init": "./src/apps/tako/helper/cloud_init.ts"
+    "./deps/validation-utils": "./src/deps/validation_utils.ts"
   },
   "publish": {
     "include": ["./src", "./deno.json", "./README.md", "./LICENSE"]
@@ -58,7 +57,6 @@
       "exclude": ["no-slow-types"]
     }
   },
-  "unstable": ["raw-imports"],
   "imports": {
     "$deps/": "./src/deps/",
     "$libs/": "./src/libs/",
