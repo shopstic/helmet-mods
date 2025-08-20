@@ -1,6 +1,6 @@
 {
   "name": "@wok/helmet-mods",
-  "version": "0.0.0",
+  "version": "4.1.22",
   "exports": {
     "./fdb-cluster": "./src/mods/fdb_cluster/fdb_cluster.ts",
     "./github-actions-registry": "./src/mods/github_actions_registry/github_actions_registry.ts",
@@ -40,7 +40,12 @@
     "./deps/validation-utils": "./src/deps/validation_utils.ts"
   },
   "publish": {
-    "include": ["./src", "./deno.json", "./README.md", "./LICENSE"]
+    "include": [
+      "./src",
+      "./deno.json",
+      "./README.md",
+      "./LICENSE"
+    ]
   },
   "tasks": {
     "update_cache": "rm -f ./deno.lock && deno cache ./src/deps/*"
@@ -55,7 +60,9 @@
   },
   "lint": {
     "rules": {
-      "exclude": ["no-slow-types"]
+      "exclude": [
+        "no-slow-types"
+      ]
     }
   },
   "imports": {
