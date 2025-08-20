@@ -22,6 +22,7 @@
     "./deps/cli-utils": "./src/deps/cli_utils.ts",
     "./deps/exec-utils": "./src/deps/exec_utils.ts",
     "./deps/helmet": "./src/deps/helmet.ts",
+    "./deps/helmet-cli": "./src/deps/helmet_cli.ts",
     "./deps/immer": "./src/deps/immer.ts",
     "./deps/k8s-openapi": "./src/deps/k8s_openapi.ts",
     "./deps/openapi-merge": "./src/deps/openapi_merge.ts",
